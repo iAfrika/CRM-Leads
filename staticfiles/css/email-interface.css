@@ -1,0 +1,169 @@
+/* Email Interface Styling */
+.email-container {
+    display: flex;
+    height: 100vh;
+    background-color: #f3f4f6;
+}
+
+.email-accounts-panel {
+    width: 250px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.email-account-group {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.email-account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.email-account-header:hover {
+    background-color: #e9ecef;
+}
+
+.email-account-name {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.email-account-name i {
+    margin-right: 10px;
+    color: #6c757d;
+}
+
+.email-account-actions {
+    display: flex;
+    align-items: center;
+}
+
+.email-folders-list {
+    list-style: none;
+    padding-left: 30px;
+}
+
+.email-folder-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.email-folder-item:hover, .email-folder-item.active {
+    background-color: #e9ecef;
+    border-radius: 5px;
+}
+
+.email-folder-item i {
+    margin-right: 10px;
+    color: #6c757d;
+}
+
+.email-folder-count {
+    background-color: #6c757d;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 0.8em;
+}
+
+.email-add-account {
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid #e9ecef;
+}
+
+.email-add-account button {
+    width: 100%;
+}
+
+.email-main-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.email-toolbar {
+    background-color: white;
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.email-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: white;
+}
+
+.email-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.email-item:hover, .email-item.selected {
+    background-color: #f1f3f5;
+}
+
+.email-item.unread {
+    font-weight: bold;
+}
+
+.email-detail-panel {
+    width: 40%;
+    background-color: white;
+    border-left: 1px solid #e9ecef;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.email-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.email-sender-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.email-sender-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.email-body {
+    line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .email-container {
+        flex-direction: column;
+    }
+    
+    .email-accounts-panel, .email-main-panel, .email-detail-panel {
+        width: 100%;
+    }
+}

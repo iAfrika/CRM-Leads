@@ -1,0 +1,176 @@
+:root {
+    --dashboard-bg: #f4f7fc; /* Light blue-grey background */
+    --dashboard-card-bg: #ffffff;
+    --dashboard-text-primary: #34495e; /* Dark blue-grey text */
+    --dashboard-text-secondary: #7f8c8d; /* Muted grey */
+    --dashboard-primary: #3498db; /* Bright blue */
+    --dashboard-border: #e3e8ee;
+    --dashboard-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --dashboard-avatar-bg: #eaf2f8;
+    --dashboard-logout-bg: #e74c3c; /* Standard danger red */
+    --dashboard-logout-text: #ffffff;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--dashboard-bg);
+    color: var(--dashboard-text-primary);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.profile-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Changed for a 2-column symmetrical layout */
+    gap: 25px;
+    padding: 30px;
+    max-width: 1400px;
+    margin: 20px auto;
+}
+
+.profile-card {
+    background-color: var(--dashboard-card-bg);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--dashboard-shadow);
+    border: 1px solid var(--dashboard-border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card-header {
+    grid-column: 1 / -1; /* Span across both columns */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-avatar, .profile-default-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: var(--dashboard-primary);
+    background-color: var(--dashboard-avatar-bg);
+    object-fit: cover;
+    border: 4px solid var(--dashboard-card-bg);
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.profile-name {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--dashboard-text-primary);
+}
+
+.profile-email,
+.profile-role {
+    font-size: 0.95rem;
+    color: var(--dashboard-text-secondary);
+    margin-bottom: 15px;
+}
+
+.profile-actions-card {
+    grid-column: 1 / -1; /* Span across both columns */
+    background-color: transparent; /* Optional: make actions card background transparent */
+    box-shadow: none;
+    border: none;
+    padding: 0; /* Reset padding if needed */
+    margin-bottom: -10px; /* Adjust spacing if needed */
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.profile-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    background-color: var(--dashboard-primary);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+.profile-btn:hover {
+    background-color: #2980b9; /* Darker blue */
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+.profile-btn-logout {
+    background-color: var(--dashboard-logout-bg);
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+.profile-btn-logout:hover {
+    background-color: #c0392b; /* Darker red */
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+/* Chart Card Styling */
+.profile-chart-card:nth-of-type(1) { /* Target the first chart card (Leads) */
+    grid-column: 1 / 2;
+}
+
+.profile-chart-card:nth-of-type(2) { /* Target the second chart card (Projects) */
+    grid-column: 2 / 3;
+}
+
+.profile-chart-card {
+    /* Inherits .profile-card styles */
+    /* Add specific chart card styles if needed */
+}
+
+.profile-chart-card h3 {
+    font-size: 1.2rem;
+    color: var(--dashboard-text-primary);
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-dashboard-grid {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .profile-card {
+        padding: 20px;
+    }
+
+    .profile-avatar, .profile-default-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+
+    .profile-name {
+        font-size: 1.4rem;
+    }
+
+    .profile-btn {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+    }
+}

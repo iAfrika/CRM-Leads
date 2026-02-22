@@ -1,9 +1,22 @@
 {% extends "registration/base_registration.html" %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/subscription_plans.css' %}">
+<link rel="stylesheet" href="{% static 'css/plans.css' %}">
+{% endblock %}
+{% load static %}
+
 {% block title %}Subscription Plans{% endblock %}
 
 {% block content %}
+<style>
+.registration-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+</style>
 <div class="registration-container">
     <section class="registration-header">
         <h1>Choose the Right Plan for Your Business</h1>
@@ -15,7 +28,11 @@
         <div class="plan-card">
             <h3>Basic</h3>
             <div class="plan-price">
-                KES 4,999<small>/month</small>
+                $10<small>/month</small>
+            </div>
+            <div class="plan-annual-price">
+                $96<small>/year</small>
+                <span class="price-save">Save 20%</span>
             </div>
             <ul class="plan-features">
                 <li class="included">Up to 3 Users</li>
@@ -36,7 +53,11 @@
         <div class="plan-card popular">
             <h3>Professional</h3>
             <div class="plan-price">
-                KES 9,999<small>/month</small>
+                $20<small>/month</small>
+            </div>
+            <div class="plan-annual-price">
+                $192<small>/year</small>
+                <span class="price-save">Save 20%</span>
             </div>
             <ul class="plan-features">
                 <li class="included">Up to 10 Users</li>
@@ -57,7 +78,11 @@
         <div class="plan-card">
             <h3>Enterprise</h3>
             <div class="plan-price">
-                KES 19,999<small>/month</small>
+                $50<small>/month</small>
+            </div>
+            <div class="plan-annual-price">
+                $480<small>/year</small>
+                <span class="price-save">Save 20%</span>
             </div>
             <ul class="plan-features">
                 <li class="included">Unlimited Users</li>

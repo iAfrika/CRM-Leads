@@ -50,6 +50,10 @@
   --transition-slow: 350ms ease;
 }
 
+body {
+  font-family: 'Nunito', sans-serif;
+}
+
 /* Base Layout */
 .leads-container {
   max-width: 1400px;

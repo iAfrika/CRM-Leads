@@ -1,142 +1,87 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load static %}
+{% load product_filters %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/products/report.css' %}">
-<link rel="stylesheet" href="{% static 'css/products/purchases_report.css' %}">
-{% endblock %}
+{% block title %}Purchase Report - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="report-container">
-    <div class="report-header">
-        <h1><i class="fas fa-shopping-cart"></i> Purchases Report</h1>
-        <div class="report-actions">
-            <button id="printReport" class="action-button">
-                <i class="fas fa-print"></i> Print Report
-            </button>
-            <button id="exportCSV" class="action-button">
-                <i class="fas fa-file-csv"></i> Export CSV
-            </button>
+<div class="container py-4">
+    <h1 class="mb-4">Purchase Report</h1>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Purchases</h5>
+                    <p class="card-text display-4">{{ total_purchases }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Spent</h5>
+                    <p class="card-text display-4">${{ total_spent|floatformat:2 }}</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="report-filters">
-        <div class="filter-group date-range-filter">
-            <label class="filter-label">Date Range</label>
-            <div class="date-range-inputs">
-                <input type="date" id="startDate" class="filter-input" value="{{ start_date|date:'Y-m-d' }}">
-                <span class="date-separator">to</span>
-                <input type="date" id="endDate" class="filter-input" value="{{ end_date|date:'Y-m-d' }}">
-                <button id="applyDateRange" class="filter-button">Apply</button>
-            </div>
+    <!-- Product Purchase History -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Product Purchase History</h2>
         </div>
-        <div class="filter-group">
-            <label class="filter-label" for="statusFilter">Status</label>
-            <select id="statusFilter" class="filter-input">
-                <option value="">All Statuses</option>
-                <option value="DRAFT" {% if status == 'DRAFT' %}selected{% endif %}>Draft</option>
-                <option value="PENDING" {% if status == 'PENDING' %}selected{% endif %}>Pending</option>
-                <option value="APPROVED" {% if status == 'APPROVED' %}selected{% endif %}>Approved</option>
-                <option value="RECEIVED" {% if status == 'RECEIVED' %}selected{% endif %}>Received</option>
-                <option value="CANCELED" {% if status == 'CANCELED' %}selected{% endif %}>Canceled</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="report-content">
-        <div class="report-summary">
-            <div class="summary-card">
-                <div class="summary-value">{{ total_purchases }}</div>
-                <div class="summary-label">Total Purchase Orders</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-value">${{ total_amount|floatformat:2 }}</div>
-                <div class="summary-label">Total Spent</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-value">{{ total_items }}</div>
-                <div class="summary-label">Items Purchased</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-value">{{ total_suppliers }}</div>
-                <div class="summary-label">Suppliers</div>
-            </div>
-        </div>
-
-        <div class="report-charts">
-            <div class="chart-container">
-                <h2>Purchase Trend</h2>
-                <canvas id="purchasesTrendChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h2>Top Suppliers</h2>
-                <canvas id="topSuppliersChart"></canvas>
-            </div>
-        </div>
-
-        <div class="report-tables">
-            <div class="table-section">
-                <h2>Recent Purchases</h2>
-                <table class="report-table" id="recentPurchasesTable">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Reference #</th>
-                            <th>Supplier</th>
-                            <th>Date</th>
-                            <th>Items</th>
-                            <th>Amount</th>
-                            <th>Status</th>
+                            <th>Product</th>
+                            <th>Total Quantity</th>
+                            <th>Total Cost</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for purchase in recent_purchases %}
+                        {% for item in product_purchases %}
                         <tr>
-                            <td>
-                                <a href="{% url 'products:purchase_detail' purchase.id %}">
-                                    {{ purchase.reference_number }}
-                                </a>
-                            </td>
-                            <td>{{ purchase.supplier.name }}</td>
-                            <td>{{ purchase.purchase_date|date:"d M Y" }}</td>
-                            <td class="text-right">{{ purchase.items.count }}</td>
-                            <td class="text-right">${{ purchase.total_amount|floatformat:2 }}</td>
-                            <td>
-                                <span class="status-badge status-{{ purchase.status|lower }}">
-                                    {{ purchase.get_status_display }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="no-data">No recent purchases</td>
+                            <td>{{ item.product__name }}</td>
+                            <td>{{ item.total_quantity }}</td>
+                            <td>${{ item.total_cost|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
 
-            <div class="table-section">
-                <h2>Top Suppliers</h2>
-                <table class="report-table" id="topSuppliersTable">
+    <!-- Recent Purchases -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Recent Purchases</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Supplier</th>
-                            <th>Purchases</th>
-                            <th>Amount</th>
-                            <th>% of Total</th>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for supplier in top_suppliers %}
+                        {% for item in purchase_items %}
                         <tr>
-                            <td>{{ supplier.name }}</td>
-                            <td class="text-right">{{ supplier.purchase_count }}</td>
-                            <td class="text-right">${{ supplier.total_purchases|floatformat:2 }}</td>
-                            <td class="text-right">{{ supplier.percentage|floatformat:1 }}%</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="no-data">No supplier data available</td>
+                            <td>{{ item.purchase.date|date:"Y-m-d" }}</td>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.unit_price|floatformat:2 }}</td>
+                            <td>${{ item.quantity|multiply:item.unit_price|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -146,184 +91,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Date range and status filtering
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-    const applyDateRangeBtn = document.getElementById('applyDateRange');
-    const statusFilter = document.getElementById('statusFilter');
-    
-    function updateFilters() {
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-        const status = statusFilter.value;
-        
-        if (startDate && endDate) {
-            let url = `?start_date=${startDate}&end_date=${endDate}`;
-            if (status) {
-                url += `&status=${status}`;
-            }
-            window.location.href = url;
-        }
-    }
-    
-    applyDateRangeBtn.addEventListener('click', updateFilters);
-    statusFilter.addEventListener('change', function() {
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-        
-        if (startDate && endDate) {
-            updateFilters();
-        }
-    });
-    
-    // Purchases Trend Chart
-    const purchasesTrendData = {
-        labels: {{ purchase_trend_labels|safe }},
-        datasets: [{
-            label: 'Amount',
-            data: {{ purchase_trend_data|safe }},
-            borderColor: '#8b5cf6',
-            backgroundColor: 'rgba(139, 92, 246, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4
-        }]
-    };
-    
-    new Chart(document.getElementById('purchasesTrendChart').getContext('2d'), {
-        type: 'line',
-        data: purchasesTrendData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `Amount: $${context.raw.toFixed(2)}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    }
-                }
-            }
-        }
-    });
-    
-    // Top Suppliers Chart
-    const topSuppliersData = {
-        labels: {{ top_suppliers_labels|safe }},
-        datasets: [{
-            label: 'Purchase Amount',
-            data: {{ top_suppliers_amounts|safe }},
-            backgroundColor: [
-                'rgba(139, 92, 246, 0.7)',
-                'rgba(59, 130, 246, 0.7)',
-                'rgba(16, 185, 129, 0.7)',
-                'rgba(245, 158, 11, 0.7)',
-                'rgba(239, 68, 68, 0.7)'
-            ],
-            borderWidth: 1
-        }]
-    };
-    
-    new Chart(document.getElementById('topSuppliersChart').getContext('2d'), {
-        type: 'pie',
-        data: topSuppliersData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const percentage = context.parsed || 0;
-                            return `${label}: $${value.toFixed(2)} (${percentage.toFixed(1)}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-    
-    // Print report
-    document.getElementById('printReport').addEventListener('click', function() {
-        window.print();
-    });
-    
-    // Export to CSV
-    document.getElementById('exportCSV').addEventListener('click', function() {
-        // Export recent purchases table
-        exportTableToCSV('recentPurchasesTable', 'recent_purchases.csv');
-    });
-    
-    function exportTableToCSV(tableId, filename) {
-        const table = document.getElementById(tableId);
-        let csv = [];
-        
-        // Get headers
-        const headers = [];
-        const headerCells = table.querySelectorAll('thead th');
-        headerCells.forEach(cell => {
-            headers.push(cell.textContent);
-        });
-        csv.push(headers.join(','));
-        
-        // Get rows
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-            if (row.querySelector('.no-data')) return;
-            
-            const rowData = [];
-            const cells = row.querySelectorAll('td');
-            cells.forEach(cell => {
-                // Extract text, handling links
-                let text = cell.textContent.trim().replace(/"/g, '""');
-                if (text.includes(',') || text.includes('"') || text.includes('\n')) {
-                    text = `"${text}"`;
-                }
-                rowData.push(text);
-            });
-            csv.push(rowData.join(','));
-        });
-        
-        // Download the CSV
-        const csvContent = csv.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-});
-</script>
-{% endblock %} 

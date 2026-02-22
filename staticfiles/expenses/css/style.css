@@ -74,6 +74,11 @@
     overflow-y: auto;
 }
 
+/* Global Styles */
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .expenses-container {

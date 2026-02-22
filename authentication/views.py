@@ -18,6 +18,9 @@ from django.db.models import Sum, Q, Count
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def profile_selection(request):
@@ -38,17 +41,23 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
-            # Store the role in session before doing login
+            # For users with username 'admin', always set role to administrator
+            if username.lower() == 'admin' or user.is_superuser:
+                role = 'administrator'
+                print(f"User {username} has username 'admin' or is_superuser, setting role to administrator")
+            
+            # Standardize role naming
+            if role == 'admin':
+                role = 'administrator'
+                
+            # Store the standardized role in session
             request.session['user_role'] = role
             print(f"User {username} logged in as {role}")
             
             login(request, user)
-            
-            # Redirect based on role
-            if role == 'administrator':
-                return redirect('dashboard:dashboard')
-            else:
-                return redirect('authentication:profile')
+                
+            # Always redirect to company selection after login
+            return redirect('registration:company_selection')
         else:
             messages.error(request, 'Invalid username or password')
     
@@ -108,18 +117,29 @@ def profile_select(request, pk):
                 request.profile = profile
                 messages.success(request, f'Welcome back, {profile.name}!')
                 
-                # Get the role from session
-                role = request.session.get('user_role', 'staff')
+                # Get the profile's role and use it
+                role = profile.role
                 
-                # Ensure the profile has the correct role
-                profile.role = role  
-                profile.save()
+                # If the role from profile is empty or invalid, use the session role as fallback
+                if role not in ['administrator', 'staff']:
+                    session_role = request.session.get('user_role', 'staff')
+                    # Standardize role naming for consistency
+                    if session_role == 'admin':
+                        session_role = 'administrator'
+                    role = session_role
+                    # Update the profile with the standardized role
+                    profile.role = role
+                    profile.save()
+                
+                # Update the session with the correct role from the profile
+                request.session['user_role'] = role
+                print(f"User {request.user.username} selected profile with role: {role}")
                 
                 # Redirect based on role
                 if role == 'administrator':
-                    return redirect('dashboard:dashboard')
+                    return redirect('dashboard:main_dashboard')
                 else:  # staff role
-                    return redirect('authentication:profile')
+                    return redirect('authentication:staff_workspace')
             else:
                 messages.error(request, 'Incorrect PIN. Please try again.')
         
@@ -134,13 +154,29 @@ class ProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        now = timezone.now()
-
-        # Profile Statistics
+        
+        # Import Person model
+        from people.models import Person
+        
+        # Try to get or create a Person instance for the user
+        try:
+            person, created = Person.objects.get_or_create(
+                user=user,
+                defaults={
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email
+                }
+            )
+        except Exception as e:
+            logger.error(f"Error creating Person for user {user}: {str(e)}")
+            person = None
+        
+        # Update context with lead counts using Person
         context['total_leads'] = Lead.objects.filter(
-            Q(assigned_to=user) | 
-            Q(created_by=user)
-        ).count()
+            Q(assigned_to=person) |  
+            Q(created_by=user)     
+        ).count() if person else 0
         
         context['total_projects'] = Project.objects.count()
         
@@ -154,22 +190,22 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         )[:5]
         
         context['overdue_documents'] = Document.objects.filter(
-            due_date__lt=now,
+            due_date__lt=timezone.now(),
             status__in=['draft', 'in_progress']
         )[:5]
 
         # Open Leads
         context['open_leads'] = Lead.objects.filter(
-            Q(assigned_to=user) | 
+            Q(assigned_to=person) | 
             Q(created_by=user),
             status__in=['new', 'in_progress']
-        )[:5]
+        )[:5] if person else []
 
         # Upcoming Events
         context['upcoming_events'] = Event.objects.filter(
             user=user,
-            start_time__gte=now,
-            start_time__lte=now + timedelta(days=30)
+            start_time__gte=timezone.now(),
+            start_time__lte=timezone.now() + timedelta(days=30)
         )[:5]
 
         # Open Projects
@@ -188,7 +224,7 @@ def password_change(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Your password was successfully updated!')
-            return redirect('authentication:profile')
+            return redirect('authentication:profile_selection')
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'authentication/password_change.html', {'form': form})
@@ -211,7 +247,7 @@ def password_reset(request):
 def index_view(request):
     if request.user.is_authenticated:
         if request.session.get('profile_id'):
-            return redirect('dashboard:dashboard')
+            return redirect('dashboard:main_dashboard')
         return redirect('authentication:profile_selection')
     return redirect('authentication:login') 
 

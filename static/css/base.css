@@ -140,6 +140,33 @@ img {
   min-height: 100vh;
 }
 
+.app-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  padding: 20px;
+  min-height: calc(100vh - var(--header-height));
+}
+
+.app-footer {
+  margin-top: auto;
+  padding: 15px 20px;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  z-index: 100;
+}
+
 .app-sidebar {
   width: var(--sidebar-width);
   background-color: #000000;

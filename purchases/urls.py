@@ -10,6 +10,7 @@ urlpatterns = [
     path('<int:pk>/', views.purchase_detail, name='purchase_detail'),
     path('<int:pk>/update/', views.purchase_update, name='purchase_update'),
     path('<int:pk>/delete/', views.purchase_delete, name='purchase_delete'),
+    path('<int:pk>/generate-purchase-order/', views.generate_purchase_order, name='generate_purchase_order'),
     
     
     # Category URLs

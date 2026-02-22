@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
+<meta name="csrf-token" content="{{ csrf_token }}">
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/documents/invoice_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/documents/status_update.css' %}">
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="invoice-container">
     <div class="invoice-header">
         <h1>Invoices</h1>
@@ -44,9 +47,28 @@
                         <td>{{ invoice.created_at|date:"d/m/Y" }}</td>
                         <td>KES {{ invoice.total_amount|floatformat:2 }}</td>
                         <td>
-                            <span class="status-badge status-{{ invoice.status|lower }}">
-                                {{ invoice.get_status_display }}
-                            </span>
+                            {% if invoice.status == 'PAID' or invoice.status == 'CANCELLED' %}
+                                <span class="status-badge status-{{ invoice.status|lower }}">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                            {% else %}
+                                <div class="status-dropdown">
+                                    <select class="status-select" data-invoice-id="{{ invoice.id }}" data-current-status="{{ invoice.status }}">
+                                        <option value="{{ invoice.status }}" selected>{{ invoice.get_status_display }}</option>
+                                        {% if invoice.status == 'DRAFT' %}
+                                            <option value="SENT">Mark as Sent</option>
+                                            <option value="CANCELLED">Cancel</option>
+                                        {% elif invoice.status == 'SENT' %}
+                                            <option value="PAID">Mark as Paid</option>
+                                            <option value="OVERDUE">Mark as Overdue</option>
+                                            <option value="CANCELLED">Cancel</option>
+                                        {% elif invoice.status == 'OVERDUE' %}
+                                            <option value="PAID">Mark as Paid</option>
+                                            <option value="CANCELLED">Cancel</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            {% endif %}
                         </td>
                         <td class="actions">
                             <a href="{% url 'documents:document_detail' invoice.id %}" class="btn-icon">
@@ -74,4 +96,5 @@
 
 {% block extra_js %}
 <script src="{% static 'js/documents/invoice_list.js' %}"></script>
+<script src="{% static 'js/documents/status_update.js' %}"></script>
 {% endblock %} 

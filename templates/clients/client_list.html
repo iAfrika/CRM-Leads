@@ -144,6 +144,7 @@
             {% if clients %}
                 <thead>
                     <tr>
+                        <th>Client ID</th>
                         <th>Company Name</th>
                         <th>Contact Person</th>
                         <th>Email</th>
@@ -155,6 +156,9 @@
                     {% for client in clients %}
                         <tr>
                             <td>
+                                <span class="badge bg-primary">{{ client.client_id }}</span>
+                            </td>
+                            <td>
                                 <a href="javascript:void(0)" class="client-name" 
                                    onclick="showDetailsModal(
                                        {{ client.pk }}, 
@@ -163,7 +167,8 @@
                                        '{{ client.email }}', 
                                        '{{ client.phone }}', 
                                        '{{ client.address|escapejs }}', 
-                                       '{{ client.notes|default:''|escapejs }}'
+                                       '{{ client.notes|default:''|escapejs }}',
+                                       '{{ client.client_id }}'
                                    )">
                                     <i class="fas fa-building"></i>
                                     <span>{{ client.name }}</span>
@@ -281,6 +286,12 @@
     </div>
     
     <div class="client-details-content">
+        <div class="detail-group">
+            <div class="detail-label">
+                <i class="fas fa-id-card"></i> Client ID
+            </div>
+            <div class="detail-value" id="detailsClientId"></div>
+        </div>
         <div class="detail-group">
             <div class="detail-label">
                 <i class="fas fa-user"></i> Contact Person

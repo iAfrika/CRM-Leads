@@ -244,76 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     /**
-     * 1. QUOTES VS INVOICES CHART
-     */
-    const setupQuotesVsInvoicesChart = () => {
-        const canvas = document.getElementById('quotesVsInvoicesChart');
-        if (!canvas) return;
-        
-        // Debug all attributes
-        const attributes = debugCanvasAttributes(canvas);
-        
-        const updateChart = (metric) => {
-            let data, labels;
-            
-            // For amount, compare total quotes amount to paid invoices amount
-            switch(metric) {
-                case 'amount':
-                    data = [
-                        getDataAttribute(canvas, 'quotes-amount', 0, 'float'),
-                        getDataAttribute(canvas, 'invoices-amount', 0, 'float')
-                    ];
-                    labels = ['Total Quotes Value', 'Paid Invoices Value'];
-                    break;
-                case 'average':
-                    const quotesCount = getDataAttribute(canvas, 'quotes', 1, 'int');
-                    const invoicesCount = getDataAttribute(canvas, 'invoices', 1, 'int');
-                    const quotesAmount = getDataAttribute(canvas, 'quotes-amount', 0, 'float');
-                    const invoicesAmount = getDataAttribute(canvas, 'invoices-amount', 0, 'float');
-                    
-                    data = [
-                        quotesCount > 0 ? quotesAmount / quotesCount : 0,
-                        invoicesCount > 0 ? invoicesAmount / invoicesCount : 0
-                    ];
-                    labels = ['Average Quote', 'Average Invoice'];
-                    break;
-                default: // count
-                    data = [
-                        getDataAttribute(canvas, 'quotes', 0, 'int'),
-                        getDataAttribute(canvas, 'invoices', 0, 'int')
-                    ];
-                    labels = ['Quotes', 'Invoices'];
-                    break;
-            }
-            
-            console.log(`Quotes vs Invoices [${metric}] data:`, data);
-            
-            const chartData = {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(16, 185, 129, 0.5)'],
-                    borderColor: ['rgb(59, 130, 246)', 'rgb(16, 185, 129)'],
-                    borderWidth: 1
-                }]
-            };
-            
-            initChart('quotesVsInvoicesChart', 'bar', chartData, commonOptions);
-        };
-        
-        // Initialize with default metric
-        updateChart('count');
-        
-        // Add event listener for metric change
-        const metricSelector = document.getElementById('quotesVsInvoicesMetric');
-        if (metricSelector) {
-            metricSelector.addEventListener('change', function(e) {
-                updateChart(e.target.value);
-            });
-        }
-    };
-    
-    /**
      * 2. REVENUE VS EXPENDITURE CHART
      */
     const setupRevenueVsExpenditureChart = () => {
@@ -532,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        setupQuotesVsInvoicesChart();
+        // Remove setupQuotesVsInvoicesChart() since it's handled by charts.js
         setupRevenueVsExpenditureChart();
         setupPurchasesVsSalesChart();
         setupMonthlyTrendsChart();
@@ -541,4 +471,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start chart initialization with a small delay to ensure DOM is fully loaded
     setTimeout(initializeAllCharts, 100);
-}); 
+});

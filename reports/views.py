@@ -5,13 +5,15 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Sum, Count, Avg, Q, Min, Max, F
+from django.db.models import Sum, Count, Q, Avg, F, Min, Max
 from django.db.models.functions import TruncMonth, Coalesce
 from django.utils import timezone
 from django.conf import settings
 from datetime import datetime, timedelta
 import json
 import uuid
+import logging
+from decimal import Decimal
 
 from .models import (
     Report, ReportConfiguration, ReportSchedule, ReportDelivery,
@@ -25,11 +27,9 @@ from .utils import (
     export_report_to_csv, send_scheduled_report
 )
 
-from products.models import Product, Category, Purchase
 from project_management.models import Project
 from leads.models import Lead
 from clients.models import Client
-from sales.models import Quote, Invoice
 from documents.models import Document
 
 from django.contrib import messages
@@ -39,6 +39,8 @@ from django.db.models import Q, Count
 from django.urls import reverse
 from django.http import JsonResponse
 from django.db.models.functions import TruncMonth
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def dashboard(request):
@@ -80,9 +82,6 @@ def dashboard(request):
         'recent_reports': recent_reports,
         'report_types': report_types,
         'scheduled_reports': scheduled_reports,
-        'recent_purchases': Purchase.objects.order_by('-purchase_date')[:5],
-        'total_products': Product.objects.count(),
-        'active_products': Product.objects.filter(status='active').count(),
         'total_clients': Client.objects.count(),
         'total_leads': Lead.objects.count(),
         'converted_leads': Lead.objects.filter(status='converted').count(),
@@ -99,7 +98,6 @@ def dashboard(request):
         'sales_reports_count': Report.objects.filter(configuration__report_type='SALES').count(),
         'client_reports_count': Report.objects.filter(configuration__report_type='CLIENT').count(),
         'expense_reports_count': Report.objects.filter(configuration__report_type='EXPENSE').count(),
-        'purchase_reports_count': Report.objects.filter(configuration__report_type='PURCHASE').count(),
         'lead_reports_count': Report.objects.filter(configuration__report_type='LEAD').count(),
         'project_reports_count': Report.objects.filter(configuration__report_type='PROJECT').count(),
     }
@@ -706,9 +704,24 @@ def create_report_config(request):
     return redirect('reports:dashboard')
 
 
-def calculate_lead_conversion_rate():
-    total_leads = Lead.objects.count()
-    converted_leads = Lead.objects.filter(status='converted').count()
+def calculate_lead_conversion_rate(start_date=None):
+    """
+    Calculate lead conversion rate.
+    
+    :param start_date: Optional start date to filter leads
+    :return: Conversion rate as a percentage
+    """
+    # If no start date provided, calculate for all leads
+    if start_date is None:
+        total_leads = Lead.objects.count()
+        converted_leads = Lead.objects.filter(status='converted').count()
+    else:
+        # Filter leads from the given start date
+        total_leads = Lead.objects.filter(created_at__gte=start_date).count()
+        converted_leads = Lead.objects.filter(
+            status='converted', 
+            created_at__gte=start_date
+        ).count()
     
     if total_leads > 0:
         return round((converted_leads / total_leads) * 100, 1)
@@ -716,7 +729,8 @@ def calculate_lead_conversion_rate():
         return 0.0
 
 
-def get_quotes_invoices_chart_data():
+@login_required
+def get_quotes_invoices_chart_data(request):
     """
     Generate chart data for quotes vs invoices over time
     """
@@ -865,3 +879,251 @@ def diagnose_documents_chart_data(request):
     }
     
     return JsonResponse(context)
+
+
+@login_required
+def analytics(request):
+    """
+    Comprehensive analytics dashboard with enhanced metrics
+    """
+    # Log entry point
+    print(f"Analytics view accessed by user: {request.user.username}")
+    logger.info(f"Analytics view accessed by user: {request.user.username}")
+
+    # Time ranges
+    today = timezone.now().date()
+    last_month = today - timedelta(days=30)
+    last_year = today - timedelta(days=365)
+
+    # Revenue Metrics
+    total_revenue = Document.objects.filter(
+        document_type='INVOICE', 
+        status='PAID'
+    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+    last_month_revenue = Document.objects.filter(
+        document_type='INVOICE', 
+        status='PAID',
+        document_date__gte=last_month
+    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+    revenue_change = (
+        ((total_revenue - last_month_revenue) / last_month_revenue * 100) 
+        if last_month_revenue > 0 else 0
+    )
+
+    # Expense Metrics
+    total_expenses = Document.objects.filter(
+        document_type='EXPENSE'
+    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+    last_month_expenses = Document.objects.filter(
+        document_type='EXPENSE',
+        document_date__gte=last_month
+    ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0.00')
+
+    expenses_change = (
+        ((total_expenses - last_month_expenses) / last_month_expenses * 100) 
+        if last_month_expenses > 0 else 0
+    )
+
+    # Profitability Metrics
+    net_profit = total_revenue - total_expenses
+    profit_margin = (
+        (net_profit / total_revenue * 100) 
+        if total_revenue > 0 else 0
+    )
+
+    # Lead Metrics
+    total_leads = Lead.objects.count()
+    last_month_leads = Lead.objects.filter(created_at__gte=last_month).count()
+    leads_change = (
+        ((total_leads - last_month_leads) / last_month_leads * 100) 
+        if last_month_leads > 0 else 0
+    )
+
+    # Lead Conversion Metrics
+    lead_conversion_rate = calculate_lead_conversion_rate()
+    last_month_conversion_rate = calculate_lead_conversion_rate(last_month)
+    conversion_change = (
+        ((lead_conversion_rate - last_month_conversion_rate) / last_month_conversion_rate * 100) 
+        if last_month_conversion_rate > 0 else 0
+    )
+
+    # Project Metrics
+    total_projects = Project.objects.count()
+    last_month_projects = Project.objects.filter(created_at__gte=last_month).count()
+    projects_change = (
+        ((total_projects - last_month_projects) / last_month_projects * 100) 
+        if last_month_projects > 0 else 0
+    )
+
+    # Client Metrics
+    total_clients = Client.objects.count()
+    new_clients_last_month = Client.objects.filter(created_at__gte=last_month).count()
+    client_growth_rate = (
+        ((total_clients - new_clients_last_month) / new_clients_last_month * 100) 
+        if new_clients_last_month > 0 else 0
+    )
+
+    # Sales Pipeline Metrics
+    total_quotes = Document.objects.filter(document_type='QUOTE').count()
+    quotes_converted_to_invoices = Document.objects.filter(
+        document_type='INVOICE', 
+        quote__isnull=False
+    ).count()
+    quote_conversion_rate = (
+        (quotes_converted_to_invoices / total_quotes * 100) 
+        if total_quotes > 0 else 0
+    )
+
+    # Monthly Revenue Chart Data
+    monthly_revenue = Document.objects.filter(
+        document_type='INVOICE', 
+        status='PAID',
+        document_date__gte=last_year
+    ).annotate(month=TruncMonth('document_date')).values('month').annotate(
+        total_revenue=Sum('total_amount')
+    ).order_by('month')
+
+    monthly_revenue_labels = [
+        month['month'].strftime('%b %Y') for month in monthly_revenue
+    ]
+    monthly_revenue_data = [
+        float(month['total_revenue']) for month in monthly_revenue
+    ]
+
+    # Lead Conversion Chart Data
+    lead_conversion_data = Lead.objects.filter(
+        created_at__gte=last_year
+    ).annotate(month=TruncMonth('created_at')).values('month', 'status').annotate(
+        count=Count('id')
+    ).order_by('month', 'status')
+
+    lead_conversion_labels = []
+    lead_conversion_chart_data = {}
+    for entry in lead_conversion_data:
+        month = entry['month'].strftime('%b %Y')
+        status = entry['status']
+        count = entry['count']
+        
+        if month not in lead_conversion_labels:
+            lead_conversion_labels.append(month)
+        
+        if status not in lead_conversion_chart_data:
+            lead_conversion_chart_data[status] = []
+        
+        # Ensure data points for each month
+        while len(lead_conversion_chart_data[status]) < len(lead_conversion_labels) - 1:
+            lead_conversion_chart_data[status].append(0)
+        
+        lead_conversion_chart_data[status].append(count)
+
+    # Expense Breakdown Chart Data
+    expense_breakdown = Document.objects.filter(
+        document_type='EXPENSE',
+        document_date__gte=last_year
+    ).annotate(month=TruncMonth('document_date')).values('month', 'status').annotate(
+        total_amount=Sum('total_amount')
+    ).order_by('month', 'status')
+
+    expense_labels = []
+    expense_chart_data = {}
+    for entry in expense_breakdown:
+        month = entry['month'].strftime('%b %Y')
+        status = entry['status']
+        total = float(entry['total_amount'])
+        
+        if month not in expense_labels:
+            expense_labels.append(month)
+        
+        if status not in expense_chart_data:
+            expense_chart_data[status] = []
+        
+        # Ensure data points for each month
+        while len(expense_chart_data[status]) < len(expense_labels) - 1:
+            expense_chart_data[status].append(0)
+        
+        expense_chart_data[status].append(total)
+
+    # Project Status Chart Data
+    project_status_data = Project.objects.values('status').annotate(
+        count=Count('id'),
+        total_budget=Sum('budget')
+    )
+
+    project_status_labels = [
+        status['status'] for status in project_status_data
+    ]
+    project_status_chart_data = [
+        status['count'] for status in project_status_data
+    ]
+
+    # Client Acquisition Chart Data
+    client_acquisition = Client.objects.filter(
+        created_at__gte=last_year
+    ).annotate(month=TruncMonth('created_at')).values('month').annotate(
+        count=Count('id')
+    ).order_by('month')
+
+    client_acquisition_labels = [
+        month['month'].strftime('%b %Y') for month in client_acquisition
+    ]
+    client_acquisition_data = [
+        month['count'] for month in client_acquisition
+    ]
+
+    context = {
+        # Revenue Metrics
+        'total_revenue': total_revenue,
+        'last_month_revenue': last_month_revenue,
+        'revenue_change': revenue_change,
+        'total_expenses': total_expenses,
+        'last_month_expenses': last_month_expenses,
+        'expenses_change': expenses_change,
+        'net_profit': net_profit,
+        'profit_margin': profit_margin,
+        'total_leads': total_leads,
+        'lead_conversion_rate': lead_conversion_rate,
+        'conversion_change': conversion_change,
+        'total_projects': total_projects,
+        'projects_change': projects_change,
+        'total_clients': total_clients,
+        'client_growth_rate': client_growth_rate,
+        'total_quotes': total_quotes,
+        'quote_conversion_rate': quote_conversion_rate,
+
+        # Chart Data
+        'monthly_revenue_labels': json.dumps(monthly_revenue_labels),
+        'monthly_revenue_data': json.dumps(monthly_revenue_data),
+        
+        'lead_conversion_labels': json.dumps(lead_conversion_labels),
+        'lead_conversion_data': json.dumps({
+            'labels': list(lead_conversion_chart_data.keys()),
+            'datasets': [
+                {
+                    'label': status,
+                    'data': data
+                } for status, data in lead_conversion_chart_data.items()
+            ]
+        }),
+        
+        'expense_labels': json.dumps(expense_labels),
+        'expense_data': json.dumps({
+            'labels': list(expense_chart_data.keys()),
+            'datasets': [
+                {
+                    'label': status,
+                    'data': data
+                } for status, data in expense_chart_data.items()
+            ]
+        }),
+        
+        'project_status_labels': json.dumps(project_status_labels),
+        'project_status_data': json.dumps(project_status_chart_data),
+        
+        'client_acquisition_labels': json.dumps(client_acquisition_labels),
+        'client_acquisition_data': json.dumps(client_acquisition_data),
+    }
+
+    return render(request, 'reports/analytics.html', context)

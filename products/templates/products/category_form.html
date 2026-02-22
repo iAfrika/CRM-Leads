@@ -1,213 +1,74 @@
-{% extends "base.html" %}
-{% extends "products/base.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block product_content %}
-<div class="card">
-    <div class="header-actions">
-        <h1>
-            <i class="fas fa-folder"></i>
-            {% if category %}Edit{% else %}Add{% endif %} Category
+{% block title %}{% if category %}Edit Category{% else %}New Category{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'products/css/product-form-new.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="product-form-container">
+    <div class="product-form-card p-4">
+        <h1 class="product-form-header">
+            {% if category %}Edit Category{% else %}New Category{% endif %}
         </h1>
-    </div>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <form method="post" class="category-form" action="{% if category %}{% url 'products:category_update' category.id %}{% else %}{% url 'products:category_create' %}{% endif %}" novalidate>
-        {% csrf_token %}
-        
-        {% if form.non_field_errors %}
-        <div class="error-message form-wide-error">
-            {% for error in form.non_field_errors %}
-            <p>{{ error }}</p>
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             {% endfor %}
         </div>
         {% endif %}
-        
-        <div class="form-group">
-            <label for="{{ form.name.id_for_label }}" class="form-label">Category Name *</label>
-            {{ form.name }}
-            {% if form.name.errors %}
-            <div class="error-message">
-                {% for error in form.name.errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
 
-        <div class="form-group">
-            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-            {{ form.description }}
-            {% if form.description.errors %}
-            <div class="error-message">
-                {% for error in form.description.errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
+        <form method="post" class="product-form">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Category Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.name.errors|join:" " }}
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
 
-        <div class="form-actions">
-            <a href="{% url 'products:category_list' %}" class="btn btn-secondary">
-                <i class="fas fa-times"></i> Cancel
-            </a>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Category
-            </button>
-        </div>
-    </form>
+            <div class="mb-4">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.description.errors|join:" " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4 form-check">
+                {{ form.is_active }} 
+                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                    Active
+                </label>
+                {% if form.is_active.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.is_active.errors|join:" " }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'products:category_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Categories
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Category
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
-
-{% block extra_css %}
-{{ block.super }}
-<style>
-    .category-form {
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #64748b;
-        margin-bottom: 0.5rem;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        color: #1e293b;
-        background: white;
-        transition: all 0.2s;
-    }
-    
-    .form-control:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    textarea.form-control {
-        min-height: 100px;
-        resize: vertical;
-    }
-    
-    .error-message {
-        color: #dc2626;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-    
-    .form-wide-error {
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background-color: rgba(239, 68, 68, 0.1);
-        border-radius: 0.375rem;
-    }
-    
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e2e8f0;
-    }
-    
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    
-    .btn-primary {
-        background: #3b82f6;
-        color: white;
-        border: none;
-    }
-    
-    .btn-primary:hover {
-        background: #2563eb;
-    }
-    
-    .btn-secondary {
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .btn-secondary:hover {
-        background: #e2e8f0;
-        color: #1e293b;
-    }
-
-    .messages {
-        margin-bottom: 1.5rem;
-    }
-
-    .alert {
-        padding: 0.75rem 1rem;
-        border-radius: 0.375rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .alert-success {
-        background-color: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
-    }
-
-    .alert-error {
-        background-color: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-</style>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.category-form');
-    const nameInput = document.getElementById('id_name');
-    
-    form.addEventListener('submit', function(e) {
-        if (!nameInput.value.trim()) {
-            e.preventDefault();
-            
-            const errorDiv = nameInput.nextElementSibling;
-            if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-                const newErrorDiv = document.createElement('div');
-                newErrorDiv.className = 'error-message';
-                newErrorDiv.innerHTML = '<p>This field is required.</p>';
-                nameInput.parentNode.insertBefore(newErrorDiv, nameInput.nextSibling);
-            }
-            nameInput.focus();
-        }
-    });
-});
-</script>
-{% endblock %} 

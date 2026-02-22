@@ -363,3 +363,7 @@ html.dark-mode .client-details-content {
         font-size: 0.75rem;
     }
 }
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

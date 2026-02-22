@@ -17,12 +17,16 @@
   --lead-grey-100: #f8f9fa;
   --lead-grey-200: #e9ecef;
   --lead-grey-300: #dee2e6;
-  --lead-grey-600: #6c757d;
-  --lead-grey-800: #343a40;
+  --lead-grey-600: #475569;
+  --lead-grey-800: #1e293b;
   --lead-border-radius: 8px;
   --lead-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   --lead-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
   --lead-transition: all 0.3s ease;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
 }
 
 /* Lead Detail Container */
@@ -256,7 +260,7 @@
 
 .lead-info-value {
   font-weight: 500;
-  color: var(--lead-dark);
+  color: var(--lead-grey-800);
 }
 
 .lead-info-description {

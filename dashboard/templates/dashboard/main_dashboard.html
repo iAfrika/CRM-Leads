@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load number_filters %}
+
+{% block app_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/main_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <nav class="advanced-dashboard-navbar">
+        <div class="navbar-grid">
+            <div class="navbar-brand">
+                <div class="logo-container">
+                    <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    <span class="logo-text">CRM</span>
+                </div>
+            </div>
+            
+            <div class="navbar-menu">
+                <ul class="nav-links">
+                    <li>
+                        <a href="#" class="nav-item active">
+                            <i class="bi bi-house-door"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i class="bi bi-graph-up"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-item">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-content">
+        <script>
+            (function() {
+                var chartData = {
+                    quotes_invoices_data: JSON.parse('{{ quotes_invoices_data|escapejs }}'),
+                    quotes_count: Number('{{ quotes_count|default:0 }}'),
+                    invoices_count: Number('{{ invoices_count|default:0 }}'),
+                    quotes_count_value: Number('{{ quotes_count_value|default:0 }}'),
+                    invoices_count_value: Number('{{ invoices_count_value|default:0 }}'),
+                    quotes_total_value: Number('{{ quotes_total_value|default:0 }}'),
+                    invoices_total_value: Number('{{ invoices_total_value|default:0 }}'),
+                    revenue_expenditure_data: JSON.parse('{{ revenue_expenditure_data|escapejs }}'),
+                    purchases_sales_data: JSON.parse('{{ purchases_sales_data|escapejs }}'),
+                    monthly_trends_data: JSON.parse('{{ monthly_trends_data|escapejs }}')
+                };
+                window.chartData = chartData;
+            })();
+        </script>
+
+        <div class="dashboard-grid">
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="header-container">
+                        <h3>Quotes vs Invoices</h3>
+                        <label class="chart-toggle-switch-small">
+                            <input type="checkbox" id="chartDataToggle">
+                            <span class="chart-toggle-slider-small">
+                                <span class="chart-toggle-label-small chart-toggle-count active">Count</span>
+                                <span class="chart-toggle-label-small chart-toggle-value">Value</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="quotesInvoicesChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="header-container">
+                        <h3>Revenue vs Expenses</h3>
+                        <div class="chart-timeframe-toggle">
+                            <span 
+                                class="revenue-expenditures-timeframe-label active" 
+                                data-timeframe="monthly">Monthly</span>
+                            <span 
+                                class="revenue-expenditures-timeframe-label" 
+                                data-timeframe="weekly">Weekly</span>
+                            <span 
+                                class="revenue-expenditures-timeframe-label" 
+                                data-timeframe="daily">Daily</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container revenue-expenditures-chart-container">
+                    <canvas id="revenueExpendituresChart"></canvas>
+                </div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="header-container">
+                        <h3>Purchases vs Sales</h3>
+                    </div>
+                </div>
+                <div class="chart-container purchases-sales-chart-container">
+                    <canvas id="purchasesSalesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="widget">
+                <div class="widget-header">
+                    <div class="header-container">
+                        <h3>Financial Trends</h3>
+                    </div>
+                </div>
+                <div class="chart-container financial-trends-chart-container">
+                    <canvas id="financialTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-metrics">
+            <div class="metrics-grid">
+                <div class="metric-card total-revenue">
+                    <div class="metric-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-graph-up-arrow metric-title-icon"></i>
+                            <h4 class="metric-title">Total Revenue</h4>
+                        </div>
+                        <div class="metric-value">{{ total_revenue|thousands_separator }}</div>
+                        <div class="metric-change {% if revenue_change >= 0 %}positive{% else %}negative{% endif %}">
+                            <i class="bi {% if revenue_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
+                            {{ revenue_change|floatformat:2 }}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card total-expenses">
+                    <div class="metric-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-cash-coin metric-title-icon"></i>
+                            <h4 class="metric-title">Total Expenses</h4>
+                        </div>
+                        <div class="metric-value">{{ total_expenses|thousands_separator }}</div>
+                        <div class="metric-change {% if expenses_change >= 0 %}negative{% else %}positive{% endif %}">
+                            <i class="bi {% if expenses_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
+                            {{ expenses_change|floatformat:2 }}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card pnl-analysis">
+                    <div class="metric-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-pie-chart metric-title-icon"></i>
+                            <h4 class="metric-title">PNL Analysis</h4>
+                        </div>
+                        <div class="metric-value {% if pnl_value >= 0 %}positive{% else %}negative{% endif %}">
+                            {{ pnl_value|thousands_separator }}
+                        </div>
+                        <div class="metric-change {% if pnl_change >= 0 %}positive{% else %}negative{% endif %}">
+                            <i class="bi {% if pnl_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
+                            {{ pnl_change|floatformat:2 }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card total-purchases">
+                    <div class="metric-icon">
+                        <i class="bi bi-cart-plus"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-basket metric-title-icon"></i>
+                            <h4 class="metric-title">Total Purchases</h4>
+                        </div>
+                        <div class="metric-value">{{ total_purchases|thousands_separator }}</div>
+                        <div class="metric-change {% if purchases_change >= 0 %}negative{% else %}positive{% endif %}">
+                            <i class="bi {% if purchases_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
+                            {{ purchases_change|floatformat:2 }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card total-sales">
+                    <div class="metric-icon">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-tags metric-title-icon"></i>
+                            <h4 class="metric-title">Total Sales</h4>
+                        </div>
+                        <div class="metric-value">{{ total_sales|thousands_separator }}</div>
+                        <div class="metric-change {% if sales_change >= 0 %}positive{% else %}negative{% endif %}">
+                            <i class="bi {% if sales_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
+                            {{ sales_change|floatformat:2 }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-additional-cards">
+            <div class="large-card pending-quotes-overview">
+                <div class="card-header">
+                    <h3><i class="bi bi-file-earmark-text"></i> Pending Quotes Detailed Overview</h3>
+                </div>
+                <div class="card-body">
+                    <div class="card-metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">Total Pending Quotes</span>
+                            <span class="metric-value">{{ total_pending_quotes }}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Total Pending Value</span>
+                            <span class="metric-value">{{ total_pending_quotes_value|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="card-details">
+                        <table class="quotes-table">
+                            <thead>
+                                <tr>
+                                    <th>Quote ID</th>
+                                    <th>Client</th>
+                                    <th>Created Date</th>
+                                    <th>Value</th>
+                                    <th>Days Pending</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for quote in recent_pending_quotes %}
+                                <tr>
+                                    <td>{{ quote.id }}</td>
+                                    <td>{{ quote.client_name }}</td>
+                                    <td>{{ quote.created_at|date:"d M Y" }}</td>
+                                    <td>{{ quote.total_amount|thousands_separator }}</td>
+                                    <td>
+                                        <span class="status-badge status-pending">
+                                            {{ quote.days_pending.days }} Days
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="large-card overdue-invoices-overview">
+                <div class="card-header">
+                    <h3><i class="bi bi-exclamation-triangle"></i> Overdue Invoices Detailed Overview</h3>
+                </div>
+                <div class="card-body">
+                    <div class="card-metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">Total Overdue Invoices</span>
+                            <span class="metric-value">{{ total_overdue_invoices }}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Total Overdue Value</span>
+                            <span class="metric-value">{{ total_overdue_invoices_value|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    <div class="card-details">
+                        <table class="invoices-table">
+                            <thead>
+                                <tr>
+                                    <th>Invoice ID</th>
+                                    <th>Client</th>
+                                    <th>Due Date</th>
+                                    <th>Value</th>
+                                    <th>Days Overdue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for invoice in recent_overdue_invoices %}
+                                <tr>
+                                    <td>{{ invoice.id }}</td>
+                                    <td>{{ invoice.client_name }}</td>
+                                    <td>{{ invoice.due_date|date:"d M Y" }}</td>
+                                    <td>{{ invoice.total_amount|thousands_separator }}</td>
+                                    <td>
+                                        <span class="status-badge status-overdue">
+                                            {{ invoice.days_overdue.days }} Days
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block app_js %}
+<!-- Load Chart.js first -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+    // Verify Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js failed to load. Please check your internet connection.');
+    }
+</script>
+<!-- Load dashboard charts after Chart.js -->
+<script src="{% static 'dashboard/js/dashboard_charts.js' %}"></script>
+{% endblock %}

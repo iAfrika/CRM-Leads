@@ -1,5 +1,9 @@
 /* Banking Forms CSS */
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 .banking-form {
     margin-bottom: 20px;
 }

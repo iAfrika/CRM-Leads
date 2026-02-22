@@ -231,4 +231,8 @@
         margin-top: 10px;
         align-self: flex-end;
     }
-} 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

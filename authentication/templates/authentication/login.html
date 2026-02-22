@@ -1,92 +1,271 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #6a11cb;
+        --secondary-color: #2575fc;
+        --gradient-angle: 45deg;
+    }
+
+    body {
+        background: linear-gradient(var(--gradient-angle), var(--primary-color), var(--secondary-color));
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .auth-container {
+        display: flex;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        max-width: 900px;
+        background: white;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .auth-image {
+        flex: 1;
+        background: linear-gradient(var(--gradient-angle), var(--primary-color), var(--secondary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .auth-image img {
+        max-width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+    }
+
+    .auth-form {
+        flex: 1;
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .auth-tabs {
+        display: flex;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #f1f1f1;
+    }
+
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        color: #888;
+        transition: all 0.3s ease;
+    }
+
+    .auth-tab.active {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+    }
+
+    .form-control {
+        border-radius: 25px;
+        padding: 12px 20px;
+        border: 1px solid #e1e1e1;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 15px rgba(106, 17, 203, 0.2);
+        border-color: var(--primary-color);
+    }
+
+    .btn-auth {
+        border-radius: 25px;
+        padding: 12px 20px;
+        background: linear-gradient(var(--gradient-angle), var(--primary-color), var(--secondary-color));
+        border: none;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .social-login {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
+
+    .social-btn {
+        flex: 1;
+        margin: 0 0.5rem;
+        border-radius: 25px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .social-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .social-btn img {
+        max-width: 24px;
+        margin-right: 10px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card login-card">
-                <div class="card-header login-header">
-                    <h4 class="mb-0">Login</h4>
-                </div>
-                <div class="card-body login-body">
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        {% for field in form %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ field.errors|join:", " }}
-                            </div>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                        
-                        <!-- Role selection -->
-                        <div class="mb-3">
-                            <label for="id_role" class="form-label">Role</label>
-                            <select name="role" id="id_role" class="form-select">
-                                <option value="administrator">Administrator</option>
-                                <option value="staff">Staff</option>
-                            </select>
-                        </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary login-button">Login</button>
-                        </div>
-                    </form>
-                    <div class="mt-3 text-center">
-                        <a href="{% url 'authentication:password_reset' %}" class="forgot-password-link">Forgot Password?</a>
-                    </div>
-                </div>
+<div class="container-fluid p-0">
+    <div class="auth-container">
+        <div class="auth-image">
+            <img src="{% static 'images/login-illustration.svg' %}" alt="Login Illustration">
+        </div>
+        <div class="auth-form">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-form="login">Login</div>
+                <div class="auth-tab" data-form="register">Register</div>
             </div>
+
+            <!-- Login Form -->
+            <form method="post" id="login-form" class="auth-form-section" style="display: block;">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="login">
+                
+                <div class="mb-3">
+                    <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                
+                <div class="mb-3 d-flex justify-content-between">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember-me">
+                        <label class="form-check-label" for="remember-me">Remember Me</label>
+                    </div>
+                    <a href="{% url 'authentication:password_reset' %}" class="text-primary">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-auth w-100">Login</button>
+                
+                <div class="text-center my-3">
+                    <span class="text-muted">or continue with</span>
+                </div>
+                
+                <div class="social-login">
+                    <button type="button" class="social-btn" style="background-color: #4285F4; color: white;">
+                        <img src="{% static 'images/google-icon.svg' %}" alt="Google">
+                        Google
+                    </button>
+                    <button type="button" class="social-btn" style="background-color: #1877F2; color: white;">
+                        <img src="{% static 'images/facebook-icon.svg' %}" alt="Facebook">
+                        Facebook
+                    </button>
+                </div>
+            </form>
+
+            <!-- Registration Form -->
+            <form method="post" id="register-form" class="auth-form-section" style="display: none;">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="register">
+                
+                <div class="mb-3">
+                    <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                </div>
+                
+                <div class="mb-3">
+                    <select name="role" class="form-control">
+                        <option value="">Select Role</option>
+                        <option value="staff">Staff</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-auth w-100">Create Account</button>
+                
+                <div class="text-center my-3">
+                    <span class="text-muted">Already have an account? <a href="#" class="switch-form text-primary">Login</a></span>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-    /* Dark mode specific styles */
-    html.dark-mode .login-card {
-        background-color: var(--card-bg);
-        border-color: var(--border-color);
-    }
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const authTabs = document.querySelectorAll('.auth-tab');
+    const authForms = document.querySelectorAll('.auth-form-section');
+    const switchFormLinks = document.querySelectorAll('.switch-form');
 
-    html.dark-mode .login-header {
-        background-color: var(--hover-bg);
-        border-bottom-color: var(--border-color);
-        color: var(--text-color);
-    }
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const formType = this.dataset.form;
 
-    html.dark-mode .login-body {
-        background-color: var(--card-bg);
-    }
+            // Update active tab
+            authTabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
 
-    html.dark-mode .login-body .form-label {
-        color: var(--text-color);
-    }
+            // Show/hide forms
+            authForms.forEach(form => {
+                form.style.display = form.id === `${formType}-form` ? 'block' : 'none';
+            });
+        });
+    });
 
-    html.dark-mode .login-body .form-control {
-        background-color: var(--input-bg);
-        border-color: var(--form-border);
-        color: var(--form-text);
-    }
+    // Switch form links
+    switchFormLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const loginTab = document.querySelector('.auth-tab[data-form="login"]');
+            const registerTab = document.querySelector('.auth-tab[data-form="register"]');
+            
+            loginTab.classList.toggle('active');
+            registerTab.classList.toggle('active');
 
-    html.dark-mode .login-body .form-control:focus {
-        background-color: var(--input-bg);
-        border-color: var(--form-focus-border);
-        box-shadow: 0 0 0 0.25rem var(--form-focus-shadow);
-    }
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
 
-    html.dark-mode .login-button {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    html.dark-mode .forgot-password-link {
-        color: var(--primary-color);
-    }
-</style>
+            loginForm.style.display = loginForm.style.display === 'none' ? 'block' : 'none';
+            registerForm.style.display = registerForm.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+});
+</script>
 {% endblock %}

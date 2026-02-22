@@ -2,6 +2,7 @@
 /* Variables are inherited from base.css */
 
 :root {
+    /* Color variables */
     --primary: #2c3e50;
     --primary-light: #34495e;
     --primary-dark: #1a252f;
@@ -12,9 +13,9 @@
     --info: #3498db;
     --light: #ecf0f1;
     --dark: #2c3e50;
-    --gray: #7f8c8d;
-    --gray-light: #95a5a6;
-    --gray-dark: #34495e;
+    --text-muted: #7f8c8d;
+    
+    /* Font and spacing */
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
@@ -24,8 +25,17 @@
     --spacing-md: 16px;
     --spacing-lg: 24px;
     --spacing-xl: 32px;
-    --box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    
+    /* Effects */
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* Button hover effects */
+    --primary-hover: #395673;
+    --secondary-hover: #8a9a9b;
+    --success-hover: #219355;
+    --danger-hover: #d14232;
+    --warning-hover: #db8d0f;
+    --info-hover: #2884c3;
 }
 
 /* Base styles */
@@ -33,9 +43,10 @@ body {
     font-family: var(--font-family);
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: var(--body-bg);
+    color: var(--body-color);
     line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Layout */

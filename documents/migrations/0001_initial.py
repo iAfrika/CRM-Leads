@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('clients', '0001_initial'),
         ('expenses', '0001_initial'),
-        ('products', '0001_initial'),
         ('sales', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -58,7 +57,7 @@ class Migration(migrations.Migration):
                 ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='clients.client')),
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_documents', to=settings.AUTH_USER_MODEL)),
                 ('expense', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='documents', to='expenses.expense')),
-                ('purchase', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='documents', to='products.purchase')),
+                ('purchase', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='document', to='purchases.Purchase')),
                 ('sale', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='documents', to='sales.sale')),
                 ('updated_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='updated_documents', to=settings.AUTH_USER_MODEL)),
             ],

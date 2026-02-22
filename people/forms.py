@@ -9,19 +9,6 @@ class PersonForm(forms.ModelForm):
         widgets = {
             'address': forms.Textarea(attrs={'rows': 3}),
         }
-        
-    def clean_phone(self):
-        phone = self.cleaned_data.get('phone')
-        if phone:
-            # Check if this phone number already exists (exclude current instance if updating)
-            if self.instance.pk:
-                exists = Person.objects.filter(phone=phone).exclude(pk=self.instance.pk).exists()
-            else:
-                exists = Person.objects.filter(phone=phone).exists()
-                
-            if exists:
-                raise forms.ValidationError("This phone number is already in use.")
-        return phone
     
     def clean_telegram_username(self):
         telegram_username = self.cleaned_data.get('telegram_username')

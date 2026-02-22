@@ -1,24 +1,33 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CRM Leads</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/authentication/login.css' %}">
+    <link href="{% static 'css/authentication/login.css' %}" rel="stylesheet">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>Welcome Back</h1>
-                <p>Enter your credentials to continue</p>
+    <div class="auth-container">
+        <div class="auth-image">
+            <img src="{% static 'images/logo-placeholder.svg' %}" alt="Logo Placeholder" id="crm-logo">
+        </div>
+        <div class="auth-form">
+            <div class="company-logo">
+                <img src="{% static 'images/company-logo.png' %}" alt="Company Logo" id="company-logo">
             </div>
-
-            <form method="post" class="login-form">
+            
+            <div class="welcome-text">
+                <h1>Welcome Back</h1>
+                <p>Please sign in to continue</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form method="post" id="login-form" class="auth-form-section">
                 {% csrf_token %}
-                
+                <input type="hidden" name="form_type" value="login">
+
                 {% if messages %}
                 <div class="messages">
                     {% for message in messages %}
@@ -28,28 +37,124 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-
-                <div class="form-group">
-                    <input type="text" name="username" id="username" placeholder="Username" required>
-                </div>
                 
-                <div class="form-group">
-                    <input type="password" name="password" id="password" placeholder="Password" required>
-                </div>
-
-                <div class="form-group">
-                    <select id="role" name="role" required>
+                <input type="text" name="username" id="username" class="form-control" placeholder="Username" required>
+                
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                
+                <div class="role-select-container">
+                    <select name="role" id="role" class="custom-select" required>
                         <option value="">Select Role</option>
                         <option value="admin">Administrator</option>
                         <option value="staff">Staff</option>
                     </select>
                 </div>
 
-                <button type="submit" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
+                <div class="forgot-password">
+                    <a href="{% url 'authentication:password_reset' %}">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="btn-auth">Sign In</button>
+            </form>
+
+            <!-- Registration Form -->
+            <form method="post" id="register-form" class="auth-form-section hidden">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="register">
+                
+                <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                
+                <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+                
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                
+                <div class="role-select-container">
+                    <select name="role" class="custom-select">
+                        <option value="">Select Role</option>
+                        <option value="staff">Staff</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-auth">Create Account</button>
             </form>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle company logo image error
+        const companyLogo = document.getElementById('company-logo');
+        if (companyLogo) {
+            companyLogo.onerror = function() {
+                this.src = "{% static 'images/default-logo.png' %}";
+                this.onerror = null;
+            };
+        }
+        
+        // Handle CRM logo image error
+        const crmLogo = document.getElementById('crm-logo');
+        if (crmLogo) {
+            crmLogo.onerror = function() {
+                this.src = "{% static 'images/default-logo.png' %}";
+                this.onerror = null;
+            };
+        }
+        
+        // Add Register tab functionality if needed
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            const loginForm = document.getElementById('login-form');
+            
+            // Create tabs dynamically if they don't exist
+            if (!document.querySelector('.auth-tabs')) {
+                const tabsContainer = document.createElement('div');
+                tabsContainer.className = 'auth-tabs';
+                
+                const loginTab = document.createElement('div');
+                loginTab.className = 'auth-tab active';
+                loginTab.dataset.form = 'login';
+                loginTab.textContent = 'Login';
+                
+                const registerTab = document.createElement('div');
+                registerTab.className = 'auth-tab';
+                registerTab.dataset.form = 'register';
+                registerTab.textContent = 'Register';
+                
+                tabsContainer.appendChild(loginTab);
+                tabsContainer.appendChild(registerTab);
+                
+                // Insert tabs before the login form
+                loginForm.parentNode.insertBefore(tabsContainer, loginForm);
+                
+                // Add event listeners to tabs
+                tabsContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('auth-tab')) {
+                        const formType = e.target.dataset.form;
+                        
+                        // Update active tab
+                        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        // Show/hide forms
+                        if (formType === 'login') {
+                            loginForm.classList.remove('hidden');
+                            registerForm.classList.add('hidden');
+                        } else {
+                            loginForm.classList.add('hidden');
+                            registerForm.classList.remove('hidden');
+                        }
+                    }
+                });
+            }
+        }
+    });
+    </script>
 </body>
 </html>

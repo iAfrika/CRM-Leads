@@ -103,7 +103,7 @@ html.dark-mode {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: 'Nunito', sans-serif;
   font-size: 14px;
   color: var(--text-color);
   background-color: var(--app-bg);
@@ -140,9 +140,36 @@ img {
   min-height: 100vh;
 }
 
+.app-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  padding: 20px;
+  min-height: calc(100vh - var(--header-height));
+}
+
+.app-footer {
+  margin-top: auto;
+  padding: 15px 20px;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  z-index: 100;
+}
+
 .app-sidebar {
   width: var(--sidebar-width);
-  background-color: var(--dark-color);
+  background-color: #000000;
   color: var(--light-text);
   position: fixed;
   height: 100vh;
@@ -154,7 +181,7 @@ img {
 
 /* Dark mode sidebar */
 html.dark-mode .app-sidebar {
-  background-color: #212529;
+  background-color: #000000;
 }
 
 .app-main {
@@ -1112,4 +1139,121 @@ html.dark-mode ::-webkit-scrollbar-thumb {
 
 html.dark-mode ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Inline styles from base.html */
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Header action buttons */
+.header-buttons {
+    margin-right: auto;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Sidebar Styling */
+.app-sidebar {
+    width: 180px; /* Reduced from default width */
+    min-width: 180px;
+    max-width: 180px;
+}
+
+/* Sidebar Logo */
+.sidebar-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-logo img {
+    max-height: 25px;
+    max-width: 100px;
+}
+
+.sidebar-section {
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.sidebar-menu {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* Adjust main content margin to match new sidebar width */
+.app-main {
+    margin-left: 180px;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+    .app-sidebar {
+        width: 100%;
+        position: static;
+    }
+
+    .app-main {
+        margin-left: 0;
+    }
+}
+
+/* Sidebar Navigation Hover Effects */
+.sidebar-menu .nav-link {
+    position: relative;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    margin: 2px 8px;
+    padding: 10px 12px;
+}
+
+.sidebar-menu .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transform: translateX(5px);
+}
+
+.sidebar-menu .nav-link i {
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-menu .nav-link:hover i {
+    transform: scale(1.1);
+    color: var(--primary-color);
+}
+
+.sidebar-menu .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-weight: 600;
+    border-right: 3px solid var(--primary-color);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--primary-color);
+}
+
+.sidebar-section .sidebar-heading {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 15px 8px 8px;
+    padding-left: 4px;
 }

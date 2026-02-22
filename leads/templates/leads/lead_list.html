@@ -14,7 +14,7 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
-        display: none;
+        display: flex;
         align-items: center;
         justify-content: center;
         z-index: 1050;
@@ -28,7 +28,6 @@
         opacity: 1;
         visibility: visible;
         pointer-events: all;
-        display: flex;
     }
     
     .modal {
@@ -185,7 +184,7 @@
                         <a href="{% url 'leads:lead_update' lead.pk %}" class="btn-icon" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <button data-lead-id="{{ lead.pk }}" data-lead-title="{{ lead.title }}" class="btn-icon btn-delete delete-lead-btn" title="Delete">
+                        <button type="button" data-lead-id="{{ lead.pk }}" data-lead-title="{{ lead.title }}" class="btn-icon btn-delete delete-lead-btn" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -273,31 +272,42 @@
         const deleteLeadTitle = document.getElementById('deleteLeadTitle');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         
+        console.log('Delete modal elements:', {
+            modal: deleteModal,
+            title: deleteLeadTitle,
+            confirmBtn: confirmDeleteBtn
+        });
+        
         // Add event listeners to all delete buttons
-        document.querySelectorAll('.delete-lead-btn').forEach(button => {
+        const deleteButtons = document.querySelectorAll('.delete-lead-btn');
+        console.log('Found delete buttons:', deleteButtons.length);
+        
+        deleteButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 // Prevent default behavior
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Log for debugging
-                console.log('Delete button clicked');
-                
                 // Get the lead id and title from data attributes
                 const leadId = this.getAttribute('data-lead-id');
                 const leadTitle = this.getAttribute('data-lead-title');
                 
-                console.log('Opening modal for lead:', leadTitle, 'ID:', leadId);
+                console.log('Delete button clicked - Lead:', leadTitle, 'ID:', leadId);
                 
                 // Set the lead title in the modal
                 deleteLeadTitle.textContent = leadTitle;
                 
                 // Set the href for the confirm button
-                confirmDeleteBtn.href = "{% url 'leads:lead_delete' 0 %}".replace('0', leadId);
+                const deleteUrl = "{% url 'leads:lead_delete' 0 %}".replace('0', leadId);
+                confirmDeleteBtn.href = deleteUrl;
                 
-                // Show the modal using classList
+                console.log('Delete URL:', deleteUrl);
+                
+                // Show the modal
                 deleteModal.classList.add('show');
                 document.body.style.overflow = 'hidden';
+                
+                console.log('Modal should now be visible');
             });
         });
         

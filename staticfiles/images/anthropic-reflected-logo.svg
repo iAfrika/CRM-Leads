@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9D5CFF" />
+      <stop offset="100%" stop-color="#5C24FF" />
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <g transform="scale(-1, 1) translate(-500, 0)" filter="url(#glow)">
+    <!-- Mirrored/reflected 'A' logo -->
+    <path d="M150 400 L250 150 L350 400 Z" fill="none" stroke="url(#logo-gradient)" stroke-width="40" stroke-linejoin="round" />
+    <!-- Horizontal bar of "A" -->
+    <path d="M180 320 L320 320" stroke="url(#logo-gradient)" stroke-width="40" stroke-linecap="round" />
+  </g>
+</svg>

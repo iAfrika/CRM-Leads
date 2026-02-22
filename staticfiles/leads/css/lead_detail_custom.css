@@ -27,6 +27,10 @@
   --transition: all 0.3s ease;
 }
 
+body {
+  font-family: 'Nunito', sans-serif;
+}
+
 /* Layout */
 .leads-container {
   max-width: 1400px;

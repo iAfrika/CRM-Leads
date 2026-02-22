@@ -1,0 +1,23 @@
+{% extends "products/base_products.html" %}
+{% load static %}
+
+{% block product_content %}
+<div class="header-actions">
+    <h1>Delete Supplier</h1>
+</div>
+
+<div class="card">
+    <h3>Are you sure you want to delete {{ supplier.name }}?</h3>
+    <p>This action cannot be undone.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete
+        </button>
+        <a href="{% url 'products:supplier_list' %}" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

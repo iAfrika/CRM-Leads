@@ -1,15 +1,13 @@
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-from django.contrib.auth.models import User
-from authentication.models import Profile
-from django.utils import timezone
+from decimal import Decimal
 
 class ExpenseCategory(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_categories')
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='categories')
+    created_by_id = models.IntegerField(null=True)
+    profile_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     
@@ -58,8 +56,8 @@ class Expense(models.Model):
         blank=True,
         null=True
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_expenses')
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
+    created_by_id = models.IntegerField(null=True)
+    profile_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     
@@ -68,6 +66,33 @@ class Expense(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.amount} ({self.date})"
+
+    def create_document(self):
+        """Create a Document instance from this Expense"""
+        from documents.models import Document
+        from clients.models import Client
+        
+        # Try to get a default client or create a generic one if not found
+        try:
+            default_client = Client.objects.first() or Client.objects.create(
+                name='Default Client', 
+                email='default@example.com'
+            )
+        except Exception:
+            default_client = None
+
+        return Document.objects.create(
+            client=default_client,
+            document_type='EXPENSE',
+            description=self.title,
+            subtotal=self.amount,
+            tax_rate=Decimal('0.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=self.amount,
+            document_date=self.date,
+            status='COMPLETED',
+            expense=self
+        )
 
 class RecurringExpense(models.Model):
     FREQUENCY_CHOICES = (
@@ -89,10 +114,10 @@ class RecurringExpense(models.Model):
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
     next_date = models.DateField(default=timezone.now)
     is_active = models.BooleanField(default=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recurring_expenses')
+    created_by_id = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    profile = models.ForeignKey('authentication.Profile', on_delete=models.CASCADE, null=True, blank=True)
+    profile_id = models.IntegerField(null=True, blank=True)
     
     def __str__(self):
         return f"{self.title} - {self.frequency}"
@@ -142,7 +167,7 @@ class RecurringExpense(models.Model):
             project=self.project,
             date=next_date,
             description=f"Auto-generated from recurring expense: {self.title}",
-            created_by=self.created_by,
-            profile=self.profile
+            created_by_id=self.created_by_id,
+            profile_id=self.profile_id
         )
         return expense

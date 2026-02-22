@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Sum
 import uuid
@@ -14,15 +13,17 @@ class Account(models.Model):
     #     ('LOAN', 'Loan Account'),
     )
     
+    # Link to the actual company bank account from company details
+    company_bank_account_id = models.IntegerField(null=True, blank=True, help_text="Reference to CompanyBankAccount")
+    
     account_number = models.CharField(max_length=20, unique=True)
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='accounts')
+    owner_id = models.IntegerField(default=1)
     balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    pin = models.CharField(max_length=4, help_text="4-digit PIN for transactions")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='accounts', null=True, blank=True)
+    project = models.ForeignKey('project_management.Project', on_delete=models.CASCADE, related_name='banking_accounts', null=True, blank=True)
     is_main_company_account = models.BooleanField(default=False, help_text="Is this the main company account that tracks all finances?")
     
     class Meta:
@@ -37,6 +38,16 @@ class Account(models.Model):
             return f"Project Account ({self.project.name}) - {self.account_number}"
         else:
             return f"{self.account_type} - {self.account_number}"
+    
+    def get_company_bank_account(self):
+        """Get the linked CompanyBankAccount object"""
+        if self.company_bank_account_id:
+            from registration.models import CompanyBankAccount
+            try:
+                return CompanyBankAccount.objects.get(id=self.company_bank_account_id)
+            except CompanyBankAccount.DoesNotExist:
+                return None
+        return None
     
     def deposit(self, amount, description=None):
         if amount <= 0:
@@ -60,9 +71,7 @@ class Account(models.Model):
         
         return transaction
     
-    def withdraw(self, amount, pin, description=None):
-        if pin != self.pin:
-            raise ValueError("Invalid PIN")
+    def withdraw(self, amount, description=None):
         if amount <= 0:
             raise ValueError("Withdrawal amount must be positive")
         if self.balance < amount:
@@ -82,13 +91,11 @@ class Account(models.Model):
         if self.project and not self.is_main_company_account:
             main_account = Account.objects.filter(is_main_company_account=True).first()
             if main_account:
-                main_account.withdraw(amount, main_account.pin, f"Project Expense: {self.project.name} - {description or 'Withdrawal'}")
+                main_account.withdraw(amount, f"Project Expense: {self.project.name} - {description or 'Withdrawal'}")
         
         return transaction
     
-    def transfer(self, destination_account, amount, pin, description=None):
-        if pin != self.pin:
-            raise ValueError("Invalid PIN")
+    def transfer(self, destination_account, amount, description=None):
         if amount <= 0:
             raise ValueError("Transfer amount must be positive")
         if self.balance < amount:
@@ -140,7 +147,7 @@ class Account(models.Model):
 
 class ProjectFinancialSummary(models.Model):
     """Model to store pre-calculated financial summaries for projects"""
-    project = models.OneToOneField('projects.Project', on_delete=models.CASCADE, related_name='financial_summary')
+    project = models.OneToOneField('project_management.Project', on_delete=models.CASCADE, related_name='financial_summary')
     total_revenue = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     total_expenses = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     total_profit = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
@@ -151,7 +158,7 @@ class ProjectFinancialSummary(models.Model):
     
     def update_summary(self):
         """Update the financial summary based on the project's account transactions"""
-        account = Account.objects.filter(project=self.project).first()
+        account = self.project.banking_accounts.first()
         if account:
             self.total_revenue = account.get_revenue()
             self.total_expenses = account.get_expenditure()
@@ -174,7 +181,7 @@ class Debt(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     is_active = models.BooleanField(default=True)
-    project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, related_name='debts', null=True, blank=True)
+    project = models.ForeignKey('project_management.Project', on_delete=models.SET_NULL, related_name='banking_debts', null=True, blank=True)
     
     def __str__(self):
         if self.project:
@@ -209,7 +216,7 @@ class Transaction(models.Model):
     description = models.CharField(max_length=255)
     timestamp = models.DateTimeField(default=timezone.now)
     related_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True, related_name='related_transactions')
-    project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, related_name='transactions', null=True, blank=True)
+    project = models.ForeignKey('project_management.Project', on_delete=models.SET_NULL, related_name='banking_transactions', null=True, blank=True)
     # Using string references to prevent app dependency issues
     invoice = models.ForeignKey('sales.Invoice', on_delete=models.SET_NULL, related_name='transactions', null=True, blank=True)
     expense = models.ForeignKey('expenses.Expense', on_delete=models.SET_NULL, related_name='transactions', null=True, blank=True)
@@ -247,7 +254,7 @@ class Tax(models.Model):
     description = models.CharField(max_length=255)
     date_applied = models.DateField()
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name='taxes', null=True, blank=True)
-    project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, related_name='taxes', null=True, blank=True)
+    project = models.ForeignKey('project_management.Project', on_delete=models.SET_NULL, related_name='banking_taxes', null=True, blank=True)
     
     def __str__(self):
         if self.project:

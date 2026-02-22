@@ -205,7 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const darkModeToggle = document.querySelector('.dark-mode-toggle');
     if (darkModeToggle) {
         const toggleDarkMode = function(isDark) {
-            document.body.classList.toggle('dark-mode', isDark);
+            // Apply dark mode class to the html element
+            document.documentElement.classList.toggle('dark-mode', isDark);
             
             // Update icon
             const icon = darkModeToggle.querySelector('i');
@@ -221,10 +222,14 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Store preference
             localStorage.setItem('site_admin_dark_mode', isDark);
+            
+            // Log for debugging
+            console.log('Dark mode toggled:', isDark);
         };
         
-        darkModeToggle.addEventListener('click', function() {
-            const isDarkMode = !document.body.classList.contains('dark-mode');
+        darkModeToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isDarkMode = !document.documentElement.classList.contains('dark-mode');
             toggleDarkMode(isDarkMode);
         });
         
@@ -252,8 +257,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (userDropdown && userDropdownToggle) {
         userDropdownToggle.addEventListener('click', function(e) {
+            e.preventDefault();
             e.stopPropagation();
             userDropdown.classList.toggle('open');
+            
+            // Log for debugging
+            console.log('User dropdown clicked', userDropdown.classList.contains('open'));
         });
         
         // Close dropdown when clicking outside

@@ -25,6 +25,11 @@
   --lead-transition: all 0.3s ease;
 }
 
+/* Global Styles */
+body {
+  font-family: 'Nunito', sans-serif;
+}
+
 /* Lead Form Container */
 .leads-container {
   max-width: 1400px;

@@ -2,366 +2,114 @@
 {% load static %}
 
 {% block extra_css %}
-<style>
-    :root {
-        --bg-primary: #f4f6f9;
-        --text-primary: #2c3e50;
-        --text-secondary: #7f8c8d;
-        --border-color: #e0e4e8;
-        --card-bg: white;
-        --accent-color: #3498db;
-    }
-
-    body {
-        background-color: var(--bg-primary);
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        color: var(--text-primary);
-        line-height: 1.6;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-    }
-
-    .profile-container {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        min-height: 100vh;
-        width: 100%;
-    }
-
-    .profile-sidebar {
-        background-color: var(--bg-primary);
-        padding: 40px 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border-right: 1px solid var(--border-color);
-    }
-
-    .profile-avatar {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid var(--accent-color);
-        margin-bottom: 20px;
-    }
-
-    .profile-name {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .profile-email {
-        color: var(--text-secondary);
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .profile-stats {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        margin-top: 20px;
-    }
-
-    .profile-stat {
-        text-align: center;
-        background-color: white;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
-
-    .profile-stat-value {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--accent-color);
-        margin-bottom: 5px;
-    }
-
-    .profile-stat-label {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-
-    .profile-content {
-        display: grid;
-        grid-template-rows: auto 1fr;
-        padding: 40px;
-        background-color: white;
-        overflow-y: auto;
-    }
-
-    .profile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    .profile-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
-
-    .profile-actions {
-        display: flex;
-        gap: 15px;
-    }
-
-    .profile-action-btn {
-        text-decoration: none;
-        color: var(--accent-color);
-        font-weight: 600;
-        padding: 8px 15px;
-        border-radius: 6px;
-        transition: background-color 0.3s, color 0.3s;
-    }
-
-    .profile-action-btn:hover {
-        background-color: rgba(52, 152, 219, 0.1);
-    }
-
-    .profile-sections {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-    }
-
-    .profile-section {
-        background-color: var(--bg-primary);
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .profile-section-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--border-color);
-    }
-
-    .profile-chart-container {
-        background-color: white;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
-        margin-top: 20px;
-    }
-
-    .profile-chart {
-        width: 100%;
-        max-height: 250px;
-    }
-
-    .profile-list {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .profile-list-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 0.9rem;
-    }
-
-    .profile-list-item-title {
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 60%;
-    }
-
-    .profile-list-item-status {
-        color: var(--text-secondary);
-        font-size: 0.8rem;
-        white-space: nowrap;
-    }
-
-    @media (max-width: 1200px) {
-        .profile-container {
-            grid-template-columns: 1fr;
-        }
-
-        .profile-sections {
-            grid-template-columns: 1fr;
-        }
-
-        .profile-sidebar {
-            border-right: none;
-            border-bottom: 1px solid var(--border-color);
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'authentication/css/profile_dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <div class="profile-sidebar">
-        {% if user.profile.avatar %}
-            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}" class="profile-avatar">
+<div class="profile-dashboard-grid">
+    <div class="profile-card profile-card-header">
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="profile-avatar">
         {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="{{ user.get_full_name }}" class="profile-avatar">
+            <div class="profile-default-avatar">{{ profile.name|first|upper }}</div>
         {% endif %}
-        
-        <h1 class="profile-name">{{ user.get_full_name }}</h1>
+        <h1 class="profile-name">{{ profile.name }}</h1>
         <p class="profile-email">{{ user.email }}</p>
-        
-        <div class="profile-stats">
-            <div class="profile-stat">
-                <div class="profile-stat-value">{{ total_leads }}</div>
-                <div class="profile-stat-label">Leads</div>
-            </div>
-            <div class="profile-stat">
-                <div class="profile-stat-value">{{ total_projects }}</div>
-                <div class="profile-stat-label">Projects</div>
-            </div>
-            <div class="profile-stat">
-                <div class="profile-stat-value">${{ total_sales|floatformat:2 }}</div>
-                <div class="profile-stat-label">Sales</div>
-            </div>
+        <p class="profile-role">Role: {{ request.session.user_role|default:"Staff" }}</p>
+    </div>
+
+    <div class="profile-card profile-actions-card">
+        <div class="profile-actions">
+            <a href="/dashboard/" class="profile-btn">Dashboard</a>
+            <a href="{% url 'authentication:logout' %}" class="profile-btn profile-btn-logout">Logout</a>
+            <!-- Add other relevant actions if needed -->
         </div>
     </div>
-    
-    <div class="profile-content">
-        <div class="profile-header">
-            <h2 class="profile-title">Dashboard</h2>
-            <div class="profile-actions">
-                <a href="{% url 'authentication:profile_create' %}" class="profile-action-btn">Edit Profile</a>
-                <a href="{% url 'authentication:password_change' %}" class="profile-action-btn">Change Password</a>
-            </div>
-        </div>
 
-        <div class="profile-sections">
-            <div class="profile-section">
-                <h3 class="profile-section-title">Open Leads</h3>
-                <ul class="profile-list">
-                    {% for lead in open_leads %}
-                    <li class="profile-list-item">
-                        <span class="profile-list-item-title">{{ lead.company_name }}</span>
-                        <span class="profile-list-item-status">{{ lead.status }}</span>
-                    </li>
-                    {% empty %}
-                    <li class="profile-list-item">No open leads</li>
-                    {% endfor %}
-                </ul>
-                <div class="profile-chart-container">
-                    <canvas class="profile-chart" id="leadsChart"></canvas>
-                </div>
-            </div>
-
-            <div class="profile-section">
-                <h3 class="profile-section-title">Recent Projects</h3>
-                <ul class="profile-list">
-                    {% for project in open_projects %}
-                    <li class="profile-list-item">
-                        <span class="profile-list-item-title">{{ project.name }}</span>
-                        <span class="profile-list-item-status">{{ project.start_date|date:"M d, Y" }}</span>
-                    </li>
-                    {% empty %}
-                    <li class="profile-list-item">No projects found</li>
-                    {% endfor %}
-                </ul>
-                <div class="profile-chart-container">
-                    <canvas class="profile-chart" id="projectsChart"></canvas>
-                </div>
-            </div>
+    <!-- Statistics Charts -->
+    {# Removed redundant Statistics title card #}
+    <div class="profile-card profile-chart-card">
+            <h4>Leads Over Time</h4>
+            <canvas id="leadsChart"></canvas>
         </div>
     </div>
+    <div class="profile-card profile-chart-card">
+        <h4>Projects Over Time</h4>
+            <canvas id="projectsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Optional: Add other sections/cards here -->
+
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{# Remove the old complex structure and inline styles #}
+{% block app_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Leads Chart
-    const leadsCtx = document.getElementById('leadsChart').getContext('2d');
-    new Chart(leadsCtx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Leads',
-                data: {{ leads_chart_data|safe }},
-                borderColor: 'var(--accent-color)',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Leads Chart
+        const leadsCtx = document.getElementById('leadsChart');
+        if (leadsCtx) {
+            new Chart(leadsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Leads',
+                        data: [12, 19, 3, 5, 2, 3],
+                        borderColor: '#8E44AD',
+                        backgroundColor: 'rgba(142, 68, 173, 0.2)',
+                        tension: 0.4
+                    }]
                 },
-                y: {
-                    grid: {
-                        color: 'var(--border-color)'
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
+            });
         }
-    });
 
-    // Projects Chart
-    const projectsCtx = document.getElementById('projectsChart').getContext('2d');
-    new Chart(projectsCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Projects',
-                data: {{ projects_chart_data|safe }},
-                backgroundColor: 'var(--accent-color)',
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    }
+        // Projects Chart
+        const projectsCtx = document.getElementById('projectsChart');
+        if (projectsCtx) {
+            new Chart(projectsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Projects',
+                        data: [5, 8, 3, 7, 2, 6],
+                        backgroundColor: '#7E57C2',
+                        borderColor: '#7E57C2',
+                        borderWidth: 1
+                    }]
                 },
-                y: {
-                    grid: {
-                        color: 'var(--border-color)'
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
+            });
         }
     });
-});
 </script>
 {% endblock %}

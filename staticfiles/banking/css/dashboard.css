@@ -232,4 +232,8 @@
     .account-actions {
         grid-template-columns: repeat(2, 1fr);
     }
-} 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

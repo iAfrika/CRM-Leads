@@ -2,11 +2,12 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Project, ProjectDocument, ProjectNote, ProjectMilestone, Transaction
 from django.utils import timezone
+from people.models import Person
 
 class ProjectForm(forms.ModelForm):
     team_members = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-control select2'}),
+        queryset=Person.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
         required=False
     )
     
@@ -27,7 +28,12 @@ class ProjectForm(forms.ModelForm):
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'code': forms.TextInput(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'readonly': 'readonly',
+                'placeholder': 'Will be auto-generated (e.g., CC-P0001)',
+                'style': 'background-color: #f8f9fa; cursor: not-allowed;'
+            }),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'client': forms.Select(attrs={'class': 'form-control select2'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
@@ -36,6 +42,33 @@ class ProjectForm(forms.ModelForm):
             'manager': forms.Select(attrs={'class': 'form-control select2'}),
             'tags': forms.TextInput(attrs={'class': 'form-control', 'data-role': 'tagsinput'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make code field optional and readonly for new projects
+        self.fields['code'].required = False
+        
+        # For existing projects, show the current code
+        if self.instance and self.instance.pk:
+            self.fields['code'].widget.attrs['readonly'] = 'readonly'
+            self.fields['code'].widget.attrs['placeholder'] = self.instance.code
+        else:
+            # For new projects, show preview of next code
+            self.fields['code'].widget.attrs['placeholder'] = self._get_next_code_preview()
+    
+    def _get_next_code_preview(self):
+        """Get a preview of the next project code that will be generated"""
+        try:
+            last_project = Project.objects.filter(code__startswith='CC-P').order_by('-code').first()
+            if last_project:
+                # Extract the number from the last code
+                last_number = int(last_project.code.split('CC-P')[1])
+                next_number = last_number + 1
+            else:
+                next_number = 1
+            return f"CC-P{next_number:04d}"
+        except:
+            return "CC-P0001"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -44,6 +77,11 @@ class ProjectForm(forms.ModelForm):
 
         if start_date and end_date and end_date < start_date:
             raise forms.ValidationError("End date cannot be earlier than start date.")
+        
+        # Clear the code field so it doesn't interfere with auto-generation
+        # The model's save method will generate it
+        if not self.instance.pk:
+            cleaned_data['code'] = ''
 
         return cleaned_data
 

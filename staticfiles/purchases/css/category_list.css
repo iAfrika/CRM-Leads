@@ -120,9 +120,14 @@
     color: var(--danger-color);
 }
 
+/* Global Styles */
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .categories-list {
         grid-template-columns: 1fr;
     }
-} 
+}

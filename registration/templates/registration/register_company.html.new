@@ -1,0 +1,266 @@
+{% extends "registration/base_registration.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .registration-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .registration-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .registration-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background-color: #4a6cf7;
+        color: white;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background-color: #3a5bdb;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: #dc3545;
+        margin-left: 4px;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-col {
+        flex: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Register Company{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <section class="registration-header">
+        <h1>Register Your Company</h1>
+        <p>Enter your company information to get started</p>
+    </section>
+    
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <section class="registration-card">
+        <form class="registration-form" method="post" action="{% url 'registration:register_company' %}" enctype="multipart/form-data" id="company-form">
+            {% csrf_token %}
+            
+            <div id="validation-errors" class="alert alert-danger" style="display: none;"></div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="company_name" class="required-field">Company Name</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" required placeholder="Enter company name">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="phone_number" class="required-field">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone_number" name="phone_number" required placeholder="Enter phone number">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="required-field">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" required placeholder="Enter company email">
+            </div>
+            
+            <div class="form-group">
+                <label for="tax_pin">Tax PIN</label>
+                <input type="text" class="form-control" id="tax_pin" name="tax_pin" placeholder="Enter tax PIN (optional)">
+            </div>
+            
+            <div class="form-group">
+                <label for="physical_address" class="required-field">Physical Address</label>
+                <textarea class="form-control" id="physical_address" name="physical_address" rows="3" required placeholder="Enter physical address"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="postal_address">Postal Address</label>
+                <textarea class="form-control" id="postal_address" name="postal_address" rows="3" placeholder="Enter postal address (optional)"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="company_logo">Company Logo (optional)</label>
+                <input type="file" class="form-control" id="company_logo" name="company_logo" accept="image/*">
+                <small class="text-muted">Upload a company logo (max 2MB, JPEG or PNG)</small>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+                <a href="{% url 'registration:registration_home' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn btn-primary" id="submit-btn">
+                    Register Company <i class="fas fa-check-circle"></i>
+                </button>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('company-form');
+    const validationErrors = document.getElementById('validation-errors');
+    
+    form.addEventListener('submit', function(e) {
+        let errors = [];
+        validationErrors.innerHTML = '';
+        validationErrors.style.display = 'none';
+        
+        // Validate company name
+        const companyName = document.getElementById('company_name').value.trim();
+        if (!companyName) {
+            errors.push('Company name is required');
+        } else if (companyName.length < 2) {
+            errors.push('Company name must be at least 2 characters long');
+        }
+        
+        // Validate phone number
+        const phoneNumber = document.getElementById('phone_number').value.trim();
+        if (!phoneNumber) {
+            errors.push('Phone number is required');
+        } else if (!/^[+]?[\d\s()-]{8,20}$/.test(phoneNumber)) {
+            errors.push('Please enter a valid phone number');
+        }
+        
+        // Validate email
+        const email = document.getElementById('email').value.trim();
+        if (!email) {
+            errors.push('Email address is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.push('Please enter a valid email address');
+        }
+        
+        // Validate physical address
+        const physicalAddress = document.getElementById('physical_address').value.trim();
+        if (!physicalAddress) {
+            errors.push('Physical address is required');
+        } else if (physicalAddress.length < 5) {
+            errors.push('Physical address must be at least 5 characters long');
+        }
+        
+        // Validate file size if logo is uploaded
+        const logoInput = document.getElementById('company_logo');
+        if (logoInput.files.length > 0) {
+            const file = logoInput.files[0];
+            const fileSize = file.size / 1024 / 1024; // size in MB
+            
+            if (fileSize > 2) {
+                errors.push('Logo file size must be less than 2MB');
+            }
+            
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                errors.push('Logo must be a JPEG or PNG image');
+            }
+        }
+        
+        // If there are errors, prevent form submission and show errors
+        if (errors.length > 0) {
+            e.preventDefault();
+            
+            const errorList = document.createElement('ul');
+            errorList.style.margin = '0';
+            errorList.style.paddingLeft = '1.5rem';
+            
+            errors.forEach(function(error) {
+                const errorItem = document.createElement('li');
+                errorItem.textContent = error;
+                errorList.appendChild(errorItem);
+            });
+            
+            validationErrors.appendChild(errorList);
+            validationErrors.style.display = 'block';
+            
+            // Scroll to the errors
+            validationErrors.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            // Disable submit button to prevent double submission
+            document.getElementById('submit-btn').disabled = true;
+            document.getElementById('submit-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+        }
+    });
+});
+</script>
+{% endblock %}

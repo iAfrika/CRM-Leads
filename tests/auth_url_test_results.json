@@ -1,0 +1,133 @@
+{
+  "success": [
+    {
+      "url": "http://127.0.0.1:8000/auth/login/",
+      "app": "authentication"
+    },
+    {
+      "url": "http://127.0.0.1:8000/auth/logout/",
+      "app": "authentication"
+    },
+    {
+      "url": "http://127.0.0.1:8000/auth/profile/",
+      "app": "authentication"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/schedule/",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/calendar/",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/statistics/",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/api/chart-data/?type=quotes_invoices&timeline=month",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/api/chart-data/?type=revenue_expenditure&timeline=month",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/dashboard/api/chart-data/?type=purchases_sales&timeline=month",
+      "app": "dashboard"
+    },
+    {
+      "url": "http://127.0.0.1:8000/clients/",
+      "app": "clients"
+    },
+    {
+      "url": "http://127.0.0.1:8000/clients/create/",
+      "app": "clients"
+    },
+    {
+      "url": "http://127.0.0.1:8000/projects/",
+      "app": "project_management"
+    },
+    {
+      "url": "http://127.0.0.1:8000/projects/dashboard/",
+      "app": "project_management"
+    },
+    {
+      "url": "http://127.0.0.1:8000/leads/",
+      "app": "leads"
+    },
+    {
+      "url": "http://127.0.0.1:8000/leads/create/",
+      "app": "leads"
+    },
+    {
+      "url": "http://127.0.0.1:8000/products/",
+      "app": "products"
+    },
+    {
+      "url": "http://127.0.0.1:8000/products/create/",
+      "app": "products"
+    },
+    {
+      "url": "http://127.0.0.1:8000/sales/",
+      "app": "sales"
+    },
+    {
+      "url": "http://127.0.0.1:8000/sales/create/",
+      "app": "sales"
+    },
+    {
+      "url": "http://127.0.0.1:8000/purchases/",
+      "app": "purchases"
+    },
+    {
+      "url": "http://127.0.0.1:8000/purchases/create/",
+      "app": "purchases"
+    },
+    {
+      "url": "http://127.0.0.1:8000/documents/",
+      "app": "documents"
+    },
+    {
+      "url": "http://127.0.0.1:8000/documents/quotes/",
+      "app": "documents"
+    },
+    {
+      "url": "http://127.0.0.1:8000/documents/quotes/create/",
+      "app": "documents"
+    },
+    {
+      "url": "http://127.0.0.1:8000/expenses/",
+      "app": "expenses"
+    },
+    {
+      "url": "http://127.0.0.1:8000/expenses/create/",
+      "app": "expenses"
+    },
+    {
+      "url": "http://127.0.0.1:8000/banking/",
+      "app": "banking"
+    },
+    {
+      "url": "http://127.0.0.1:8000/banking/dashboard/",
+      "app": "banking"
+    },
+    {
+      "url": "http://127.0.0.1:8000/reports/",
+      "app": "reports"
+    },
+    {
+      "url": "http://127.0.0.1:8000/reports/dashboard/",
+      "app": "reports"
+    }
+  ],
+  "error": [],
+  "not_found": [],
+  "server_error": [],
+  "login_required": [],
+  "redirect": []
+}

@@ -1,0 +1,32 @@
+INFO 2025-04-02 00:59:42,186 views 27752 24912 DashboardView accessed by user: admin
+INFO 2025-04-02 00:59:42,187 views 27752 24912 User is authenticated: True
+INFO 2025-04-02 00:59:42,187 views 27752 24912 User role: admin
+INFO 2025-04-02 01:00:02,353 views 27752 24912 DashboardView accessed by user: admin
+INFO 2025-04-02 01:00:02,353 views 27752 24912 User is authenticated: True
+INFO 2025-04-02 01:00:02,353 views 27752 24912 User role: admin
+INFO 2025-04-02 01:02:00,418 views 27912 25628 DashboardView accessed by user: admin
+INFO 2025-04-02 01:02:00,418 views 27912 25628 User is authenticated: True
+INFO 2025-04-02 01:02:00,418 views 27912 25628 User role: admin
+INFO 2025-04-02 01:03:24,597 views 21120 3084 DashboardView accessed by user: admin
+INFO 2025-04-02 01:03:24,606 views 21120 3084 User is authenticated: True
+INFO 2025-04-02 01:03:24,607 views 21120 3084 User role: admin
+INFO 2025-04-02 01:03:24,648 views 21120 3084 Context Data:
+INFO 2025-04-02 01:03:24,648 views 21120 3084 view: <dashboard.views.DashboardView object at 0x000001DBC20982F0>
+INFO 2025-04-02 01:03:24,648 views 21120 3084 recent_clients: [<Client: icm>, <Client: wicky>, <Client: test>, <Client: sdfghj>, <Client: sdfghj>]
+INFO 2025-04-02 01:03:24,649 views 21120 3084 recent_sales: [<Sale: Sale 2 - jim - $11600.00>]
+INFO 2025-04-02 01:03:24,654 views 21120 3084 recent_documents: [<Document: Invoice - sdfghj>, <Document: Invoice - jim>, <Document: Quote - jim>, <Document: Quote - sdfghj>, <Document: Invoice - icm>]
+INFO 2025-04-02 01:03:24,658 views 21120 3084 recent_quotes: [<Quote: Quote #Q20250401001 - jim>, <Quote: Quote #Q20250331002 - sdfghj>, <Quote: Quote #Q20250331001 - icm>, <Quote: Quote #Q20250329001 - wicky>, <Quote: Quote #Q20250324003 - jim>]
+INFO 2025-04-02 01:03:24,658 views 21120 3084 stats: {'total_quotes': 6, 'total_invoices': 6, 'quotes_amount': Decimal('97027795.1600000'), 'invoices_amount': Decimal('97027795.1600000'), 'total_revenue': Decimal('6050230.56000000'), 'total_expenditure': Decimal('2200000'), 'total_profit': Decimal('3850230.56000000'), 'total_sales': Decimal('6050230.56000000'), 'quote_trend': 0, 'invoice_trend': 0, 'conversion_rate': 0, 'conversion_trend': 0}
+INFO 2025-04-02 01:03:24,698 views 21120 3084 Context Data:
+INFO 2025-04-02 01:03:24,698 views 21120 3084 view: <dashboard.views.DashboardView object at 0x000001DBC20982F0>
+INFO 2025-04-02 01:03:24,698 views 21120 3084 recent_clients: [<Client: icm>, <Client: wicky>, <Client: test>, <Client: sdfghj>, <Client: sdfghj>]
+INFO 2025-04-02 01:03:24,698 views 21120 3084 recent_sales: [<Sale: Sale 2 - jim - $11600.00>]
+INFO 2025-04-02 01:03:24,703 views 21120 3084 recent_documents: [<Document: Invoice - sdfghj>, <Document: Invoice - jim>, <Document: Quote - jim>, <Document: Quote - sdfghj>, <Document: Invoice - icm>]
+INFO 2025-04-02 01:03:24,706 views 21120 3084 recent_quotes: [<Quote: Quote #Q20250401001 - jim>, <Quote: Quote #Q20250331002 - sdfghj>, <Quote: Quote #Q20250331001 - icm>, <Quote: Quote #Q20250329001 - wicky>, <Quote: Quote #Q20250324003 - jim>]
+INFO 2025-04-02 01:03:24,706 views 21120 3084 stats: {'total_quotes': 6, 'total_invoices': 6, 'quotes_amount': Decimal('97027795.1600000'), 'invoices_amount': Decimal('97027795.1600000'), 'total_revenue': Decimal('6050230.56000000'), 'total_expenditure': Decimal('2200000'), 'total_profit': Decimal('3850230.56000000'), 'total_sales': Decimal('6050230.56000000'), 'quote_trend': 0, 'invoice_trend': 0, 'conversion_rate': 0, 'conversion_trend': 0}
+INFO 2025-04-02 01:03:24,706 views 21120 3084 Context Data Keys:
+INFO 2025-04-02 01:03:24,706 views 21120 3084 view: <class 'dashboard.views.DashboardView'>
+INFO 2025-04-02 01:03:24,706 views 21120 3084 recent_clients: <class 'list'>
+INFO 2025-04-02 01:15:14,209 views 27856 13256 DashboardView accessed by user: admin
+INFO 2025-04-02 01:15:14,209 views 27856 13256 User is authenticated: True
+INFO 2025-04-02 01:15:14,209 views 27856 13256 User role: admin

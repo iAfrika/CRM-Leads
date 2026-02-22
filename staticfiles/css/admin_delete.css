@@ -1,96 +1,139 @@
-/* Delete confirmation page specific styles */
+/* Delete confirmation page styles */
 
-/* Delete confirmation */
 .delete-container {
-    max-width: 800px;
+    max-width: 700px;
     margin: 0 auto;
+    padding: var(--spacing-lg);
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 
-.delete-confirmation {
-    background-color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    padding: var(--spacing-lg);
-    text-align: center;
+.delete-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--danger);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--spacing-md);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .delete-icon {
-    font-size: 48px;
-    color: var(--danger);
-    margin-bottom: var(--spacing-md);
+    font-size: 28px;
+    margin-right: var(--spacing-md);
 }
 
 .delete-title {
-    font-size: 24px;
-    margin-bottom: var(--spacing-md);
-    color: var(--danger);
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0;
+}
+
+.delete-message {
+    background-color: var(--danger-bg);
+    border-left: 4px solid var(--danger);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    color: var(--body-color);
+    border-radius: var(--border-radius);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.delete-message p {
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.delete-message p:last-child {
+    margin-bottom: 0;
 }
 
 .delete-warning {
+    font-weight: 500;
+    color: var(--danger);
+    margin-bottom: var(--spacing-sm);
+    transition: color 0.3s ease;
+}
+
+.object-info {
     margin-bottom: var(--spacing-lg);
-    padding: var(--spacing-md);
-    background-color: rgba(231, 76, 60, 0.1);
-    border-radius: var(--border-radius);
+}
+
+.object-name {
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+    color: var(--body-color);
+    transition: color 0.3s ease;
 }
 
 .related-objects {
     margin-top: var(--spacing-md);
-    text-align: left;
-}
-
-.related-objects h4 {
-    margin-bottom: var(--spacing-sm);
-}
-
-.related-objects ul {
-    list-style: disc;
-    padding-left: var(--spacing-lg);
-}
-
-.object-summary {
     margin-bottom: var(--spacing-lg);
 }
 
-.summary-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: var(--spacing-sm);
-}
-
-.summary-table th,
-.summary-table td {
-    padding: var(--spacing-sm);
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.summary-table th {
-    width: 200px;
-    background-color: var(--light);
+.related-title {
     font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+    color: var(--body-color);
+    transition: color 0.3s ease;
+}
+
+.related-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.related-item {
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--body-color);
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.related-item:last-child {
+    border-bottom: none;
 }
 
 .delete-actions {
     display: flex;
-    justify-content: center;
-    gap: var(--spacing-md);
+    justify-content: space-between;
     margin-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-md);
+    transition: border-color 0.3s ease;
 }
 
-/* Dark mode styles */
-body.dark-mode .delete-confirmation {
-    background-color: #2d3748;
+.btn-delete {
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
 }
 
-body.dark-mode .delete-warning {
-    background-color: rgba(231, 76, 60, 0.1);
+.btn-delete:hover {
+    background-color: var(--danger-hover);
 }
 
-body.dark-mode .summary-table th {
-    background-color: #374151;
+.btn-cancel {
+    background-color: var(--secondary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
 }
 
-body.dark-mode .summary-table th,
-body.dark-mode .summary-table td {
-    border-bottom-color: #4b5563;
+.btn-cancel:hover {
+    background-color: var(--secondary-hover);
 }

@@ -1,6 +1,9 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Lead, LeadActivity, LeadNote, LeadDocument
+from people.models import Person
+from clients.models import Client
+
 
 class LeadForm(forms.ModelForm):
     follow_up_date = forms.DateTimeField(
@@ -66,7 +69,7 @@ class LeadFilterForm(forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     assigned_to = forms.ModelChoiceField(
-        queryset=User.objects.all(),
+        queryset=Person.objects.all(),
         required=False,
         empty_label="All Users",
         widget=forms.Select(attrs={'class': 'form-control'})

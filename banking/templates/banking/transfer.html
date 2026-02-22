@@ -33,20 +33,48 @@
                     {% csrf_token %}
                     
                     <div class="form-group">
-                        <label for="destination_account">Destination Account Number</label>
-                        <input type="text" name="destination_account" id="destination_account" class="form-control" required>
-                        <small class="form-text text-muted">Enter the account number you want to transfer funds to.</small>
+                        <label for="{{ form.destination_account.id_for_label }}">Destination Account Number</label>
+                        {{ form.destination_account }}
+                        {% if form.destination_account.help_text %}
+                            <small class="form-text text-muted">{{ form.destination_account.help_text }}</small>
+                        {% endif %}
+                        {% if form.destination_account.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.destination_account.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="amount">Amount to Transfer ($)</label>
-                        <input type="number" name="amount" id="amount" class="form-control" min="0.01" step="0.01" max="{{ account.balance }}" required>
+                        <label for="{{ form.amount.id_for_label }}">Amount to Transfer ($)</label>
+                        {{ form.amount }}
+                        {% if form.amount.help_text %}
+                            <small class="form-text text-muted">{{ form.amount.help_text }}</small>
+                        {% endif %}
+                        {% if form.amount.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.amount.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="pin">Enter PIN</label>
-                        <input type="password" name="pin" id="pin" class="form-control" maxlength="4" pattern="[0-9]{4}" required>
-                        <small class="form-text text-muted">Enter your 4-digit PIN to authorize this transfer.</small>
+                        <label for="{{ form.description.id_for_label }}">Description</label>
+                        {{ form.description }}
+                        {% if form.description.help_text %}
+                            <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                        {% endif %}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.description.errors %}
+                                    <small class="text-danger">{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="form-group text-center mt-4">

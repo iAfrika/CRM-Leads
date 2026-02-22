@@ -34,18 +34,24 @@ class ProfileAuthenticationMiddleware:
         
         # Get the user's role from session
         role = request.session.get('user_role', 'staff')
+        
+        # Standardize role naming for consistency
+        if role == 'admin':
+            role = 'administrator'
+            request.session['user_role'] = role
+            
         print(f"User {request.user} has role: {role}")
         
         # Simple redirect rules:
         # 1. Administrator going to profile? Send them to dashboard
         if role == 'administrator' and request.path == '/auth/profile/':
             print(f"Redirecting administrator from profile to dashboard")
-            return redirect('dashboard:dashboard')
+            return redirect('dashboard:main_dashboard')
         
-        # 2. Staff going to dashboard? Send them to profile
+        # 2. Staff going to dashboard? Send them to staff workspace
         if role == 'staff' and request.path == '/dashboard/':
-            print(f"Redirecting staff from dashboard to profile")
-            return redirect('authentication:profile')
+            print(f"Redirecting staff from dashboard to staff workspace")
+            return redirect('authentication:staff_workspace')
         
         # Continue with the request
         return self.get_response(request) 

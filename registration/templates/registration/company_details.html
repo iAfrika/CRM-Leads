@@ -1,73 +1,190 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Company Details{% endblock %}
+{% block title %}Companies List{% endblock %}
 
-{% block header_title %}Company Details{% endblock %}
+{% block header_title %}Companies List{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/company_details.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
+<div class="companies-container">
+    <div class="companies-header">
+        <h2><i class="fas fa-building me-3" style="color: var(--primary-color);"></i>Companies</h2>
+        <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Company
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-info-circle me-2"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if companies %}
+        <div class="company-grid">
+            {% for company in companies %}
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Company Information</h4>
+                <div class="card-header">
+                    <div class="company-logo">
+                        {% if company.logo %}
+                            <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" class="img-fluid rounded-circle" style="width: 56px; height: 56px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle text-white">
+                                <i class="fas fa-building"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ company.name }}</h5>
                 </div>
                 <div class="card-body">
-                    {% if company %}
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Company Name:</div>
-                            <div class="col-md-8">{{ company.name }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Phone Number:</div>
-                            <div class="col-md-8">{{ company.phone_number|default:"Not provided" }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Email:</div>
-                            <div class="col-md-8">{{ company.email|default:"Not provided" }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Tax PIN:</div>
-                            <div class="col-md-8">{{ company.tax_pin|default:"Not provided" }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Physical Address:</div>
-                            <div class="col-md-8">{{ company.physical_address|default:"Not provided" }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Postal Address:</div>
-                            <div class="col-md-8">{{ company.postal_address|default:"Not provided" }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Currency:</div>
-                            <div class="col-md-8">{{ company.currency }}</div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Timezone:</div>
-                            <div class="col-md-8">{{ company.timezone }}</div>
-                        </div>
-                        {% if company.logo %}
-                        <div class="row mb-3">
-                            <div class="col-md-4 fw-bold">Company Logo:</div>
-                            <div class="col-md-8">
-                                <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" class="img-thumbnail" style="max-height: 100px;">
-                            </div>
-                        </div>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fas fa-phone text-muted"></i>
+                            <span>{{ company.phone_number|default:"Not provided" }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-envelope text-muted"></i>
+                            <span>{{ company.email|default:"Not provided" }}</span>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-map-marker-alt text-muted"></i>
+                            <span>{{ company.physical_address|default:"Not provided" }}</span>
+                        </li>
+                        {% if company.tax_pin %}
+                        <li class="list-group-item">
+                            <i class="fas fa-receipt text-muted"></i>
+                            <span>{{ company.tax_pin }}</span>
+                        </li>
                         {% endif %}
-                    {% else %}
-                        <div class="alert alert-info">
-                            <p>No company information available. Please register a company first.</p>
-                        </div>
-                    {% endif %}
+                        <li class="list-group-item">
+                            <i class="fas fa-calendar text-muted"></i>
+                            <span>{{ company.created_at|date:"M j, Y" }}</span>
+                        </li>
+                    </ul>
                 </div>
                 <div class="card-footer">
-                    <a href="{% url 'dashboard:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                    <a href="{% url 'registration:company_users' company.id %}" class="btn btn-primary">
+                        <i class="fas fa-users"></i> Manage Users
+                    </a>
+                    <a href="{% url 'registration:company_apps' company.id %}" class="btn btn-info">
+                        <i class="fas fa-th"></i> Manage Apps
+                    </a>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#companyModal{{ company.id }}">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
                     {% if user.is_staff or request.session.user_role == 'admin' %}
-                        <a href="#" class="btn btn-primary">Edit Company Details</a>
+                    <a href="{% url 'registration:edit_company' company.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Company Details Modal -->
+            <div class="modal fade" id="companyModal{{ company.id }}" tabindex="-1" aria-labelledby="companyModalLabel{{ company.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="companyModalLabel{{ company.id }}">
+                                <i class="fas fa-building me-2"></i>{{ company.name }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% if company.logo %}
+                            <div class="text-center mb-4">
+                                <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" style="max-height: 100px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
+                            </div>
+                            {% endif %}
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Company Name</label>
+                                        <div class="form-control-static">{{ company.name }}</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <div class="form-control-static">{{ company.phone_number|default:"Not provided" }}</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email Address</label>
+                                        <div class="form-control-static">{{ company.email|default:"Not provided" }}</div>
+                                    </div>
+                                    {% if company.tax_pin %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Tax PIN</label>
+                                        <div class="form-control-static">{{ company.tax_pin }}</div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Physical Address</label>
+                                        <div class="form-control-static">{{ company.physical_address|default:"Not provided" }}</div>
+                                    </div>
+                                    {% if company.postal_address %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Postal Address</label>
+                                        <div class="form-control-static">{{ company.postal_address }}</div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Registration Date</label>
+                                        <div class="form-control-static">{{ company.created_at|date:"F j, Y" }}</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Last Updated</label>
+                                        <div class="form-control-static">{{ company.updated_at|date:"F j, Y" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                            <a href="{% url 'registration:company_apps' company.id %}" class="btn btn-info">
+                                <i class="fas fa-th"></i> Manage Apps
+                            </a>
+                            <a href="{% url 'registration:company_users' company.id %}" class="btn btn-primary">
+                                <i class="fas fa-users"></i> Manage Users
+                            </a>
+                            {% if user.is_staff or request.session.user_role == 'admin' %}
+                            <a href="{% url 'registration:edit_company' company.id %}" class="btn btn-success">
+                                <i class="fas fa-edit"></i> Edit Company
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-building"></i>
+            <h4>No Companies Found</h4>
+            <p>You haven't registered any companies yet. Get started by adding your first company to the system.</p>
+            <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Your First Company
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'dashboard:main_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
     </div>
 </div>
 {% endblock %}

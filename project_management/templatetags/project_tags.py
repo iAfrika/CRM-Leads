@@ -16,4 +16,12 @@ def percentage(value, arg):
     try:
         return (float(value) / float(arg)) * 100
     except (ValueError, TypeError, ZeroDivisionError):
-        return 0 
+        return 0
+
+@register.filter
+def multiply(value, arg):
+    """Multiply the value by the arg."""
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0

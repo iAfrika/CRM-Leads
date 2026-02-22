@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Existing User to {{ company.name }}{% endblock %}
+
+{% block header_title %}Assign Existing User{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/user-management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2>Assign Existing User</h2>
+        <p class="text-muted">Assign an existing user to <strong>{{ company.name }}</strong> and set their role</p>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-sm">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Assign User Form</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'registration:assign_existing_user' company.id %}">
+                {% csrf_token %}
+                
+                <div class="form-group mb-4">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">User Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback">{{ form.email.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">{{ form.email.help_text }}</div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label for="{{ form.role.id_for_label }}" class="form-label">Role in Company</label>
+                    {{ form.role }}
+                    {% if form.role.errors %}
+                        <div class="invalid-feedback">{{ form.role.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">{{ form.role.help_text }}</div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <label for="{{ form.notes.id_for_label }}" class="form-label">Notes (Optional)</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <div class="invalid-feedback">{{ form.notes.errors }}</div>
+                    {% endif %}
+                    <div class="form-text">{{ form.notes.help_text }}</div>
+                </div>
+                
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{% url 'registration:company_users' company.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Users List
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-check"></i> Assign User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Style Django form fields with Bootstrap classes
+    document.addEventListener('DOMContentLoaded', function() {
+        const formFields = document.querySelectorAll('input[type="text"], input[type="email"], select, textarea');
+        formFields.forEach(field => {
+            field.classList.add('form-control');
+        });
+    });
+</script>
+{% endblock %}

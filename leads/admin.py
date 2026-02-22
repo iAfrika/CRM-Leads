@@ -28,7 +28,7 @@ class LeadAdmin(admin.ModelAdmin):
 
 @admin.register(LeadActivity)
 class LeadActivityAdmin(admin.ModelAdmin):
-    list_display = ['lead', 'activity_type', 'created_at', 'created_by', 'is_completed']
+    list_display = ['lead', 'activity_type', 'created_at', 'created_by_id', 'is_completed']
     list_filter = ['activity_type', 'is_completed', 'created_at']
     search_fields = ['lead__company_name', 'description']
     date_hierarchy = 'created_at'
@@ -41,6 +41,6 @@ class LeadActivityAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'due_date', 'is_completed', 'completed_at')
         }),
         ('User Information', {
-            'fields': ('created_by',)
+            'fields': ('created_by_id',)
         }),
     )

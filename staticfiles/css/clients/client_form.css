@@ -120,6 +120,10 @@ h2 {
     }
 }
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 .client-form-container {
     max-width: 800px;
     margin: 2rem auto;

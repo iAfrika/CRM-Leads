@@ -1,9 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from model_utils import FieldTracker
 from clients.models import Client
+from people.models import Person
+
 
 class Lead(models.Model):
     STATUS_CHOICES = [
@@ -58,9 +59,9 @@ class Lead(models.Model):
     next_follow_up = models.DateTimeField(null=True, blank=True)
     
     # Relationships
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_leads')
-    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='modified_leads')
+    assigned_to = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
+    created_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
+    modified_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
     converted_to_client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True, related_name='converted_from_lead')
     
     # Additional Information
@@ -68,7 +69,7 @@ class Lead(models.Model):
     notes_text = models.TextField(blank=True)
 
     # Field tracker
-    tracker = FieldTracker(fields=['assigned_to', 'status', 'priority', 'modified_by', 'next_follow_up'])
+    tracker = FieldTracker(fields=['assigned_to', 'status', 'priority', 'modified_by_id', 'next_follow_up'])
 
     class Meta:
         ordering = ['-created_at']
@@ -138,7 +139,7 @@ class LeadActivity(models.Model):
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
     due_date = models.DateTimeField(null=True, blank=True)
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
@@ -168,7 +169,7 @@ class LeadNote(models.Model):
     """Model for lead notes"""
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='notes')
     content = models.TextField()
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -183,7 +184,7 @@ class LeadDocument(models.Model):
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='documents')
     file = models.FileField(upload_to='leads/documents/%Y/%m/')
     description = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

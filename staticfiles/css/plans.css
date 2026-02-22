@@ -1,0 +1,222 @@
+/* Base plan layout */
+:root {
+  --primary-color: #4f46e5;
+  --primary-color-light: #818cf8;
+  --dark-gray: #6b7280;
+  --border-radius: 0.5rem;
+  --text-color: #111827;
+}
+
+/* Fix for the plan grid layout */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+/* Plan cards styling */
+.plan-card {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.plan-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.plan-card.popular {
+  border: 2px solid var(--primary-color);
+  position: relative;
+}
+
+.plan-card.popular::before {
+  content: "MOST POPULAR";
+  position: absolute;
+  top: 1rem;
+  right: -2rem;
+  background: var(--primary-color);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 2rem;
+  transform: rotate(45deg);
+}
+
+/* Plan pricing styling */
+.plan-price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 1.5rem 0 0.5rem;
+}
+
+.plan-price small {
+  font-size: 1rem;
+  color: var(--dark-gray);
+}
+
+.plan-annual-price {
+  font-size: 1.25rem;
+  color: #4b87c2;
+  margin-bottom: 1.5rem;
+}
+
+.plan-annual-price small {
+  font-size: 0.85rem;
+  color: var(--dark-gray);
+}
+
+.price-save {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  background-color: #10b981;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Feature lists */
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+}
+
+.plan-features li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+}
+
+.plan-features li.included::before {
+  content: "✓";
+  color: #10b981;
+  font-weight: bold;
+  margin-right: 0.75rem;
+}
+
+.plan-features li.not-included {
+  color: var(--dark-gray);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.plan-features li.not-included::before {
+  content: "✕";
+  color: #ef4444;
+  font-weight: bold;
+  margin-right: 0.75rem;
+}
+
+/* Button styles */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+
+.btn-outline:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Feature grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+/* Registration card */
+.registration-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.registration-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.registration-header h1 {
+  font-size: 2.5rem;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.registration-header p {
+  font-size: 1.25rem;
+  color: var(--dark-gray);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .registration-header h1 {
+    font-size: 2rem;
+  }
+}

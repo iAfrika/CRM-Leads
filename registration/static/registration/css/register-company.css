@@ -1,0 +1,242 @@
+/* Modern Company Registration Styles */
+.registration-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.registration-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.registration-header h1 {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.75rem;
+    font-size: 2.25rem;
+}
+
+.registration-header p {
+    color: #718096;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.registration-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    color: #2d3748;
+}
+
+.form-control:focus {
+    border-color: #4a6cf7;
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+    background-color: #fff;
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.form-control:hover:not(:focus) {
+    border-color: #cbd5e0;
+    background-color: #fff;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+    font-size: 0.95rem;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn {
+    padding: 0.875rem 1.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4a6cf7 0%, #5a7cfa 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(74, 108, 247, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #3a5bdb 0%, #4a6cf7 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 108, 247, 0.3);
+    color: white;
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-outline-secondary {
+    background-color: transparent;
+    color: #718096;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: none;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+    color: #4a5568;
+    transform: translateY(-1px);
+}
+
+.required-field::after {
+    content: "*";
+    color: #e53e3e;
+    margin-left: 6px;
+    font-weight: 600;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 1.25rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    border: none;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+    color: #c53030;
+    border-left: 4px solid #e53e3e;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #f0fff4 0%, #f0fff4 100%);
+    color: #38a169;
+    border-left: 4px solid #48bb78;
+}
+
+.text-muted {
+    color: #718096;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+input[type="file"] {
+    padding: 0.75rem;
+    border: 2px dashed #e2e8f0;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    transition: all 0.3s ease;
+}
+
+input[type="file"]:hover {
+    border-color: #4a6cf7;
+    background-color: #f7fafc;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Loading state */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Focus states for accessibility */
+.btn:focus {
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.2);
+    outline: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .registration-container {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .registration-card {
+        padding: 1.75rem;
+        border-radius: 10px;
+    }
+    
+    .registration-header h1 {
+        font-size: 1.875rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .registration-header h1 {
+        font-size: 1.625rem;
+    }
+    
+    .registration-card {
+        padding: 1.5rem;
+    }
+}

@@ -315,7 +315,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-primary);
     background-color: var(--background-color);
     line-height: 1.5;

@@ -14,6 +14,11 @@
     --transition: all 0.2s ease;
   }
   
+  /* Global Styles */
+  body {
+    font-family: 'Nunito', sans-serif;
+  }
+  
   /* Form Container */
   .form-container {
     max-width: 1200px;

@@ -1,6 +1,7 @@
 {% extends 'project_management/base.html' %}
 {% load static %}
 {% load humanize %}
+{% load project_tags %}
 
 {% block title %}Project Analytics | {{ block.super }}{% endblock %}
 
@@ -13,7 +14,7 @@
 {% block content %}
 <div class="content-container">
     <div class="analytics-header">
-        <h1 class="analytics-title">Financial Analytics</h1>
+        <h1 class="analytics-title">Project Analytics Dashboard</h1>
         <div class="analytics-actions">
             <button id="export-button" class="button button-outline">
                 <i class="fas fa-file-export"></i> Export Data
@@ -69,14 +70,65 @@
     </div>
     
     <div class="analytics-grid">
-        <!-- Financial Summary Metrics -->
+        <!-- Project Health Overview -->
         <div class="analytics-card metrics-summary">
             <div class="card-header">
-                <h2 class="card-title">Financial Summary</h2>
+                <h2 class="card-title">Project Health Overview</h2>
                 <div class="card-icon icon-primary">
-                    <i class="fas fa-chart-pie"></i>
+                    <i class="fas fa-heartbeat"></i>
                 </div>
             </div>
+            
+            <div class="metrics-grid">
+                {% for health in project_health %}
+                <div class="metric-item">
+                    <div class="metric-icon {% if health.budget_health == 'over_budget' %}icon-danger{% elif health.budget_health == 'under_budget' %}icon-success{% else %}icon-warning{% endif %}">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="metric-value">{{ health.count }}</div>
+                    <div class="metric-title">{{ health.budget_health|title }} Projects</div>
+                </div>
+                {% endfor %}
+                
+                {% for health in project_health %}
+                <div class="metric-item">
+                    <div class="metric-icon {% if health.schedule_health == 'delayed' %}icon-danger{% elif health.schedule_health == 'on_track' %}icon-success{% else %}icon-warning{% endif %}">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-value">{{ health.count }}</div>
+                    <div class="metric-title">{{ health.schedule_health|title }} Projects</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Resource Utilization -->
+        <div class="analytics-card resource-utilization">
+            <div class="card-header">
+                <h2 class="card-title">Resource Utilization</h2>
+                <div class="card-icon icon-info">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            
+            <div class="resource-grid">
+                {% for resource in resource_utilization %}
+                <div class="resource-item">
+                    <div class="resource-info">
+                        <span class="resource-name">{{ resource.team_members__first_name }} {{ resource.team_members__last_name }}</span>
+                        <div class="resource-metrics">
+                            <span class="metric">Projects: {{ resource.assigned_projects }}</span>
+                            <span class="metric">Budget: ${{ resource.total_budget_managed|intcomma }}</span>
+                            <span class="metric">Active Milestones: {{ resource.active_milestones }}</span>
+                        </div>
+                    </div>
+                    <div class="resource-progress">
+                        <div class="progress-bar" style="width: {{ resource.assigned_projects|multiply:20 }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
             
             <div class="metrics-grid">
                 <div class="metric-item">
@@ -149,17 +201,41 @@
             </div>
         </div>
         
-        <!-- Side Charts -->
-        <div class="analytics-card side-chart">
+        <!-- Milestone Progress -->
+        <div class="analytics-card milestone-progress">
             <div class="card-header">
-                <h2 class="card-title">Cost Distribution</h2>
-                <div class="card-icon icon-warning">
-                    <i class="fas fa-chart-pie"></i>
+                <h2 class="card-title">Milestone Progress</h2>
+                <div class="card-icon icon-success">
+                    <i class="fas fa-flag-checkered"></i>
                 </div>
             </div>
             
-            <div class="chart-container">
-                <canvas id="distribution-chart"></canvas>
+            <div class="milestone-grid">
+                {% for milestone in milestone_analysis %}
+                <div class="milestone-item">
+                    <div class="milestone-header">
+                        <span class="project-name">{{ milestone.project__name }}</span>
+                        <span class="completion-rate">{{ milestone.completion_rate|floatformat:1 }}%</span>
+                    </div>
+                    <div class="milestone-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value">{{ milestone.total_milestones }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Completed</span>
+                            <span class="stat-value">{{ milestone.completed_milestones }}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Overdue</span>
+                            <span class="stat-value {% if milestone.overdue_milestones > 0 %}text-danger{% endif %}">{{ milestone.overdue_milestones }}</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: {{ milestone.completion_rate }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
         
@@ -177,27 +253,44 @@
             </div>
         </div>
         
-        <!-- Project Comparison Table -->
-        <div class="analytics-card project-comparison">
+        <!-- Budget Performance Analysis -->
+        <div class="analytics-card budget-performance">
             <div class="card-header">
-                <h2 class="card-title">Project Comparison</h2>
+                <h2 class="card-title">Budget Performance</h2>
                 <div class="card-icon icon-primary">
-                    <i class="fas fa-table"></i>
+                    <i class="fas fa-balance-scale"></i>
                 </div>
             </div>
             
-            <table class="comparison-table">
+            <table class="performance-table">
                 <thead>
                     <tr>
                         <th>Project</th>
                         <th>Budget</th>
-                        <th>Invoices</th>
-                        <th>Expenses</th>
-                        <th>Purchases</th>
+                        <th>Actual Cost</th>
+                        <th>Variance</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="project-comparison-body">
-                    <!-- Populated by JS -->
+                <tbody>
+                    {% for project in budget_vs_actual %}
+                    <tr>
+                        <td>{{ project.name }}</td>
+                        <td>${{ project.budget|intcomma }}</td>
+                        <td>${{ project.actual|intcomma }}</td>
+                        <td class="{% if project.variance > 0 %}text-success{% else %}text-danger{% endif %}">
+                            ${{ project.variance|intcomma }} ({{ project.variance_percentage|floatformat:1 }}%)
+                        </td>
+                        <td>
+                            <span class="status-badge {% if project.variance > 0 %}badge-success{% else %}badge-danger{% endif %}">
+                                {% if project.variance > 0 %}Under Budget{% else %}Over Budget{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
                 </tbody>
             </table>
         </div>
@@ -286,4 +379,4 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="{% static 'js/project_analytics.js' %}"></script>
-{% endblock %} 
+{% endblock %}

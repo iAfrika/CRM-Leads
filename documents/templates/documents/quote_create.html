@@ -1,206 +1,935 @@
-{% extends 'base.html' %}
 {% load static %}
-
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/documents/quote.css' %}">
-<link rel="stylesheet" href="{% static 'css/documents/quote_create.css' %}">
+<link rel="stylesheet" href="{% static 'css/document_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<style>
+    .share-options {
+        display: flex;
+        justify-content: space-around;
+        gap: 16px;
+    }
+    
+    .share-options .btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+    
+    .btn-telegram {
+        background-color: #0088cc;
+        color: white;
+    }
+    
+    .btn-email {
+        background-color: #4a90e2;
+        color: white;
+    }
+    
+    /* Quote items table styling */
+    #quote-items-table {
+        margin-top: 20px;
+    }
+    
+    #quote-items-table input.form-control {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    #quote-items-table input.form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        outline: none;
+    }
+    
+    .new-item-row {
+        background-color: #f8f9fa;
+    }
+    
+    .new-item-row input.item-description {
+        background-color: white;
+        border: 2px solid #28a745;
+    }
+    
+    .remove-item-btn {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 1;
+        border-radius: 50%;
+    }
+    
+    .item-total {
+        font-weight: bold;
+        text-align: right;
+    }
+    
+    #quote-items-table tfoot td {
+        font-weight: bold;
+        border-top: 2px solid #dee2e6;
+    }
+    
+    #quote-items-table .text-right {
+        text-align: right;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+    
+    /* Action buttons styling */
+    .quote-actions {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn {
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #545b62;
+        color: white;
+    }
+    
+    .btn-outline-secondary {
+        background-color: transparent;
+        color: #6c757d;
+        border: 2px solid #6c757d;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="quote-container">
-    <!-- Left side - Quote Form -->
-    <div class="form-section">
-        <h2>Create New Quote</h2>
-        <form id="quote-form" method="post" action="{% url 'documents:quote_create_function' %}" data-quote-number-url="{% url 'documents:get_quote_number' %}">
-            {% csrf_token %}
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="client">Select Client</label>
-                    <select name="client" id="client" required>
-                        <option value="">-- Select a client --</option>
-                        {% for client in clients %}
-                            <option value="{{ client.id }}">{{ client.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group quote-title-field">
-                    <label for="quote_title">Quote Title</label>
-                    <input type="text" name="title" id="quote_title" placeholder="Enter a title for this quote" required>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group quote-number-field">
-                    <label for="quote_number">Quote Number</label>
-                    <input type="text" name="quote_number" id="quote_number" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="valid_until">Valid Until</label>
-                    <input type="date" name="valid_until" id="valid_until" required>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="description">Description (Optional)</label>
-                <textarea name="description" id="description" placeholder="Enter a brief description of this quote"></textarea>
-            </div>
-            
-            <!-- Quote items section -->
-            <div id="quote-items">
-                <h3>Quote Items</h3>
-                <div class="quote-item">
-                    <label>Description</label>
-                    <input type="text" name="items[][description]" placeholder="Item description" required>
-                    
-                    <div class="numeric-fields">
-                        <div>
-                            <label>Quantity</label>
-                            <input type="number" name="items[][quantity]" min="1" placeholder="Qty" required>
-                        </div>
-                        
-                        <div>
-                            <label>Unit Price (KES)</label>
-                            <input type="number" name="items[][unit_price]" min="0" step="0.01" placeholder="0.00" required>
-                        </div>
-                        
-                        <div>
-                            <label>Discount %</label>
-                            <input type="number" name="items[][discount]" min="0" max="100" placeholder="0" value="0">
-                        </div>
-                    </div>
-                    
-                    <button type="button" class="remove-item">Remove Item</button>
-                </div>
-            </div>
-            <button type="button" id="add-item">+ Add Another Item</button>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="tax_rate">Tax Rate (%)</label>
-                    <input type="number" name="tax_rate" id="tax_rate" min="0" max="100" value="16" required>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="terms">Terms and Conditions</label>
-                <textarea name="terms" id="terms" placeholder="Enter terms and conditions for this quote">1. This quote is valid for 30 days from the date of issue.
-2. Payment terms: 50% advance, balance upon completion.
-3. Delivery timeline: 2-3 weeks after confirmation.</textarea>
-            </div>
-            
-            <!-- Hidden fields for calculations -->
-            <input type="hidden" name="subtotal" id="subtotal" value="0">
-            <input type="hidden" name="tax_amount" id="tax_amount" value="0">
-            <input type="hidden" name="total_amount" id="total_amount" value="0">
-            
-            <div class="form-actions">
-                <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Generate Quote</button>
-            </div>
-            <div class="form-actions">
-                <button type="button" id="preview-button" class="btn btn-secondary" onclick="previewQuote()">Preview Quote</button>
-                <a id="preview-link" href="#" target="_blank" class="btn btn-secondary" style="display: none;">Open Preview in New Tab</a>
-            </div>
-        </form>
+<div class="document-detail-container">
+    <div class="document-header">
+        <h1>
+            {% if document.document_type == 'QUOTE' %}
+                Quote #{{ document.get_document_number }}
+            {% elif document.document_type == 'INVOICE' %}
+                Invoice #{{ document.invoice_number }}
+            {% endif %}
+        </h1>
+      
     </div>
 
-    <!-- Right side - Quote Preview -->
-    <div class="preview-section">
-        <div class="quote-wrapper">
-            <div class="quote-card">
-                <div class="quote-preview-header">
-                    <h2>QUOTATION</h2>
-                    <div class="quote-info">
-                        <p>Quote No: <span id="preview-quote-number">-</span></p>
-                        <p>Date: <span id="preview-date">{% now "F d, Y" %}</span></p>
-                        <p>Valid until: <span id="preview-valid-until">-</span></p>
-                    </div>
-                </div>
-
-                <div class="company-client-details">
-                    <div class="company-details">
-                        <h3>FROM</h3>
-                        <p class="company-name">Your Company Name</p>
-                        <p>123 Business Street</p>
-                        <p>Nairobi, Kenya</p>
-                        <p>Email: info@yourcompany.co.ke</p>
-                        <p>Tel: +254 123 456 789</p>
-                    </div>
-                    <div class="client-details">
-                        <h3>TO</h3>
-                        <p class="client-name" id="preview-client">-</p>
-                        <p class="client-address" id="preview-client-address">-</p>
-                        <p class="client-contact" id="preview-client-contact">-</p>
-                    </div>
-                </div>
-
-                <div class="quote-title-section">
-                    <h3 id="preview-title">-</h3>
-                    <p id="preview-description">-</p>
-                </div>
-
-                <div class="quote-content">
-                    <table class="quote-table">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
-                                <th>Discount</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="preview-items">
-                            <!-- Items will be dynamically added here -->
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="4">Subtotal</td>
-                                <td id="preview-subtotal">KES 0.00</td>
-                            </tr>
-                            <tr>
-                                <td colspan="4">Tax (<span id="preview-tax-rate">16</span>%)</td>
-                                <td id="preview-tax">KES 0.00</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="4">Total Amount</td>
-                                <td id="preview-total">KES 0.00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-    
    
 
-                <footer class="quote-footer">
-                    <div class="terms">
-                        <h3>Terms & Conditions</h3>
-                        <div id="preview-terms">-</div>
-                    </div>
-                    <div class="thank-you">Thank you for your business!</div>
-                </footer>
-            </div>
-        </div>
+
+<div class="header">
+    <div class="colored-bar">
+        <div class="orange-bar"></div>
+        <div class="pink-bar"></div>
     </div>
 </div>
+<div class="quote-content">
+    <!-- CSRF Token for form submissions -->
+    {% csrf_token %}
+    
+    <!-- Company Header Section -->
+    <div class="company-info">
+        <!-- company details -->
+
+        <div class="logo-container">
+            <div class="logo">
+                {% if active_company.logo %}
+                <img src="{{ active_company.logo.url }}" alt="{{ active_company.name }} Logo" style="max-width: 250px; max-height: 150px; object-fit: contain;">
+                {% else %}
+                <img src="#" alt="Logo" style="opacity: 0.3;">
+                {% endif %}
+            </div>
+            <div class="company-info">
+                <p class="presented-by">Presented by</p>
+                <h1 class="company-name">{{ active_company.name|default:"Company Name" }}</h1>
+                <p class="company-address">{{ active_company.physical_address|default:"company physical address," }}</p>
+                <p class="contact-info">Tel: {{ active_company.phone_number|default:"phone number" }}</p>
+                <p class="contact-info"><a href="mailto:{{ active_company.email }}" class="email">{{ active_company.email|default:"email address" }}</a></p>
+            </div>
+        </div>
+
+        <!-- document details -->
+
+        <div class="document-details">
+            <div class="left-details">
+                <div class="detail-row">
+                    <span class="detail-label">Revision:</span>
+                    <span class="detail-value">{{ document.edit_count|default:0 }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Modified:</span>
+                    <span class="detail-value">{% now "d/m/Y" %}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">To:</span>
+                    <span class="detail-value">
+                        <select name="client" id="client" class="form-control" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                            <option value="">Select a client...</option>
+                            {% for client in clients %}
+                                <option value="{{ client.id }}" {% if document.client.id == client.id %}selected{% endif %}>{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">C/o:</span>
+                    <span id="detail-value"><strong>{{ document.client.contact_person }}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Project:</span>
+                    <span class="detail-value">
+                        <input type="text" name="project" id="project" class="form-control" value="{% if document.description %}{{ document.description }}{% endif %}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Prepared by:</span>
+                    <span id="detail-value">{{ request.user.get_full_name|default:request.user.username }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Validity:</span>
+                    <span class="detail-value">
+                        <input type="date" name="valid_until" id="valid_until" class="form-control" value="{% if document.valid_until %}{{ document.valid_until|date:'Y-m-d' }}{% endif %}" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tax pin:</span>
+                    <span class="detail-value">{{ quote.tax_pin }}</span>
+                </div>
+            </div>
+            
+            <div class="right-details">
+                <div class="document-title">
+                    {% if document.document_type %}
+                        QUOTE
+                    {% else %}
+                        QUOTE
+                    {% endif %}
+                    <span class="document-title">{{document.document_title}}</span>
+                </div>
+                <div class="form-group quote-number-field">
+                    <label for="quote_number">Quote Number</label>
+                    {% if document.document_type == 'QUOTE' and document.quote %}
+                        <input type="text" name="quote_number" id="quote_number" value="{{ document.quote.quote_number }}" readonly>
+                    {% else %}
+                        <input type="text" name="quote_number" id="quote_number" value="" readonly>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+        <div class="document-subtitle">{{ quote.description }}</div>
+
+        <div class="document-items">
+            <table class="table" id="quote-items-table">
+                <thead>
+                    <tr>
+                        <th>ITEM</th>
+                        <th>DESCRIPTION</th>
+                        <th>QTY</th>
+                        <th>UOM</th>
+                        <th>RATES</th>
+                        <th>TOTAL</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody id="quote-items-tbody">
+                    {% if document.document_type == 'QUOTE' %}
+                        {% for item in document.quote.items.all %}
+                        <tr data-item-row>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <input type="text" name="items[{{ forloop.counter0 }}][description]" value="{{ item.description }}" class="form-control item-description" style="border: none; background: transparent;">
+                            </td>
+                            <td>
+                                <input type="number" name="items[{{ forloop.counter0 }}][quantity]" value="{{ item.quantity }}" class="form-control item-quantity" style="border: none; background: transparent; width: 60px;" min="1">
+                            </td>
+                            <td>pcs</td>
+                            <td>
+                                <input type="number" name="items[{{ forloop.counter0 }}][unit_price]" value="{{ item.unit_price }}" class="form-control item-price" style="border: none; background: transparent; width: 80px;" step="0.01" min="0">
+                            </td>
+                            <td class="item-total">{{ item.get_total|floatformat:2 }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger remove-item-btn" onclick="removeItem(this)">×</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for item in document.items.all %}
+                        <tr data-item-row>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <input type="text" name="items[{{ forloop.counter0 }}][description]" value="{{ item.description }}" class="form-control item-description" style="border: none; background: transparent;">
+                            </td>
+                            <td>
+                                <input type="number" name="items[{{ forloop.counter0 }}][quantity]" value="{{ item.quantity }}" class="form-control item-quantity" style="border: none; background: transparent; width: 60px;" min="1">
+                            </td>
+                            <td>pcs</td>
+                            <td>
+                                <input type="number" name="items[{{ forloop.counter0 }}][unit_price]" value="{{ item.unit_price }}" class="form-control item-price" style="border: none; background: transparent; width: 80px;" step="0.01" min="0">
+                            </td>
+                            <td class="item-total">{{ item.total|floatformat:2 }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger remove-item-btn" onclick="removeItem(this)">×</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Default empty row for adding new items -->
+                    <tr data-item-row class="new-item-row">
+                        <td class="item-number">1</td>
+                        <td>
+                            <input type="text" name="items[0][description]" placeholder="Enter item description..." class="form-control item-description" style="border: 1px solid #ddd;">
+                        </td>
+                        <td>
+                            <input type="number" name="items[0][quantity]" value="1" class="form-control item-quantity" style="width: 60px;" min="1">
+                        </td>
+                        <td>pcs</td>
+                        <td>
+                            <input type="number" name="items[0][unit_price]" placeholder="0.00" class="form-control item-price" style="width: 80px;" step="0.01" min="0">
+                        </td>
+                        <td class="item-total">0.00</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger remove-item-btn" onclick="removeItem(this)">×</button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 10px;">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addNewItem()">+ Add Item</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-right">
+                            <strong>SUB TOTAL</strong>
+                        </td>
+                        <td id="subtotal-display">{{ document.subtotal|floatformat:2 }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-right">
+                            <strong>VAT{% if document.tax_rate %} ({{ document.tax_rate }}%){% endif %}</strong>
+                            <input type="checkbox" name="apply_vat" id="apply_vat" {% if document.apply_vat %}checked{% endif %} style="width: 18px; height: 18px; cursor: pointer; margin-left: 10px; vertical-align: middle;" onchange="updateTotals()" title="Apply VAT">
+                        </td>
+                        <td id="tax-display">{{ document.tax_amount|floatformat:2 }}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-right">
+                            <strong>GRAND TOTAL</strong>
+                        </td>
+                        <td id="total-display">{{ document.total_amount|floatformat:2 }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <!-- Payment Terms Section - Identical to PDF -->
+        <div class="payment-terms">
+            <p><strong>Payment terms:</strong> 70% with LPO 30% on completion</p>
+            <h3>BANK DETAILS</h3>
+            <p>BANK NAME: KENYA COMMERCIAL BANK LIMITED</p>
+            <p>ACCOUNT NAME: CRESCENT CONTROLS</p>
+            <p>ACCOUNT NUMBER: 1298790468</p>
+            <p>SWIFT CODE: KCBLKENX01338</p>
+        </div>
+    </div>
+    
+    <!-- Action Buttons Section -->
+    <div class="quote-actions" style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-top: 2px solid #dee2e6; text-align: center;">
+        <div class="btn-group" style="display: inline-flex; gap: 15px;">
+            <button type="button" class="btn btn-secondary" onclick="previewQuote()" style="padding: 12px 24px; font-size: 16px;">
+                <i class="fas fa-eye"></i> Preview Quote
+            </button>
+            <button type="button" class="btn btn-primary" onclick="generateQuote()" style="padding: 12px 24px; font-size: 16px;">
+                <i class="fas fa-file-alt"></i> Generate Quote
+            </button>
+            <a href="{% url 'documents:document_list' %}" class="btn btn-outline-secondary" style="padding: 12px 24px; font-size: 16px; text-decoration: none;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </div>
+    
+    <!-- Footer - Only shown in web view -->
+    <div class="document-footer">
+        <p>Quote generated on {{ document.created_at|date:"d/m/Y" }}</p>
+    </div>
+</div>
+        
+
 {% endblock %}
 
+
+
+
 {% block extra_js %}
-<script src="{% static 'js/documents/quote_create.js' %}"></script>
-{% endblock %} 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set quote number when the page loads
+    const quoteNumberField = document.getElementById('quote_number');
+    if (quoteNumberField && !quoteNumberField.value) {
+        console.log("Quote number field found, fetching new quote number");
+        
+        // Fetch a new quote number from the server
+        fetch('{% url "documents:get_quote_number" %}')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received quote number:", data.quote_number);
+                if (data.quote_number) {
+                    quoteNumberField.value = data.quote_number;
+                }
+            })
+            .catch(error => console.error("Error fetching quote number:", error));
+    }
+    
+    // Add event listener for client selection
+    const clientSelect = document.getElementById('client');
+    if (clientSelect) {
+        clientSelect.addEventListener('change', async function() {
+            const clientId = this.value;
+            if (clientId) {
+                try {
+                    const response = await fetch(`/clients/${clientId}/`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const clientData = await response.json();
+                    
+                    // Update client details
+                    const detailValueElements = document.querySelectorAll('#detail-value');
+                    detailValueElements.forEach(element => {
+                        const parentRow = element.closest('.detail-row');
+                        if (parentRow) {
+                            const label = parentRow.querySelector('.detail-label').textContent.toLowerCase();
+                            if (label.includes('c/o')) {
+                                element.textContent = clientData.contact_person || '';
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error fetching client details:', error);
+                }
+            } else {
+                // Clear the fields if no client is selected
+                const detailValueElements = document.querySelectorAll('#detail-value');
+                detailValueElements.forEach(element => {
+                    element.textContent = '';
+                });
+            }
+        });
+    }
+    
+    // Add event listeners for item calculations
+    addCalculationListeners();
+    updateItemNumbers();
+    calculateTotals();
+    
+    // Check if we're returning from preview
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('continue_editing') === '1') {
+        // Restore form data if returning from preview
+        restoreFormData();
+    }
+});
+
+function restoreFormData() {
+    const savedData = localStorage.getItem('quoteFormData');
+    if (savedData) {
+        try {
+            const formData = JSON.parse(savedData);
+            
+            // Restore client selection
+            if (formData.client) {
+                document.getElementById('client').value = formData.client;
+                // Trigger change event to update client details
+                document.getElementById('client').dispatchEvent(new Event('change'));
+            }
+            
+            // Restore project field
+            if (formData.project) {
+                document.getElementById('project').value = formData.project;
+            }
+            
+            // Restore valid until date
+            if (formData.valid_until) {
+                document.getElementById('valid_until').value = formData.valid_until;
+            }
+            
+            // Restore quote number
+            if (formData.quote_number) {
+                document.getElementById('quote_number').value = formData.quote_number;
+            }
+            
+            // Clear existing items except the first default row
+            const tbody = document.getElementById('quote-items-tbody');
+            const existingRows = tbody.querySelectorAll('[data-item-row]');
+            existingRows.forEach((row, index) => {
+                if (index > 0) { // Keep the first row, remove others
+                    row.remove();
+                }
+            });
+            
+            // Restore items
+            if (formData.items && formData.items.length > 0) {
+                formData.items.forEach((item, index) => {
+                    let row;
+                    if (index === 0) {
+                        // Use the existing first row
+                        row = tbody.querySelector('[data-item-row]');
+                    } else {
+                        // Create new rows for additional items
+                        addNewItem();
+                        row = tbody.querySelectorAll('[data-item-row]')[index];
+                    }
+                    
+                    // Fill in the item data
+                    if (row) {
+                        row.querySelector('.item-description').value = item.description || '';
+                        row.querySelector('.item-quantity').value = item.quantity || 1;
+                        row.querySelector('.item-price').value = item.unit_price || '';
+                        
+                        // Calculate and update the total
+                        calculateItemTotal(row);
+                    }
+                });
+            }
+            
+            // Update calculations
+            calculateTotals();
+            updateItemNumbers();
+            
+            // Clear the saved data after restoring
+            localStorage.removeItem('quoteFormData');
+            
+            console.log('Form data restored successfully');
+        } catch (error) {
+            console.error('Error restoring form data:', error);
+            localStorage.removeItem('quoteFormData');
+        }
+    }
+}
+
+function addCalculationListeners() {
+    // Add event listeners to quantity and price inputs for real-time calculation
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('item-quantity') || e.target.classList.contains('item-price')) {
+            const row = e.target.closest('tr');
+            calculateItemTotal(row);
+            calculateTotals();
+        }
+    });
+}
+
+function calculateItemTotal(row) {
+    const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+    const price = parseFloat(row.querySelector('.item-price').value) || 0;
+    const total = quantity * price;
+    
+    row.querySelector('.item-total').textContent = total.toFixed(2);
+}
+
+function calculateTotals() {
+    let subtotal = 0;
+    
+    // Calculate subtotal from all item rows
+    document.querySelectorAll('[data-item-row]').forEach(row => {
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        subtotal += quantity * price;
+    });
+    
+    // Check if VAT should be applied
+    const applyVat = document.getElementById('apply_vat').checked;
+    const taxRate = 16; // You can make this dynamic if needed
+    const taxAmount = applyVat ? (subtotal * (taxRate / 100)) : 0;
+    const total = subtotal + taxAmount;
+    
+    // Update display
+    document.getElementById('subtotal-display').textContent = subtotal.toFixed(2);
+    document.getElementById('tax-display').textContent = taxAmount.toFixed(2);
+    document.getElementById('total-display').textContent = total.toFixed(2);
+}
+
+// Alias for checkbox onchange event
+function updateTotals() {
+    calculateTotals();
+}
+
+function addNewItem() {
+    const tbody = document.getElementById('quote-items-tbody');
+    const newRowIndex = tbody.querySelectorAll('[data-item-row]').length;
+    
+    const newRow = document.createElement('tr');
+    newRow.setAttribute('data-item-row', '');
+    newRow.className = 'new-item-row';
+    
+    newRow.innerHTML = `
+        <td class="item-number">${newRowIndex + 1}</td>
+        <td>
+            <input type="text" name="items[${newRowIndex}][description]" placeholder="Enter item description..." class="form-control item-description" style="border: 1px solid #ddd;">
+        </td>
+        <td>
+            <input type="number" name="items[${newRowIndex}][quantity]" value="1" class="form-control item-quantity" style="width: 60px;" min="1">
+        </td>
+        <td>pcs</td>
+        <td>
+            <input type="number" name="items[${newRowIndex}][unit_price]" placeholder="0.00" class="form-control item-price" style="width: 80px;" step="0.01" min="0">
+        </td>
+        <td class="item-total">0.00</td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger remove-item-btn" onclick="removeItem(this)">×</button>
+        </td>
+    `;
+    
+    tbody.appendChild(newRow);
+    updateItemNumbers();
+    
+    // Focus on the description field of the new row
+    newRow.querySelector('.item-description').focus();
+}
+
+function removeItem(button) {
+    const row = button.closest('tr');
+    const tbody = document.getElementById('quote-items-tbody');
+    
+    // Don't remove if it's the only row
+    if (tbody.querySelectorAll('[data-item-row]').length > 1) {
+        row.remove();
+        updateItemNumbers();
+        calculateTotals();
+    } else {
+        alert('At least one item is required.');
+    }
+}
+
+function updateItemNumbers() {
+    const rows = document.querySelectorAll('[data-item-row]');
+    rows.forEach((row, index) => {
+        const itemNumberCell = row.querySelector('.item-number');
+        if (itemNumberCell) {
+            itemNumberCell.textContent = index + 1;
+        }
+        
+        // Update the name attributes to maintain proper indexing
+        const inputs = row.querySelectorAll('input');
+        inputs.forEach(input => {
+            const name = input.getAttribute('name');
+            if (name && name.includes('items[')) {
+                const newName = name.replace(/items\[\d+\]/, `items[${index}]`);
+                input.setAttribute('name', newName);
+            }
+        });
+    });
+}
+
+function previewQuote() {
+    // Validate basic required fields
+    const client = document.getElementById('client').value;
+    if (!client) {
+        alert('Please select a client before previewing the quote.');
+        document.getElementById('client').focus();
+        return;
+    }
+    
+    // Check if at least one item has description and price
+    const rows = document.querySelectorAll('[data-item-row]');
+    let hasValidItem = false;
+    
+    rows.forEach(row => {
+        const description = row.querySelector('.item-description').value.trim();
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        
+        if (description && price > 0) {
+            hasValidItem = true;
+        }
+    });
+    
+    if (!hasValidItem) {
+        alert('Please add at least one item with description and price before previewing.');
+        return;
+    }
+    
+    // Collect form data for preview
+    const formData = collectQuoteData();
+    
+    // Prepare form data for preview submission
+    const previewFormData = new FormData();
+    previewFormData.append('client', client);
+    previewFormData.append('quote_number', formData.quote_number);
+    previewFormData.append('title', formData.project || 'Quote Preview');
+    previewFormData.append('description', formData.project || '');
+    previewFormData.append('valid_until', formData.valid_until);
+    previewFormData.append('terms', 'Standard terms and conditions apply.');
+    previewFormData.append('apply_vat', document.getElementById('apply_vat').checked ? 'true' : 'false');
+    previewFormData.append('tax_rate', '16');
+    previewFormData.append('subtotal', formData.subtotal.toFixed(2));
+    previewFormData.append('tax_amount', formData.tax_amount.toFixed(2));
+    previewFormData.append('total_amount', formData.total.toFixed(2));
+    
+    // Convert items to the format expected by the backend
+    const validItems = [];
+    formData.items.forEach(item => {
+        if (item.description.trim() && item.quantity > 0 && item.unit_price > 0) {
+            validItems.push({
+                description: item.description,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                discount: 0
+            });
+        }
+    });
+    
+    previewFormData.append('items', JSON.stringify(validItems));
+    
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        previewFormData.append('csrfmiddlewaretoken', csrfToken.value);
+    }
+    
+    // Submit to preview endpoint
+    fetch('{% url "documents:quote_preview" %}', {
+        method: 'POST',
+        body: previewFormData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Store form data in localStorage before opening preview
+            localStorage.setItem('quoteFormData', JSON.stringify({
+                client: client,
+                project: document.getElementById('project').value,
+                valid_until: document.getElementById('valid_until').value,
+                quote_number: formData.quote_number,
+                items: formData.items
+            }));
+            
+            // Open preview in new tab
+            window.open(data.redirect_url, '_blank');
+        } else {
+            alert('Error creating preview: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to create preview. Please try again.');
+    });
+}
+
+function generateQuote() {
+    // Validate all required fields
+    const client = document.getElementById('client').value;
+    const quoteNumber = document.getElementById('quote_number').value;
+    const validUntil = document.getElementById('valid_until').value;
+    
+    if (!client) {
+        alert('Please select a client.');
+        document.getElementById('client').focus();
+        return;
+    }
+    
+    if (!quoteNumber) {
+        alert('Quote number is required.');
+        return;
+    }
+    
+    if (!validUntil) {
+        alert('Please set a valid until date.');
+        document.getElementById('valid_until').focus();
+        return;
+    }
+    
+    // Validate items
+    const rows = document.querySelectorAll('[data-item-row]');
+    let validItems = [];
+    
+    rows.forEach(row => {
+        const description = row.querySelector('.item-description').value.trim();
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        
+        if (description && quantity > 0 && price > 0) {
+            validItems.push({
+                description: description,
+                quantity: quantity,
+                unit_price: price,
+                discount: 0
+            });
+        }
+    });
+    
+    if (validItems.length === 0) {
+        alert('Please add at least one valid item (with description, quantity, and price).');
+        return;
+    }
+    
+    // Prepare form data for submission
+    const formData = new FormData();
+    formData.append('client', client);
+    formData.append('quote_number', quoteNumber);
+    formData.append('title', document.getElementById('project').value || 'Quote');
+    formData.append('description', document.getElementById('project').value || '');
+    formData.append('valid_until', validUntil);
+    formData.append('terms', 'Standard terms and conditions apply.');
+    formData.append('apply_vat', document.getElementById('apply_vat').checked ? 'true' : 'false');
+    formData.append('tax_rate', '16');
+    
+    // Calculate totals
+    const applyVat = document.getElementById('apply_vat').checked;
+    const subtotal = validItems.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const taxAmount = applyVat ? (subtotal * 0.16) : 0;
+    const total = subtotal + taxAmount;
+    
+    formData.append('subtotal', subtotal.toFixed(2));
+    formData.append('tax_amount', taxAmount.toFixed(2));
+    formData.append('total_amount', total.toFixed(2));
+    formData.append('items', JSON.stringify(validItems));
+    
+    // Add CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        formData.append('csrfmiddlewaretoken', csrfToken.value);
+    }
+    
+    // Submit the form
+    fetch('{% url "documents:quote_create_function" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then(data => {
+        if (data.success) {
+            alert('Quote generated successfully!');
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            } else {
+                window.location.href = '{% url "documents:document_list" %}';
+            }
+        } else {
+            alert('Error generating quote: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to generate quote. Please try again.');
+    });
+}
+
+function collectQuoteData() {
+    const rows = document.querySelectorAll('[data-item-row]');
+    const items = [];
+    
+    rows.forEach(row => {
+        const description = row.querySelector('.item-description').value.trim();
+        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        
+        if (description || quantity > 0 || price > 0) {
+            items.push({
+                description: description || 'No description',
+                quantity: quantity,
+                unit_price: price,
+                total: quantity * price
+            });
+        }
+    });
+    
+    const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+    const taxAmount = subtotal * 0.16;
+    const total = subtotal + taxAmount;
+    
+    return {
+        client: document.getElementById('client').selectedOptions[0]?.text || 'No client selected',
+        quote_number: document.getElementById('quote_number').value,
+        project: document.getElementById('project').value,
+        valid_until: document.getElementById('valid_until').value,
+        items: items,
+        subtotal: subtotal,
+        tax_amount: taxAmount,
+        total: total
+    };
+}
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

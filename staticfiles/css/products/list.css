@@ -314,4 +314,8 @@
     .filter-group {
         width: 100% !important;
     }
-} 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

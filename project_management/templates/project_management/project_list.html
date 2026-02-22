@@ -1,324 +1,109 @@
-{% extends 'base.html' %}
+{% extends 'project_management/base.html' %}
 {% load static %}
 
-{% block title %}Projects | {{ block.super }}{% endblock %}
-
-{% block header_title %}Project List{% endblock %}
-
 {% block extra_css %}
-<link href="{% static 'css/project_list.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/project_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete_modal.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="content-container">
-    <div class="page-header">
-        <div class="page-title">
-            <h1>Projects</h1>
-            <span class="project-count">{{ projects.count }} total projects</span>
+<div class="container">
+  <header class="page-header">
+    <h1>Projects</h1>
+    <details>
+      <summary class="button button-primary">Create New Project</summary>
+      <form method="post" action="{% url 'project_management:project_create' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="name">Project Name</label>
+          <input type="text" id="name" name="name" required>
         </div>
-        <div class="page-actions">
-            <a href="{% url 'project_management:project_create' %}" class="button button-primary">
-                <i class="fas fa-plus"></i> New Project
-            </a>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3"></textarea>
         </div>
-    </div>
+        <button type="submit" class="button button-primary">Create Project</button>
+      </form>
+    </details>
+  </header>
 
-    <section class="filter-panel">
-        <details>
-            <summary>
-                <i class="fas fa-filter"></i> Filter Projects
-            </summary>
-            <form id="project-filter-form" method="get" class="filter-form">
-                <div class="form-group">
-                    <label for="search">Search</label>
-                    <input type="text" name="search" id="search" class="form-control" value="{{ request.GET.search }}" 
-                           placeholder="Search by name, code, client">
-                </div>
-                
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select name="status" id="status" class="form-control">
-                        <option value="">All Statuses</option>
-                        <option value="NOT_STARTED" {% if request.GET.status == 'NOT_STARTED' %}selected{% endif %}>Not Started</option>
-                        <option value="IN_PROGRESS" {% if request.GET.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                        <option value="ON_HOLD" {% if request.GET.status == 'ON_HOLD' %}selected{% endif %}>On Hold</option>
-                        <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
-                        <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="priority">Priority</label>
-                    <select name="priority" id="priority" class="form-control">
-                        <option value="">All Priorities</option>
-                        <option value="LOW" {% if request.GET.priority == 'LOW' %}selected{% endif %}>Low</option>
-                        <option value="MEDIUM" {% if request.GET.priority == 'MEDIUM' %}selected{% endif %}>Medium</option>
-                        <option value="HIGH" {% if request.GET.priority == 'HIGH' %}selected{% endif %}>High</option>
-                    </select>
-                </div>
+  <div class="project-grid">
+    {% for project in projects %}
+    <article class="project">
+      <header class="project-header">
+        <h2 class="project-title">{{ project.name }}</h2>
+        <span class="project-status" style="background: {{ project.status_color }}">{{ project.status }}</span>
+      </header>
+      
+      <div class="project-meta">
+        <span>Created: {{ project.created_at|date:"M d, Y" }}</span>
+        <span>Tasks: {{ project.task_count }}</span>
+      </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="button button-primary">
-                        <i class="fas fa-search"></i> Apply Filters
-                    </button>
-                    <button type="button" class="button button-outline" id="clear-filters">
-                        <i class="fas fa-times"></i> Clear Filters
-                    </button>
-                </div>
-            </form>
-        </details>
-    </section>
+      <p class="project-description">{{ project.description|truncatechars:150 }}</p>
 
-    <div class="project-navigation">
-        <div class="project-nav-tabs">
-            <a href="{% url 'project_management:project_list' %}" class="project-nav-link active">
-                <i class="fas fa-list"></i> All Projects
-            </a>
-            <a href="{% url 'project_management:project_dashboard' %}" class="project-nav-link">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
-            </a>
-            <a href="{% url 'project_management:project_analytics' %}" class="project-nav-link">
-                <i class="fas fa-chart-bar"></i> Analytics
-            </a>
-        </div>
-    </div>
+      <footer class="project-footer">
+        <div class="button-group">
+          <a href="{% url 'project_management:project_detail' project.id %}" class="button button-primary">View</a>
+          <a href="{% url 'project_management:project_update' project.id %}" class="button button-outline">Edit</a>
+          <button type="button" class="button button-danger" data-project-id="{{ project.id }}" data-project-name="{{ project.name }}" onclick="openDeleteModal(this)">Delete</button>
 
-    {% if projects %}
-    <section class="projects-grid">
-        {% for project in projects %}
-        <article class="project-card status-{{ project.status|lower }}">
-            <header class="project-card-header">
-                <h2 class="project-name">{{ project.name }}</h2>
-                <span class="project-status status-{{ project.status|lower }}">
-                    {% if project.status == 'NOT_STARTED' %}
-                        <i class="fas fa-circle"></i>
-                    {% elif project.status == 'IN_PROGRESS' %}
-                        <i class="fas fa-play"></i>
-                    {% elif project.status == 'ON_HOLD' %}
-                        <i class="fas fa-pause"></i>
-                    {% elif project.status == 'COMPLETED' %}
-                        <i class="fas fa-check"></i>
-                    {% elif project.status == 'CANCELLED' %}
-                        <i class="fas fa-times"></i>
-                    {% endif %}
-                    {{ project.get_status_display }}
-                </span>
-            </header>
-            
-            <div class="project-card-body">
-                <div class="info-item">
-                    <h3><i class="fas fa-user"></i> Client</h3>
-                    {% if project.client %}
-                    <a href="{% url 'clients:client_detail' project.client.pk %}">{{ project.client.name }}</a>
-                    {% else %}
-                    <span class="empty">No client assigned</span>
-                    {% endif %}
-                </div>
-                
-                <div class="info-item">
-                    <h3><i class="fas fa-calendar-alt"></i> Timeline</h3>
-                    <div class="timeline-dates">{{ project.start_date|date:"M d, Y" }} - {{ project.end_date|date:"M d, Y" }}</div>
-                    {% if project.is_overdue %}
-                    <span class="alert-badge">
-                        <i class="fas fa-exclamation-circle"></i> Overdue
-                    </span>
-                    {% endif %}
-                </div>
-                
-                <div class="info-item">
-                    <h3><i class="fas fa-tasks"></i> Progress</h3>
-                    <div class="progress">
-                        {% with percentage=project.completion_percentage|default:0 %}
-                        <div class="progress-bar progress-{{ project.status|lower }}" data-width="{{ percentage }}"></div>
-                        <span class="progress-text">{{ percentage }}%</span>
-                        {% endwith %}
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <h3><i class="fas fa-dollar-sign"></i> Budget</h3>
-                    <div class="budget-amount">${{ project.budget|floatformat:2 }}</div>
-                    {% if project.is_over_budget %}
-                    <span class="alert-badge">
-                        <i class="fas fa-exclamation-circle"></i> Over Budget
-                    </span>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <footer class="project-card-footer">
-                <a href="{% url 'project_management:project_detail' project.pk %}" class="button button-outline">
-                    <i class="fas fa-eye"></i> View
-                </a>
-                <a href="{% url 'project_management:project_update' project.pk %}" class="button button-outline">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <button class="button button-outline danger delete-project" data-project-id="{{ project.pk }}" data-project-name="{{ project.name }}">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </footer>
-        </article>
-        {% endfor %}
-    </section>
-    {% else %}
-    <section class="empty-state">
-        <div class="empty-content">
-            <div class="empty-icon">
-                <i class="fas fa-clipboard-list"></i>
-            </div>
-            <h2>No projects found</h2>
-            <p>{% if request.GET.search or request.GET.status or request.GET.priority %}
-                No projects match your search criteria. Try adjusting your filters.
-                {% else %}
-                There are no projects yet. Create your first project to get started.
-                {% endif %}
-            </p>
-            <a href="{% url 'project_management:project_create' %}" class="button button-primary">
-                <i class="fas fa-plus"></i> Create New Project
-            </a>
-        </div>
-    </section>
-    {% endif %}
-    
-    <!-- Delete Modal -->
-    <div class="modal-overlay" id="delete-modal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <div class="modal-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <h3 class="modal-title">Confirm Delete</h3>
-            </div>
-            <div class="modal-body">
-                <p class="modal-message">Are you sure you want to delete the project "<span id="project-name-to-delete"></span>"? This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="button button-outline" id="cancel-delete">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-                <form id="delete-project-form" method="post" action="">
-                    {% csrf_token %}
-                    <button type="submit" class="button button-danger">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
+          <!-- Delete Confirmation Modal -->
+          <div class="modal" id="delete-project-modal" style="display: none;">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>Confirm Deletion</h3>
+                <button type="button" class="close-modal" onclick="closeDeleteModal()">&times;</button>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to delete project "<span id="project-name-to-delete"></span>"? This action cannot be undone.</p>
+                <form id="delete-project-form" method="post">
+                  {% csrf_token %}
+                  <div class="form-actions">
+                    <button type="button" class="button button-secondary" onclick="closeDeleteModal()">Cancel</button>
+                    <button type="submit" class="button button-danger">Delete</button>
+                  </div>
                 </form>
+              </div>
             </div>
+          </div>
         </div>
+      </footer>
+    </article>
+    {% empty %}
+    <div class="empty-state">
+      <p>No projects found. Create your first project to get started!</p>
     </div>
-    
-    <!-- Notification Container -->
-    <div class="notification-container" id="notification-container"></div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Set progress bar widths based on data-width attributes
-    document.querySelectorAll('.progress-bar[data-width]').forEach(function(progressBar) {
-        const width = progressBar.getAttribute('data-width');
-        progressBar.style.width = width + '%';
-    });
-    
-    // Delete modal functionality
-    const deleteButtons = document.querySelectorAll('.delete-project');
-    const deleteModal = document.getElementById('delete-modal');
-    const cancelDelete = document.getElementById('cancel-delete');
-    const deleteForm = document.getElementById('delete-project-form');
-    const projectNameToDelete = document.getElementById('project-name-to-delete');
-    
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const projectId = this.getAttribute('data-project-id');
-            const projectName = this.getAttribute('data-project-name');
-            
-            deleteForm.action = `{% url 'project_management:project_delete' 0 %}`.replace('0', projectId);
-            projectNameToDelete.textContent = projectName;
-            
-            deleteModal.classList.add('active');
-        });
-    });
-    
-    cancelDelete.addEventListener('click', function() {
-        deleteModal.classList.remove('active');
-    });
-    
-    deleteModal.addEventListener('click', function(e) {
-        if (e.target === deleteModal) {
-            deleteModal.classList.remove('active');
-        }
-    });
-    
-    // Filter functionality
-    const clearFiltersBtn = document.getElementById('clear-filters');
-    
-    clearFiltersBtn.addEventListener('click', function() {
-        const searchInput = document.getElementById('search');
-        const statusSelect = document.getElementById('status');
-        const prioritySelect = document.getElementById('priority');
-        
-        searchInput.value = '';
-        statusSelect.value = '';
-        prioritySelect.value = '';
-        
-        document.getElementById('project-filter-form').submit();
-    });
-    
-    // Show notification if in URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const message = urlParams.get('message');
-    const messageType = urlParams.get('type');
-    
-    if (message) {
-        showNotification(decodeURIComponent(message), messageType || 'info');
+function openDeleteModal(button) {
+    const modal = document.getElementById('delete-project-modal');
+    const projectId = button.getAttribute('data-project-id');
+    const projectName = button.getAttribute('data-project-name');
+    const form = document.getElementById('delete-project-form');
+    const projectNameSpan = document.getElementById('project-name-to-delete');
+
+    form.action = `{% url 'project_management:project_delete_with_pk' 0 %}`.replace('0', projectId);
+    projectNameSpan.textContent = projectName;
+    modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('delete-project-modal');
+    modal.style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('delete-project-modal');
+    if (event.target === modal) {
+        closeDeleteModal();
     }
-    
-    // Notification function
-    function showNotification(message, type = 'info') {
-        const container = document.getElementById('notification-container');
-        
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        
-        const iconClass = type === 'success' ? 'fa-check-circle' :
-                          type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-        
-        notification.innerHTML = `
-            <div class="notification-icon">
-                <i class="fas ${iconClass}"></i>
-            </div>
-            <div class="notification-content">
-                <h4 class="notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
-                <p class="notification-message">${message}</p>
-            </div>
-            <button class="notification-close">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(notification);
-        
-        // Add active class to animate in
-        setTimeout(() => {
-            notification.classList.add('active');
-        }, 10);
-        
-        // Auto close after 3 seconds
-        setTimeout(() => {
-            notification.classList.remove('active');
-            setTimeout(() => {
-                container.removeChild(notification);
-            }, 300);
-        }, 3000);
-        
-        // Close button functionality
-        notification.querySelector('.notification-close').addEventListener('click', function() {
-            notification.classList.remove('active');
-            setTimeout(() => {
-                container.removeChild(notification);
-            }, 300);
-        });
-    }
-});
+}
 </script>
-{% endblock %} 
+{% endblock %}

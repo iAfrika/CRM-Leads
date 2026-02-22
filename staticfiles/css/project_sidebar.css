@@ -242,4 +242,8 @@
     .project-nav-link {
         padding: 15px 15px;
     }
-} 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

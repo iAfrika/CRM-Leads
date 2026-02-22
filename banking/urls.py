@@ -11,7 +11,7 @@ urlpatterns = [
     path('account/<str:account_number>/withdraw/', views.withdraw, name='withdraw'),
     path('account/<str:account_number>/transfer/', views.transfer, name='transfer'),
     path('account/<str:account_number>/payment/', views.payment, name='payment'),
-    path('account/<str:account_number>/change-pin/', views.change_pin, name='change_pin'),
+
     path('transactions/', views.transaction_history, name='all_transactions'),
     path('account/<str:account_number>/transactions/', views.transaction_history, name='account_transactions'),
 ] 

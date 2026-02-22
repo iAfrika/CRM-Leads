@@ -89,6 +89,76 @@
         margin-top: var(--navbar-height);
         padding-top: 10px;
     }
+
+    /* Delete Modal Styles */
+    .delete-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .delete-modal-content {
+        background-color: white;
+        border-radius: 8px;
+        padding: 30px;
+        width: 450px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .delete-modal-header {
+        margin-bottom: 20px;
+    }
+
+    .delete-modal-header h3 {
+        color: #dc3545;
+        margin-bottom: 10px;
+    }
+
+    .delete-modal-body {
+        margin-bottom: 25px;
+    }
+
+    .delete-modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .delete-modal-actions .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .delete-modal-actions .btn-cancel {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #e9ecef;
+    }
+
+    .delete-modal-actions .btn-delete {
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+    }
+
+    .delete-modal-actions .btn-cancel:hover {
+        background-color: #e9ecef;
+    }
+
+    .delete-modal-actions .btn-delete:hover {
+        background-color: #c82333;
+    }
 </style>
 {% endblock %}
 
@@ -180,7 +250,7 @@
     {% if people %}
     <div class="person-grid">
         {% for person in people %}
-        <div class="person-card">
+        <div class="person-card" data-person-id="{{ person.id }}">
             <div class="person-card-status 
                 {% if person.role.all %}
                     {% with role=person.role.all.0 %}
@@ -200,7 +270,7 @@
                         <a href="{% url 'people:update_person' pk=person.id %}" class="btn-icon" title="Edit">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <button data-person-id="{{ person.id }}" data-person-name="{{ person.full_name }}" class="btn-icon btn-delete delete-person-btn" title="Delete">
+                        <button class="btn-icon btn-delete" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -291,21 +361,17 @@
     {% endif %}
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal-backdrop" id="delete-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Confirm Delete</h3>
-                <button class="modal-close" id="close-modal">&times;</button>
+    <div id="deleteModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3>Confirm Deletion</h3>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete <span id="person-to-delete"></span>? This action cannot be undone.</p>
+            <div class="delete-modal-body">
+                <p>Are you sure you want to delete <span id="deletePersonName"></span>? This action cannot be undone.</p>
             </div>
-            <div class="modal-footer">
-                <form id="delete-form" method="post">
-                    {% csrf_token %}
-                    <button type="button" class="btn-secondary" id="cancel-delete">Cancel</button>
-                    <button type="submit" class="btn-danger">Delete</button>
-                </form>
+            <div class="delete-modal-actions">
+                <button id="cancelDelete" class="btn btn-cancel">Cancel</button>
+                <button id="confirmDelete" class="btn btn-delete">Delete</button>
             </div>
         </div>
     </div>
@@ -346,35 +412,60 @@
         });
         
         // Delete confirmation modal
-        const deleteButtons = document.querySelectorAll('.delete-person-btn');
-        const deleteModal = document.getElementById('delete-modal');
-        const closeModalBtn = document.getElementById('close-modal');
-        const cancelDeleteBtn = document.getElementById('cancel-delete');
-        const deleteForm = document.getElementById('delete-form');
-        const personToDeleteSpan = document.getElementById('person-to-delete');
-        
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const personId = this.getAttribute('data-person-id');
-                const personName = this.getAttribute('data-person-name');
-                
-                deleteForm.action = `/people/${personId}/delete/`;
-                personToDeleteSpan.textContent = personName;
-                deleteModal.classList.add('show');
+        const deleteModal = document.getElementById('deleteModal');
+        const deletePersonName = document.getElementById('deletePersonName');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        let personToDeleteId = null;
+
+        // Add delete buttons to each person card
+        document.querySelectorAll('.person-card-actions').forEach(actionContainer => {
+            const deleteButton = actionContainer.querySelector('.btn-delete');
+            
+            deleteButton.addEventListener('click', function() {
+                const personCard = this.closest('.person-card');
+                const personName = personCard.querySelector('.person-title').textContent;
+                const personId = personCard.dataset.personId;
+
+                deletePersonName.textContent = personName;
+                personToDeleteId = personId;
+                deleteModal.style.display = 'flex';
             });
         });
-        
-        closeModalBtn.addEventListener('click', function() {
-            deleteModal.classList.remove('show');
+
+        // Close modal on cancel
+        cancelDelete.addEventListener('click', function() {
+            deleteModal.style.display = 'none';
+            personToDeleteId = null;
         });
-        
-        cancelDeleteBtn.addEventListener('click', function() {
-            deleteModal.classList.remove('show');
-        });
-        
-        deleteModal.addEventListener('click', function(e) {
-            if (e.target === deleteModal) {
-                deleteModal.classList.remove('show');
+
+        // Confirm delete action
+        confirmDelete.addEventListener('click', function() {
+            if (personToDeleteId) {
+                fetch(`/people/delete/${personToDeleteId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the person card from the DOM
+                        const personCard = document.querySelector(`.person-card[data-person-id="${personToDeleteId}"]`);
+                        if (personCard) {
+                            personCard.remove();
+                        }
+                        deleteModal.style.display = 'none';
+                    } else {
+                        // Handle error
+                        alert('Failed to delete person');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the person');
+                });
             }
         });
     });

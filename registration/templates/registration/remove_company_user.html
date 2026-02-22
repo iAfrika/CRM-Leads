@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Remove User from {{ company.name }}{% endblock %}
+
+{% block header_title %}Remove User{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/user-management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2>Remove User from Company</h2>
+        <p class="text-muted">You are about to remove a user from <strong>{{ company.name }}</strong></p>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} shadow-sm">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+            <h5>Confirm User Removal</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning shadow-sm">
+                <i class="fas fa-exclamation-triangle"></i> Warning: This action will remove the user's access to this company. This cannot be undone.
+            </div>
+            
+            <h5>User Details:</h5>
+            <ul class="list-group mb-4 shadow-sm">
+                <li class="list-group-item">
+                    <strong>Name:</strong> {{ company_user.user.get_full_name|default:company_user.user.username }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Email:</strong> {{ company_user.user.email }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Role:</strong> {{ company_user.get_role_display }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Added on:</strong> {{ company_user.created_at|date:"F j, Y" }}
+                </li>
+            </ul>
+            
+            <form method="post" action="{% url 'registration:remove_company_user' company.id company_user.user.id %}">
+                {% csrf_token %}
+                
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{% url 'registration:company_users' company.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-user-minus"></i> Remove User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

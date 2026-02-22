@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Category Details{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'products/css/product-form-new.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="product-form-container">
+    <div class="product-form-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="product-form-header mb-0">{{ category.name }}</h1>
+            <div class="btn-group">
+                <a href="{% url 'products:category_update' category.pk %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-2"></i>Edit Category
+                </a>
+                <a href="{% url 'products:category_delete' category.pk %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Category Details</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>Status:</strong> 
+                            <span class="status-text {% if category.is_active %}active{% else %}inactive{% endif %}">
+                                {% if category.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </p>
+                        <p class="mb-2"><strong>Total Products:</strong> {{ products|length }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-0"><strong>Description:</strong></p>
+                        <p class="text-muted">{{ category.description|default:"No description provided." }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="h4 mb-4">Products in this Category</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Item Code</th>
+                        <th>Current Stock</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.item_code }}</td>
+                        <td>{{ product.current_stock }}</td>
+                        <td>
+                            <span class="status-text {% if product.is_active %}active{% else %}inactive{% endif %}">
+                                {% if product.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <p class="text-muted mb-0">No products found in this category.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'products:category_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Categories
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

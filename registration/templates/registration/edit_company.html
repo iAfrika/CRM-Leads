@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit {{ company.name }}{% endblock %}
+
+{% block header_title %}Edit Company{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/edit_company.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="edit-company-container">
+    <div class="edit-company-header">
+        <h2><i class="fas fa-edit me-3" style="color: var(--primary-color);"></i>Edit {{ company.name }}</h2>
+        <a href="{% url 'registration:company_details' company.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Details
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-info-circle me-2"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-building me-2"></i>Company Information</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-building text-muted me-1"></i>{{ form.name.label }}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                                <i class="fas fa-phone text-muted me-1"></i>{{ form.phone_number.label }}
+                            </label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.phone_number.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope text-muted me-1"></i>{{ form.email.label }}
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.tax_pin.id_for_label }}" class="form-label">
+                                <i class="fas fa-receipt text-muted me-1"></i>{{ form.tax_pin.label }}
+                            </label>
+                            {{ form.tax_pin }}
+                            {% if form.tax_pin.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tax_pin.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.physical_address.id_for_label }}" class="form-label">
+                                <i class="fas fa-map-marker-alt text-muted me-1"></i>{{ form.physical_address.label }}
+                            </label>
+                            {{ form.physical_address }}
+                            {% if form.physical_address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.physical_address.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.postal_address.id_for_label }}" class="form-label">
+                                <i class="fas fa-mail-bulk text-muted me-1"></i>{{ form.postal_address.label }}
+                            </label>
+                            {{ form.postal_address }}
+                            {% if form.postal_address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.postal_address.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.currency.id_for_label }}" class="form-label">
+                                <i class="fas fa-money-bill text-muted me-1"></i>{{ form.currency.label }}
+                            </label>
+                            {{ form.currency }}
+                            {% if form.currency.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.currency.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.timezone.id_for_label }}" class="form-label">
+                                <i class="fas fa-clock text-muted me-1"></i>{{ form.timezone.label }}
+                            </label>
+                            {{ form.timezone }}
+                            {% if form.timezone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.timezone.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="{{ form.logo.id_for_label }}" class="form-label">
+                                <i class="fas fa-image text-muted me-1"></i>{{ form.logo.label }}
+                            </label>
+                            
+                            {% if company.logo %}
+                            <div class="current-logo mb-2">
+                                <div class="current-logo-label">Current Logo:</div>
+                                <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" class="current-logo-img">
+                            </div>
+                            {% endif %}
+                            
+                            {{ form.logo }}
+                            {% if form.logo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.logo.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Supported formats: JPG, PNG, GIF. Max size: 5MB</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Banking Information Section -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-university me-2"></i>Banking Information</h5>
+                        <small class="text-muted">Manage company bank accounts for payments and transactions</small>
+                    </div>
+                    <div class="card-body">
+                        {{ bank_formset.management_form }}
+                        
+                        <div id="bank-accounts-container">
+                            {% for bank_form in bank_formset %}
+                                <div class="bank-account-form" data-form-index="{{ forloop.counter0 }}">
+                                    {% if bank_form.non_field_errors %}
+                                        <div class="alert alert-danger">
+                                            {{ bank_form.non_field_errors }}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="bank-account-header">
+                                        <h6 class="mb-3">
+                                            {% if bank_form.instance.pk %}
+                                                <i class="fas fa-bank me-2"></i>Bank Account #{{ forloop.counter }}
+                                            {% else %}
+                                                <i class="fas fa-plus-circle me-2"></i>New Bank Account
+                                            {% endif %}
+                                        </h6>
+                                        {% if bank_formset.can_delete and bank_form.instance.pk %}
+                                            <div class="form-check form-check-delete">
+                                                {{ bank_form.DELETE }}
+                                                <label for="{{ bank_form.DELETE.id_for_label }}" class="form-check-label text-danger">
+                                                    <i class="fas fa-trash"></i> Delete this account
+                                                </label>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if bank_form.id %}{{ bank_form.id }}{% endif %}
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.bank_name.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-university text-muted me-1"></i>{{ bank_form.bank_name.label }}
+                                                </label>
+                                                {{ bank_form.bank_name }}
+                                                {% if bank_form.bank_name.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.bank_name.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.account_name.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-user text-muted me-1"></i>{{ bank_form.account_name.label }}
+                                                </label>
+                                                {{ bank_form.account_name }}
+                                                {% if bank_form.account_name.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.account_name.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.account_number.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-hashtag text-muted me-1"></i>{{ bank_form.account_number.label }}
+                                                </label>
+                                                {{ bank_form.account_number }}
+                                                {% if bank_form.account_number.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.account_number.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.account_type.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-tags text-muted me-1"></i>{{ bank_form.account_type.label }}
+                                                </label>
+                                                {{ bank_form.account_type }}
+                                                {% if bank_form.account_type.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.account_type.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.swift_code.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-code text-muted me-1"></i>{{ bank_form.swift_code.label }}
+                                                </label>
+                                                {{ bank_form.swift_code }}
+                                                {% if bank_form.swift_code.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.swift_code.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.branch_name.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-map-marker-alt text-muted me-1"></i>{{ bank_form.branch_name.label }}
+                                                </label>
+                                                {{ bank_form.branch_name }}
+                                                {% if bank_form.branch_name.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.branch_name.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.branch_code.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-code-branch text-muted me-1"></i>{{ bank_form.branch_code.label }}
+                                                </label>
+                                                {{ bank_form.branch_code }}
+                                                {% if bank_form.branch_code.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.branch_code.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-check mb-3">
+                                                        {{ bank_form.is_primary }}
+                                                        <label for="{{ bank_form.is_primary.id_for_label }}" class="form-check-label">
+                                                            <i class="fas fa-star text-warning me-1"></i>{{ bank_form.is_primary.label }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check mb-3">
+                                                        {{ bank_form.is_active }}
+                                                        <label for="{{ bank_form.is_active.id_for_label }}" class="form-check-label">
+                                                            <i class="fas fa-check-circle text-success me-1"></i>{{ bank_form.is_active.label }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if bank_form.notes %}
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="{{ bank_form.notes.id_for_label }}" class="form-label">
+                                                    <i class="fas fa-sticky-note text-muted me-1"></i>{{ bank_form.notes.label }}
+                                                </label>
+                                                {{ bank_form.notes }}
+                                                {% if bank_form.notes.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {{ bank_form.notes.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if not forloop.last %}
+                                        <hr class="my-4">
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="bank-account-actions mt-3">
+                            <button type="button" id="add-bank-account" class="btn btn-outline-primary">
+                                <i class="fas fa-plus"></i> Add Another Bank Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{% url 'registration:company_details' company.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.getElementById('add-bank-account');
+    const container = document.getElementById('bank-accounts-container');
+    const totalFormsInput = document.getElementById('id_bank_accounts-TOTAL_FORMS');
+    
+    if (addButton && container && totalFormsInput) {
+        addButton.addEventListener('click', function() {
+            const currentForms = container.querySelectorAll('.bank-account-form');
+            const formCount = currentForms.length;
+            const newFormIndex = formCount;
+            
+            // Get the last form to clone
+            const lastForm = currentForms[currentForms.length - 1];
+            if (!lastForm) return;
+            
+            // Clone the form
+            const newForm = lastForm.cloneNode(true);
+            newForm.setAttribute('data-form-index', newFormIndex);
+            
+            // Update form field names and IDs
+            const inputs = newForm.querySelectorAll('input, select, textarea');
+            inputs.forEach(function(input) {
+                const name = input.getAttribute('name');
+                const id = input.getAttribute('id');
+                
+                if (name) {
+                    input.setAttribute('name', name.replace(/bank_accounts-\d+/, 'bank_accounts-' + newFormIndex));
+                }
+                if (id) {
+                    input.setAttribute('id', id.replace(/id_bank_accounts-\d+/, 'id_bank_accounts-' + newFormIndex));
+                }
+                
+                // Clear the values for new form
+                if (input.type === 'checkbox') {
+                    input.checked = input.name.includes('is_active'); // Only check is_active by default
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            // Update labels
+            const labels = newForm.querySelectorAll('label');
+            labels.forEach(function(label) {
+                const forAttr = label.getAttribute('for');
+                if (forAttr) {
+                    label.setAttribute('for', forAttr.replace(/id_bank_accounts-\d+/, 'id_bank_accounts-' + newFormIndex));
+                }
+            });
+            
+            // Update header text
+            const header = newForm.querySelector('.bank-account-header h6');
+            if (header) {
+                header.innerHTML = '<i class="fas fa-plus-circle me-2"></i>New Bank Account';
+            }
+            
+            // Remove delete checkbox for new forms
+            const deleteDiv = newForm.querySelector('.form-check-delete');
+            if (deleteDiv) {
+                deleteDiv.remove();
+            }
+            
+            // Add separator
+            const separator = document.createElement('hr');
+            separator.className = 'my-4';
+            newForm.appendChild(separator);
+            
+            // Append to container
+            container.appendChild(newForm);
+            
+            // Update total forms count
+            totalFormsInput.value = newFormIndex + 1;
+            
+            // Scroll to new form
+            newForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

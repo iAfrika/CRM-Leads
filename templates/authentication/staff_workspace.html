@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/authentication/staff_workspace.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="staff-workspace">
+    <div class="workspace-header">
+        <div class="profile-info">
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="profile-avatar">
+            {% else %}
+                <div class="profile-default-avatar">{{ profile.name|first|upper }}</div>
+            {% endif %}
+            <div class="profile-details">
+                <h1>{{ profile.name }}'s Workspace</h1>
+                <p>Role: {{ request.session.user_role|default:"Staff" }}</p>
+            </div>
+        </div>
+        <div class="workspace-actions">
+            <!-- Debug info: role={{ user_role }}, show_admin_link={{ show_admin_link }} -->
+            {% if user_role == 'administrator' or user_role == 'admin' %}
+            <a href="{% url 'dashboard:main_dashboard' %}" class="action-btn admin-btn">Admin Dashboard</a>
+            {% endif %}
+            <a href="{% url 'authentication:logout' %}" class="action-btn logout-btn">Logout</a>
+            <a href="{% url 'authentication:profile_selection' %}" class="action-btn switch-profile-btn">Switch Profile</a>
+        </div>
+    </div>
+
+    <div class="workspace-grid">
+        <!-- Assigned Leads -->
+        <div class="workspace-card">
+            <div class="card-header">
+                <h2>My Leads</h2>
+                <span class="count-badge">{{ assigned_leads|length }}</span>
+            </div>
+            <div class="card-content">
+                {% if assigned_leads %}
+                    <ul class="item-list">
+                        {% for lead in assigned_leads %}
+                            <li class="item">
+                                <div class="item-details">
+                                    <span class="item-title">{{ lead.name }}</span>
+                                    <span class="item-subtitle">{{ lead.status }}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <a href="#" class="item-action">View</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-message">No leads assigned to you.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Assigned Projects -->
+        <div class="workspace-card">
+            <div class="card-header">
+                <h2>My Projects</h2>
+                <span class="count-badge">{{ assigned_projects|length }}</span>
+            </div>
+            <div class="card-content">
+                {% if assigned_projects %}
+                    <ul class="item-list">
+                        {% for project in assigned_projects %}
+                            <li class="item">
+                                <div class="item-details">
+                                    <span class="item-title">{{ project.name }}</span>
+                                    <span class="item-subtitle">{{ project.status }}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <a href="#" class="item-action">View</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-message">No projects assigned to you.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Documents -->
+        <div class="workspace-card">
+            <div class="card-header">
+                <h2>Recent Documents</h2>
+                <span class="count-badge">{{ recent_documents|length }}</span>
+            </div>
+            <div class="card-content">
+                {% if recent_documents %}
+                    <ul class="item-list">
+                        {% for document in recent_documents %}
+                            <li class="item">
+                                <div class="item-details">
+                                    <span class="item-title">{{ document.title|default:"Untitled Document" }}</span>
+                                    <span class="item-subtitle">{{ document.document_type }}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <a href="#" class="item-action">View</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-message">No recent documents.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upcoming Tasks -->
+        <div class="workspace-card">
+            <div class="card-header">
+                <h2>Upcoming Tasks</h2>
+                <span class="count-badge">{{ upcoming_tasks|length }}</span>
+            </div>
+            <div class="card-content">
+                {% if upcoming_tasks %}
+                    <ul class="item-list">
+                        {% for task in upcoming_tasks %}
+                            <li class="item">
+                                <div class="item-details">
+                                    <span class="item-title">{{ task.title }}</span>
+                                    <span class="item-subtitle">Due: {{ task.due_date }}</span>
+                                </div>
+                                <div class="item-actions">
+                                    <a href="#" class="item-action">View</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="empty-message">No upcoming tasks.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/authentication/staff_workspace.js' %}"></script>
+{% endblock %}

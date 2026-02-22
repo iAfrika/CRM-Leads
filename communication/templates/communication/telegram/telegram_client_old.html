@@ -1,0 +1,1541 @@
+{% extends 'base.html' %}
+{% load static %}
+{% csrf_token %}
+
+{% block title %}Telegram Client - CRM Leads{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/telegram.css' %}" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .telegram-container {
+        height: calc(100vh - 120px);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .telegram-sidebar {
+        background: #2c3e50;
+        height: 100%;
+        border-right: 1px solid #34495e;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .telegram-header {
+        background: #34495e;
+        padding: 15px 20px;
+        border-bottom: 1px solid #4a5f7a;
+        color: white;
+    }
+    
+    .telegram-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    
+    .search-container {
+        padding: 15px 20px;
+        background: #34495e;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 20px;
+        background: #4a5f7a;
+        color: white;
+        outline: none;
+    }
+    
+    .search-input::placeholder {
+        color: #bdc3c7;
+    }
+    
+    .chat-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 0;
+    }
+    
+    .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #34495e;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .chat-item:hover {
+        background: #34495e;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .chat-item.active {
+        background: #3498db;
+    }
+    
+    .chat-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #3498db, #9b59b6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .chat-avatar img {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .chat-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .chat-name {
+        font-weight: 600;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .last-message {
+        font-size: 0.85rem;
+        color: #bdc3c7;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .chat-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        min-width: 60px;
+    }
+    
+    .chat-time {
+        font-size: 0.75rem;
+        color: #95a5a6;
+        margin-bottom: 4px;
+    }
+    
+    .unread-badge {
+        background: #e74c3c;
+        color: white;
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        min-width: 20px;
+        text-align: center;
+    }
+    
+    .main-chat {
+        background: white;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-header {
+        background: #3498db;
+        color: white;
+        padding: 15px 20px;
+        border-bottom: 1px solid #2980b9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .chat-header-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .chat-header-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+    }
+    
+    .chat-header-details h4 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+    
+    .chat-header-details p {
+        margin: 0;
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+    
+    .chat-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-chat-action {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-chat-action:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #ecf0f1;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+    }
+    
+    .message-group {
+        margin-bottom: 20px;
+    }
+    
+    .message {
+        max-width: 70%;
+        margin-bottom: 8px;
+        animation: messageSlide 0.3s ease-out;
+    }
+    
+    @keyframes messageSlide {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message.outgoing {
+        margin-left: auto;
+    }
+    
+    .message.incoming {
+        margin-right: auto;
+    }
+    
+    .message-bubble {
+        padding: 12px 16px;
+        border-radius: 18px;
+        position: relative;
+        word-wrap: break-word;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .message.outgoing .message-bubble {
+        background: #3498db;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+    
+    .message.incoming .message-bubble {
+        background: white;
+        color: #2c3e50;
+        border-bottom-left-radius: 4px;
+    }
+    
+    .message-media {
+        max-width: 100%;
+        border-radius: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .message-media img,
+    .message-media video {
+        max-width: 100%;
+        border-radius: 12px;
+        display: block;
+    }
+    
+    .message-text {
+        margin: 0;
+        line-height: 1.4;
+    }
+    
+    .message-meta {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 6px;
+        font-size: 0.75rem;
+        opacity: 0.7;
+        gap: 5px;
+    }
+    
+    .message-time {
+        margin-right: 5px;
+    }
+    
+    .message-status {
+        display: flex;
+        align-items: center;
+    }
+    
+    .status-icon {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .input-container {
+        background: white;
+        padding: 15px 20px;
+        border-top: 1px solid #bdc3c7;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .attachment-btn {
+        background: #95a5a6;
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .attachment-btn:hover {
+        background: #7f8c8d;
+    }
+    
+    .message-input {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 10px 15px;
+        outline: none;
+        resize: none;
+        max-height: 100px;
+        min-height: 40px;
+    }
+    
+    .send-btn {
+        background: #3498db;
+        border: none;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .send-btn:hover {
+        background: #2980b9;
+    }
+    
+    .send-btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+    }
+    
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #7f8c8d;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+    
+    .typing-indicator {
+        display: none;
+        padding: 10px 20px;
+        color: #7f8c8d;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+    
+    .typing-dots {
+        display: inline-block;
+        animation: typingAnimation 1.5s infinite;
+    }
+    
+    @keyframes typingAnimation {
+        0%, 60%, 100% { opacity: 0.3; }
+        30% { opacity: 1; }
+    }
+    
+    .connection-status {
+        background: #f39c12;
+        color: white;
+        padding: 8px 20px;
+        text-align: center;
+        font-size: 0.9rem;
+        display: none;
+    }
+    
+    .connection-status.connected {
+        background: #27ae60;
+    }
+    
+    .connection-status.disconnected {
+        background: #e74c3c;
+    }
+    
+    /* Media queries for responsiveness */
+    @media (max-width: 768px) {
+        .telegram-sidebar {
+            display: none;
+        }
+        
+        .telegram-container {
+            height: calc(100vh - 80px);
+        }
+        
+        .message {
+            max-width: 85%;
+        }
+    }
+    
+    /* Scrollbar styling */
+    .chat-list::-webkit-scrollbar,
+    .messages-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .chat-list::-webkit-scrollbar-track,
+    .messages-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .chat-list::-webkit-scrollbar-thumb {
+        background: #4a5f7a;
+        border-radius: 3px;
+    }
+    
+    .messages-container::-webkit-scrollbar-thumb {
+        background: #bdc3c7;
+        border-radius: 3px;
+    }
+    
+    /* Tab navigation styles */
+    .tab-navigation {
+        display: flex;
+        background: #34495e;
+        border-bottom: 1px solid #4a5f7a;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        padding: 12px 16px;
+        background: transparent;
+        border: none;
+        color: #bdc3c7;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        font-size: 0.9rem;
+    }
+    
+    .tab-btn:hover {
+        background: #4a5f7a;
+        color: white;
+    }
+    
+    .tab-btn.active {
+        background: #3498db;
+        color: white;
+    }
+    
+    .tab-count {
+        background: #e74c3c;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        margin-left: 5px;
+    }
+    
+    .tab-content {
+        flex: 1;
+        overflow-y: auto;
+    }
+    
+    /* Contacts styles */
+    .contacts-list {
+        padding: 10px 0;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #34495e;
+        color: white;
+    }
+    
+    .contact-item:hover {
+        background: #34495e;
+    }
+    
+    .contact-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #e74c3c, #f39c12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 12px;
+        flex-shrink: 0;
+        font-size: 0.9rem;
+    }
+    
+    .contact-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    .contact-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .contact-name {
+        font-weight: 600;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .contact-details {
+        font-size: 0.85rem;
+        color: #bdc3c7;
+        margin-bottom: 4px;
+    }
+    
+    .contact-status {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+    
+    .contact-status .badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+    }
+    
+    .contact-actions {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .contact-actions .btn {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+    
+    .phone-number {
+        color: #95a5a6;
+        font-size: 0.8rem;
+    }
+    
+    .phone-number::before {
+        content: "📞 ";
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="connection-status" id="connectionStatus">
+        <i class="fas fa-circle"></i> Connecting to Telegram...
+    </div>
+    
+    <div class="telegram-container">
+        <div class="row g-0 h-100">
+            <!-- Sidebar with chat list -->
+            <div class="col-md-4 telegram-sidebar">
+                <div class="telegram-header">
+                    <h3><i class="fab fa-telegram-plane"></i> Telegram</h3>
+                </div>
+                
+                <!-- Tab navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn active" onclick="showTab('chats')" id="chatsTab">
+                        <i class="fas fa-comments"></i> Chats
+                        {% if chats.count > 0 %}
+                            <span class="tab-count">{{ chats.count }}</span>
+                        {% endif %}
+                    </button>
+                    <button class="tab-btn" onclick="showTab('contacts')" id="contactsTab">
+                        <i class="fas fa-address-book"></i> Contacts
+                        {% if contacts.count > 0 %}
+                            <span class="tab-count">{{ contacts.count }}</span>
+                        {% endif %}
+                    </button>
+                </div>
+                
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search..." id="searchInput">
+                </div>
+                
+                <!-- Chats Tab Content -->
+                <div class="tab-content" id="chatsContent">
+                    <div class="chat-list" id="chatList">
+                        {% for chat in chats %}
+                            <a href="?chat_id={{ chat.id }}" 
+                               class="chat-item {% if chat.id == active_chat.id %}active{% endif %}"
+                               data-chat-id="{{ chat.id }}">
+                                <div class="chat-avatar">
+                                    {% if chat.contact.profile_photo %}
+                                        <img src="{{ chat.contact.profile_photo.url }}" alt="{{ chat.title }}">
+                                    {% else %}
+                                        {{ chat.title|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="chat-info">
+                                    <div class="chat-name">{{ chat.title }}</div>
+                                    <div class="last-message">
+                                        {% if chat.messages.last %}
+                                            {% if chat.messages.last.message_type == 'text' %}
+                                                {{ chat.messages.last.preview_text }}
+                                            {% else %}
+                                                <i class="fas fa-paperclip"></i> {{ chat.messages.last.get_message_type_display }}
+                                            {% endif %}
+                                        {% else %}
+                                            No messages yet
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="chat-meta">
+                                    <div class="chat-time">
+                                        {% if chat.last_message_date %}
+                                            {{ chat.last_message_date|timesince }} ago
+                                        {% endif %}
+                                    </div>
+                                    {% if chat.unread_count > 0 %}
+                                        <div class="unread-badge">{{ chat.unread_count }}</div>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% empty %}
+                            <div class="empty-state p-4">
+                                <i class="fab fa-telegram-plane"></i>
+                                <h5>No chats available</h5>
+                                <p>Start a conversation or sync your Telegram account</p>
+                                <button class="btn btn-primary btn-lg" onclick="connectTelegramAccount()">
+                                    <i class="fas fa-link"></i> Connect Telegram Account
+                                </button>
+                                {% if telegram_session and not telegram_session.is_authenticated %}
+                                <div class="mt-3">
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Telegram session exists but is not authenticated. 
+                                        <a href="#" onclick="authenticateTelegram()">Click here to authenticate</a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary me-2" onclick="syncTelegramData('contacts')">
+                                        <i class="fas fa-sync"></i> Sync Contacts
+                                    </button>
+                                    <button class="btn btn-outline-primary me-2" onclick="syncTelegramData('chats')">
+                                        <i class="fas fa-sync"></i> Sync Chats
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="syncTelegramData('messages')">
+                                        <i class="fas fa-sync"></i> Sync Messages
+                                    </button>
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-secondary" onclick="testTelegramConnection()">
+                                        <i class="fas fa-plug"></i> Test Connection
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Contacts Tab Content -->
+                <div class="tab-content" id="contactsContent" style="display: none;">
+                    <div class="contacts-list">
+                        {% for contact in contacts %}
+                            <div class="contact-item" data-contact-id="{{ contact.id }}">
+                                <div class="contact-avatar">
+                                    {% if contact.profile_photo %}
+                                        <img src="{{ contact.profile_photo.url }}" alt="{{ contact.first_name }}">
+                                    {% else %}
+                                        {{ contact.first_name|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="contact-info">
+                                    <div class="contact-name">
+                                        {{ contact.first_name }} 
+                                        {% if contact.last_name %}{{ contact.last_name }}{% endif %}
+                                        {% if contact.is_verified %}
+                                            <i class="fas fa-check-circle text-primary" title="Verified"></i>
+                                        {% endif %}
+                                        {% if contact.is_premium %}
+                                            <i class="fas fa-star text-warning" title="Premium"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="contact-details">
+                                        {% if contact.username %}
+                                            @{{ contact.username }}
+                                        {% endif %}
+                                        {% if contact.phone_number %}
+                                            <span class="phone-number">{{ contact.phone_number }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="contact-status">
+                                        {% if contact.is_contact %}
+                                            <span class="badge bg-success">Contact</span>
+                                        {% endif %}
+                                        {% if contact.is_mutual_contact %}
+                                            <span class="badge bg-info">Mutual</span>
+                                        {% endif %}
+                                        {% if contact.is_bot %}
+                                            <span class="badge bg-secondary">Bot</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="contact-actions">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="startChatWithContact({{ contact.telegram_id }})" title="Start Chat">
+                                        <i class="fas fa-comment"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="empty-state p-4">
+                                <i class="fas fa-address-book"></i>
+                                <h5>No contacts available</h5>
+                                <p>Sync your contacts from Telegram</p>
+                                <button class="btn btn-primary" onclick="syncTelegramData('contacts')">
+                                    <i class="fas fa-sync"></i> Sync Contacts
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            
+            <!-- Main chat area -->
+            <div class="col-md-8 main-chat">
+                {% if active_chat %}
+                    <!-- Chat header -->
+                    <div class="chat-header">
+                        <div class="chat-header-info">
+                            <div class="chat-header-avatar">
+                                {% if active_chat.contact.profile_photo %}
+                                    <img src="{{ active_chat.contact.profile_photo.url }}" alt="{{ active_chat.title }}">
+                                {% else %}
+                                    {{ active_chat.title|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="chat-header-details">
+                                <h4>{{ active_chat.title }}</h4>
+                                <p>
+                                    {% if active_chat.contact %}
+                                        {% if active_chat.contact.is_verified %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% endif %}
+                                        {% if active_chat.contact.username %}
+                                            @{{ active_chat.contact.username }}
+                                        {% endif %}
+                                        {% if active_chat.contact.is_premium %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                    {{ active_chat.get_chat_type_display }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="btn-chat-action" onclick="searchInChat()" title="Search">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn-chat-action" onclick="toggleChatInfo()" title="Chat Info">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            <button class="btn-chat-action" onclick="openChatMenu()" title="Menu">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages container -->
+                    <div class="messages-container" id="messagesContainer">
+                        <div id="messagesList">
+                            {% for message in messages %}
+                                <div class="message {% if message.is_outgoing %}outgoing{% else %}incoming{% endif %}"
+                                     data-message-id="{{ message.id }}">
+                                    <div class="message-bubble">
+                                        {% if message.media_file %}
+                                            <div class="message-media">
+                                                {% if message.message_type == 'photo' %}
+                                                    <img src="{{ message.media_file.url }}" alt="Photo">
+                                                {% elif message.message_type == 'video' %}
+                                                    <video controls>
+                                                        <source src="{{ message.media_file.url }}" type="video/mp4">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                {% elif message.message_type == 'audio' %}
+                                                    <audio controls>
+                                                        <source src="{{ message.media_file.url }}" type="audio/mpeg">
+                                                        Your browser does not support the audio element.
+                                                    </audio>
+                                                {% else %}
+                                                    <div class="document-attachment">
+                                                        <i class="fas fa-file"></i>
+                                                        <a href="{{ message.media_file.url }}" target="_blank">
+                                                            {{ message.media_file.name }}
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if message.message_text %}
+                                            <p class="message-text">{{ message.message_text|linebreaks }}</p>
+                                        {% endif %}
+                                        
+                                        <div class="message-meta">
+                                            <span class="message-time">
+                                                {{ message.sent_at|date:"H:i" }}
+                                            </span>
+                                            {% if message.is_outgoing %}
+                                                <div class="message-status">
+                                                    {% if message.status == 'sent' %}
+                                                        <i class="fas fa-check status-icon"></i>
+                                                    {% elif message.status == 'delivered' %}
+                                                        <i class="fas fa-check-double status-icon"></i>
+                                                    {% elif message.status == 'read' %}
+                                                        <i class="fas fa-check-double status-icon text-primary"></i>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-comments"></i>
+                                    <h5>No messages yet</h5>
+                                    <p>Start the conversation!</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="typing-indicator" id="typingIndicator">
+                        <span class="typing-dots">Someone is typing...</span>
+                    </div>
+                    
+                    <!-- Message input -->
+                    <div class="input-container">
+                        <button class="attachment-btn" onclick="toggleAttachmentMenu()" title="Attach file">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        
+                        <textarea class="message-input" 
+                                  id="messageInput" 
+                                  placeholder="Type a message..." 
+                                  rows="1"
+                                  onkeydown="handleKeyPress(event)"></textarea>
+                        
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                {% else %}
+                    <!-- Empty state when no chat is selected -->
+                    <div class="empty-state">
+                        <i class="fab fa-telegram-plane"></i>
+                        <h3>Welcome to Telegram</h3>
+                        <p>Select a chat to start messaging</p>
+                        {% if not telegram_session.is_authenticated %}
+                            <a href="{% url 'communication:telegram_settings' %}" class="btn btn-primary">
+                                <i class="fas fa-link"></i> Connect Telegram Account
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden file input for attachments -->
+<input type="file" id="fileInput" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx" multiple>
+
+<!-- Attachment menu -->
+<div class="modal fade" id="attachmentModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Attachment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="selectFileType('image/*')">
+                        <i class="fas fa-image"></i> Photo
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="selectFileType('video/*')">
+                        <i class="fas fa-video"></i> Video
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="selectFileType('audio/*')">
+                        <i class="fas fa-music"></i> Audio
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="selectFileType('.pdf,.doc,.docx')">
+                        <i class="fas fa-file"></i> Document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentChatId = {% if active_chat %}'{{ active_chat.id }}'{% else %}null{% endif %};
+    let messagePollingInterval;
+    let isTyping = false;
+    let typingTimeout;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTelegramClient();
+        setupEventListeners();
+        
+        if (currentChatId) {
+            startMessagePolling();
+            scrollToBottom();
+        }
+    });
+    
+    function initializeTelegramClient() {
+        // Initialize WebSocket connection or polling for real-time updates
+        updateConnectionStatus('connecting');
+        
+        // Simulate connection (replace with actual connection logic)
+        setTimeout(() => {
+            updateConnectionStatus('connected');
+        }, 2000);
+    }
+    
+    function setupEventListeners() {
+        const messageInput = document.getElementById('messageInput');
+        const chatSearch = document.getElementById('chatSearch');
+        const fileInput = document.getElementById('fileInput');
+        
+        // Auto-resize message input
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            
+            // Handle typing indicator
+            handleTyping();
+        });
+        
+        // Chat search
+        if (chatSearch) {
+            chatSearch.addEventListener('input', function() {
+                filterChats(this.value);
+            });
+        }
+        
+        // File input handling
+        fileInput.addEventListener('change', function() {
+            handleFileSelection(this.files);
+        });
+        
+        // Handle paste events for file uploads
+        messageInput.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    sendMediaMessage([file]);
+                    break;
+                }
+            }
+        });
+    }
+    
+    function handleKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+        }
+    }
+    
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const text = messageInput.value.trim();
+        
+        if (!text || !currentChatId) return;
+        
+        sendBtn.disabled = true;
+        
+        // Add message to UI immediately (optimistic UI)
+        addMessageToUI({
+            text: text,
+            is_outgoing: true,
+            sent_at: new Date().toISOString(),
+            status: 'sending'
+        });
+        
+        // Send to server
+        fetch(`/communication/telegram/chat/${currentChatId}/send/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                text: text,
+                reply_to_message_id: null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update message status
+                updateMessageStatus(data.message.id, 'sent');
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+            } else {
+                showError('Failed to send message: ' + data.error);
+                removeOptimisticMessage();
+            }
+        })
+        .catch(error => {
+            showError('Network error: ' + error.message);
+            removeOptimisticMessage();
+        })
+        .finally(() => {
+            sendBtn.disabled = false;
+        });
+    }
+    
+    function sendMediaMessage(files) {
+        if (!files.length || !currentChatId) return;
+        
+        const formData = new FormData();
+        
+        for (let file of files) {
+            formData.append('media_file', file);
+        }
+        
+        const caption = prompt('Enter caption (optional):') || '';
+        formData.append('caption', caption);
+        
+        fetch(`/communication/telegram/chat/${currentChatId}/media/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addMessageToUI({
+                    media_url: data.message.media_url,
+                    caption: data.message.caption,
+                    type: data.message.type,
+                    is_outgoing: true,
+                    sent_at: data.message.sent_at,
+                    status: 'sent'
+                });
+            } else {
+                showError('Failed to send media: ' + data.error);
+            }
+        })
+        .catch(error => {
+            showError('Network error: ' + error.message);
+        });
+    }
+    
+    function addMessageToUI(message) {
+        const messagesList = document.getElementById('messagesList');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.is_outgoing ? 'outgoing' : 'incoming'}`;
+        messageDiv.setAttribute('data-message-id', message.id || 'temp-' + Date.now());
+        
+        let mediaHtml = '';
+        if (message.media_url) {
+            if (message.type === 'photo') {
+                mediaHtml = `<div class="message-media"><img src="${message.media_url}" alt="Photo"></div>`;
+            } else if (message.type === 'video') {
+                mediaHtml = `<div class="message-media"><video controls><source src="${message.media_url}" type="video/mp4"></video></div>`;
+            } else if (message.type === 'audio') {
+                mediaHtml = `<div class="message-media"><audio controls><source src="${message.media_url}" type="audio/mpeg"></audio></div>`;
+            }
+        }
+        
+        const statusIcon = message.is_outgoing ? 
+            `<div class="message-status"><i class="fas fa-check status-icon"></i></div>` : '';
+        
+        messageDiv.innerHTML = `
+            <div class="message-bubble">
+                ${mediaHtml}
+                ${message.text ? `<p class="message-text">${message.text.replace(/\n/g, '<br>')}</p>` : ''}
+                <div class="message-meta">
+                    <span class="message-time">${formatTime(message.sent_at)}</span>
+                    ${statusIcon}
+                </div>
+            </div>
+        `;
+        
+        messagesList.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    function startMessagePolling() {
+        if (messagePollingInterval) {
+            clearInterval(messagePollingInterval);
+        }
+        
+        messagePollingInterval = setInterval(() => {
+            if (currentChatId) {
+                fetchNewMessages();
+            }
+        }, 3000); // Poll every 3 seconds
+    }
+    
+    function fetchNewMessages() {
+        const lastMessage = document.querySelector('.message:last-child');
+        const lastMessageId = lastMessage ? lastMessage.getAttribute('data-message-id') : null;
+        
+        fetch(`/communication/telegram/chat/${currentChatId}/?since=${lastMessageId || ''}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(message => {
+                    if (!document.querySelector(`[data-message-id="${message.id}"]`)) {
+                        addMessageToUI(message);
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching messages:', error);
+        });
+    }
+    
+    function filterChats(query) {
+        const chatItems = document.querySelectorAll('.chat-item');
+        const lowerQuery = query.toLowerCase();
+        
+        chatItems.forEach(item => {
+            const chatName = item.querySelector('.chat-name').textContent.toLowerCase();
+            const lastMessage = item.querySelector('.last-message').textContent.toLowerCase();
+            
+            if (chatName.includes(lowerQuery) || lastMessage.includes(lowerQuery)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    function toggleAttachmentMenu() {
+        const modal = new bootstrap.Modal(document.getElementById('attachmentModal'));
+        modal.show();
+    }
+    
+    function selectFileType(accept) {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.accept = accept;
+        fileInput.click();
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('attachmentModal'));
+        if (modal) modal.hide();
+    }
+    
+    function handleFileSelection(files) {
+        if (files.length > 0) {
+            sendMediaMessage(files);
+        }
+    }
+    
+    function handleTyping() {
+        if (!isTyping) {
+            isTyping = true;
+            // Send typing indicator to server
+            fetch(`/communication/telegram/chat/${currentChatId}/typing/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                }
+            });
+        }
+        
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            isTyping = false;
+        }, 3000);
+    }
+    
+    function updateConnectionStatus(status) {
+        const statusElement = document.getElementById('connectionStatus');
+        statusElement.className = `connection-status ${status}`;
+        
+        const statusText = {
+            'connecting': 'Connecting to Telegram...',
+            'connected': 'Connected to Telegram',
+            'disconnected': 'Disconnected from Telegram'
+        };
+        
+        statusElement.innerHTML = `<i class="fas fa-circle"></i> ${statusText[status]}`;
+        
+        if (status === 'connected') {
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 2000);
+        } else {
+            statusElement.style.display = 'block';
+        }
+    }
+    
+    function scrollToBottom() {
+        const container = document.getElementById('messagesContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: false 
+        });
+    }
+    
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value ||
+               document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+    
+    function showError(message) {
+        // You can implement a toast notification system here
+        alert(message);
+    }
+    
+    function updateMessageStatus(messageId, status) {
+        const message = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (message) {
+            const statusIcon = message.querySelector('.status-icon');
+            if (statusIcon) {
+                statusIcon.className = 'fas status-icon';
+                if (status === 'sent') {
+                    statusIcon.classList.add('fa-check');
+                } else if (status === 'delivered') {
+                    statusIcon.classList.add('fa-check-double');
+                } else if (status === 'read') {
+                    statusIcon.classList.add('fa-check-double', 'text-primary');
+                }
+            }
+        }
+    }
+    
+    function removeOptimisticMessage() {
+        const tempMessage = document.querySelector('[data-message-id^="temp-"]');
+        if (tempMessage) {
+            tempMessage.remove();
+        }
+    }
+    
+    // Chat actions
+    function searchInChat() {
+        const query = prompt('Search in this chat:');
+        if (query) {
+            // Implement chat search
+            console.log('Searching for:', query);
+        }
+    }
+    
+    function toggleChatInfo() {
+        // Implement chat info sidebar
+        console.log('Toggle chat info');
+    }
+    
+    function openChatMenu() {
+        // Implement chat menu
+        console.log('Open chat menu');
+    }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (messagePollingInterval) {
+            clearInterval(messagePollingInterval);
+        }
+    });
+    
+    // Telegram Authentication and Sync Functions
+    function connectTelegramAccount() {
+        // Redirect to settings page for initial setup
+        window.location.href = '/communication/telegram/settings/';
+    }
+    
+    function authenticateTelegram() {
+        alert('Telegram authentication requires phone verification. Please use the management command:\n\npython manage.py telegram_client create_session --user {{ user.username }}');
+    }
+    
+    function syncTelegramData(syncType) {
+        const syncButton = event.target;
+        const originalText = syncButton.innerHTML;
+        
+        // Show loading state
+        syncButton.disabled = true;
+        syncButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: `action=sync_${syncType}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage(`${data.message} (${data.count} items)`);
+                // Reload page to show updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showErrorMessage(data.error);
+            }
+        })
+        .catch(error => {
+            showErrorMessage('Network error: ' + error.message);
+        })
+        .finally(() => {
+            // Restore button state
+            syncButton.disabled = false;
+            syncButton.innerHTML = originalText;
+        });
+    }
+    
+    function testTelegramConnection() {
+        const testButton = event.target;
+        const originalText = testButton.innerHTML;
+        
+        testButton.disabled = true;
+        testButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: 'action=test_connection'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage(data.message);
+                updateConnectionStatus('connected');
+            } else {
+                showErrorMessage(data.error);
+                updateConnectionStatus('disconnected');
+            }
+        })
+        .catch(error => {
+            showErrorMessage('Network error: ' + error.message);
+            updateConnectionStatus('disconnected');
+        })
+        .finally(() => {
+            testButton.disabled = false;
+            testButton.innerHTML = originalText;
+        });
+    }
+    
+    function showSuccessMessage(message) {
+        // Create a success toast notification
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success position-fixed';
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle"></i> ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        document.body.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+    
+    function showErrorMessage(message) {
+        // Create an error toast notification
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-danger position-fixed';
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i> ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+        `;
+        document.body.appendChild(toast);
+        
+        // Auto remove after 8 seconds for errors
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 8000);
+    }
+    
+    // Tab switching functions
+    function showTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        document.getElementById(tabName + 'Content').style.display = 'block';
+        
+        // Update search placeholder
+        const searchInput = document.getElementById('searchInput');
+        if (tabName === 'chats') {
+            searchInput.placeholder = 'Search chats...';
+        } else if (tabName === 'contacts') {
+            searchInput.placeholder = 'Search contacts...';
+        }
+        
+        // Clear search when switching tabs
+        searchInput.value = '';
+        filterContent();
+    }
+    
+    // Enhanced search function for both chats and contacts
+    function filterContent() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const activeTab = document.querySelector('.tab-btn.active').id.replace('Tab', '');
+        
+        if (activeTab === 'chats') {
+            filterChats(query);
+        } else if (activeTab === 'contacts') {
+            filterContacts(query);
+        }
+    }
+    
+    // Filter contacts function
+    function filterContacts(query) {
+        const contacts = document.querySelectorAll('.contact-item');
+        contacts.forEach(contact => {
+            const name = contact.querySelector('.contact-name').textContent.toLowerCase();
+            const details = contact.querySelector('.contact-details').textContent.toLowerCase();
+            
+            if (name.includes(query) || details.includes(query)) {
+                contact.style.display = 'flex';
+            } else {
+                contact.style.display = 'none';
+            }
+        });
+    }
+    
+    // Start chat with contact function
+    function startChatWithContact(contactTelegramId) {
+        // Create a new chat with the selected contact
+        const formData = new FormData();
+        formData.append('action', 'create_chat');
+        formData.append('contact_id', contactTelegramId);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch('{% url "communication:telebird_telegram_client" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the new chat
+                window.location.href = `?chat_id=${data.chat_id}`;
+            } else {
+                showErrorMessage(data.error || 'Failed to start chat');
+            }
+        })
+        .catch(error => {
+            showErrorMessage('Network error: ' + error.message);
+        });
+    }
+    
+    // Enhanced search event listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterContent);
+        }
+    });
+</script>
+{% endblock %}

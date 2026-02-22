@@ -1,14 +1,12 @@
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator
-from django.contrib.auth.models import User
-from authentication.models import Profile
 
 class PurchaseCategory(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_purchase_categories')
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='purchase_categories')
+    created_by_id = models.IntegerField(null=True)
+    profile_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     
@@ -78,8 +76,8 @@ class Purchase(models.Model):
         blank=True,
         null=True
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_purchases')
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, related_name='purchases')
+    created_by_id = models.IntegerField(null=True)
+    profile_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
     
@@ -93,3 +91,31 @@ class Purchase(models.Model):
         # Update amount based on quantity and unit price
         self.amount = self.quantity * self.unit_price
         super(Purchase, self).save(*args, **kwargs)
+
+    def create_document(self):
+        """Create a Document instance from this Purchase"""
+        from decimal import Decimal
+        from documents.models import Document
+        from clients.models import Client
+        
+        # Try to get a default client or create a generic one if not found
+        try:
+            default_client = Client.objects.first() or Client.objects.create(
+                name='Default Client', 
+                email='default@example.com'
+            )
+        except Exception:
+            default_client = None
+
+        return Document.objects.create(
+            client=default_client,
+            document_type='PURCHASE',
+            description=self.title,
+            subtotal=self.amount,
+            tax_rate=Decimal('0.00'),
+            tax_amount=Decimal('0.00'),
+            total_amount=self.amount,
+            document_date=self.date,
+            status='COMPLETED',
+            purchase=self
+        )

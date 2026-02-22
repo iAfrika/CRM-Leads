@@ -7,15 +7,22 @@ from .models import Expense, ExpenseCategory, RecurringExpense
 from .forms import ExpenseForm, ExpenseCategoryForm, RecurringExpenseForm
 from django.db.models.functions import TruncMonth
 from datetime import datetime, timedelta
+from django.contrib import messages
+from django.shortcuts import redirect
+from decimal import Decimal
+from documents.models import Document  # Corrected import
+import logging
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def expense_list(request):
     if request.user.is_superuser:
         expenses = Expense.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        expenses = Expense.objects.filter(profile=request.profile)
+        expenses = Expense.objects.filter(profile_id=request.profile.id)
     else:
-        expenses = Expense.objects.filter(created_by=request.user)
+        expenses = Expense.objects.filter(created_by_id=request.user.id)
     
     total_amount = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
     
@@ -23,9 +30,9 @@ def expense_list(request):
     if request.user.is_superuser:
         categories = ExpenseCategory.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        categories = ExpenseCategory.objects.filter(profile=request.profile)
+        categories = ExpenseCategory.objects.filter(profile_id=request.profile.id)
     else:
-        categories = ExpenseCategory.objects.filter(created_by=request.user)
+        categories = ExpenseCategory.objects.filter(created_by_id=request.user.id)
     
     context = {
         'expenses': expenses,
@@ -56,9 +63,9 @@ def expense_create(request):
         form = ExpenseForm(request.POST, request.FILES)
         if form.is_valid():
             expense = form.save(commit=False)
-            expense.created_by = request.user
+            expense.created_by_id = request.user.id
             if hasattr(request, 'profile') and request.profile:
-                expense.profile = request.profile
+                expense.profile_id = request.profile.id
             expense.save()
             messages.success(request, 'Expense created successfully!')
             return redirect('expenses:expense_list')
@@ -68,9 +75,9 @@ def expense_create(request):
         # Filter categories by profile if not superuser
         if not request.user.is_superuser:
             if hasattr(request, 'profile') and request.profile:
-                form.fields['category'].queryset = ExpenseCategory.objects.filter(profile=request.profile)
+                form.fields['category'].queryset = ExpenseCategory.objects.filter(profile_id=request.profile.id)
             else:
-                form.fields['category'].queryset = ExpenseCategory.objects.filter(created_by=request.user)
+                form.fields['category'].queryset = ExpenseCategory.objects.filter(created_by_id=request.user.id)
     
     return render(request, 'expenses/expense_form.html', {
         'form': form,
@@ -84,10 +91,10 @@ def expense_update(request, pk):
     # Check if user has permission to update this expense
     if not request.user.is_superuser:
         if hasattr(request, 'profile') and request.profile:
-            if expense.profile != request.profile:
+            if expense.profile_id != request.profile.id:
                 messages.error(request, "You don't have permission to update this expense.")
                 return redirect('expenses:expense_list')
-        elif expense.created_by != request.user:
+        elif expense.created_by_id != request.user.id:
             messages.error(request, "You don't have permission to update this expense.")
             return redirect('expenses:expense_list')
     
@@ -97,7 +104,7 @@ def expense_update(request, pk):
             expense = form.save(commit=False)
             # Don't change the created_by field, but update profile if needed
             if hasattr(request, 'profile') and request.profile:
-                expense.profile = request.profile
+                expense.profile_id = request.profile.id
             expense.save()
             messages.success(request, 'Expense updated successfully!')
             return redirect('expenses:expense_detail', pk=expense.pk)
@@ -107,9 +114,9 @@ def expense_update(request, pk):
         # Filter categories by profile if not superuser
         if not request.user.is_superuser:
             if hasattr(request, 'profile') and request.profile:
-                form.fields['category'].queryset = ExpenseCategory.objects.filter(profile=request.profile)
+                form.fields['category'].queryset = ExpenseCategory.objects.filter(profile_id=request.profile.id)
             else:
-                form.fields['category'].queryset = ExpenseCategory.objects.filter(created_by=request.user)
+                form.fields['category'].queryset = ExpenseCategory.objects.filter(created_by_id=request.user.id)
     
     return render(request, 'expenses/expense_form.html', {
         'form': form,
@@ -168,10 +175,10 @@ def category_list(request):
             category = ExpenseCategory(
                 name=name,
                 description=description,
-                created_by=request.user
+                created_by_id=request.user.id
             )
             if hasattr(request, 'profile') and request.profile:
-                category.profile = request.profile
+                category.profile_id = request.profile.id
             category.save()
             messages.success(request, 'Category created successfully!')
         
@@ -181,9 +188,9 @@ def category_list(request):
     if request.user.is_superuser:
         categories = ExpenseCategory.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        categories = ExpenseCategory.objects.filter(profile=request.profile)
+        categories = ExpenseCategory.objects.filter(profile_id=request.profile.id)
     else:
-        categories = ExpenseCategory.objects.filter(created_by=request.user)
+        categories = ExpenseCategory.objects.filter(created_by_id=request.user.id)
     
     # Calculate total amount for each category
     for category in categories:
@@ -230,17 +237,17 @@ def recurring_expense_list(request):
     if request.user.is_superuser:
         recurring_expenses = RecurringExpense.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        recurring_expenses = RecurringExpense.objects.filter(profile=request.profile)
+        recurring_expenses = RecurringExpense.objects.filter(profile_id=request.profile.id)
     else:
-        recurring_expenses = RecurringExpense.objects.filter(created_by=request.user)
+        recurring_expenses = RecurringExpense.objects.filter(created_by_id=request.user.id)
     
     # Get categories for the dropdown
     if request.user.is_superuser:
         categories = ExpenseCategory.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        categories = ExpenseCategory.objects.filter(profile=request.profile)
+        categories = ExpenseCategory.objects.filter(profile_id=request.profile.id)
     else:
-        categories = ExpenseCategory.objects.filter(created_by=request.user)
+        categories = ExpenseCategory.objects.filter(created_by_id=request.user.id)
     
     return render(request, 'expenses/recurring_expense_list.html', {
         'recurring_expenses': recurring_expenses,
@@ -268,12 +275,12 @@ def recurring_expense_create(request):
                 category=category,
                 frequency=frequency,
                 next_date=next_date,
-                created_by=request.user
+                created_by_id=request.user.id
             )
             
             # Set profile if available
             if hasattr(request, 'profile') and request.profile:
-                recurring_expense.profile = request.profile
+                recurring_expense.profile_id = request.profile.id
                 
             recurring_expense.save()
             messages.success(request, 'Recurring expense created successfully.')
@@ -301,9 +308,9 @@ def recurring_expense_update(request, pk):
     if request.user.is_superuser:
         categories = ExpenseCategory.objects.all()
     elif hasattr(request, 'profile') and request.profile:
-        categories = ExpenseCategory.objects.filter(profile=request.profile)
+        categories = ExpenseCategory.objects.filter(profile_id=request.profile.id)
     else:
-        categories = ExpenseCategory.objects.filter(created_by=request.user)
+        categories = ExpenseCategory.objects.filter(created_by_id=request.user.id)
     
     if request.method == 'POST':
         try:
@@ -393,7 +400,7 @@ def expense_reports(request):
     
     # Monthly expenses
     monthly_expenses = Expense.objects.filter(
-        created_by=request.user,
+        created_by_id=request.user.id,
         date__range=[start_date, end_date]
     ).annotate(
         month=TruncMonth('date')
@@ -403,7 +410,7 @@ def expense_reports(request):
     
     # Category wise expenses
     category_expenses = Expense.objects.filter(
-        created_by=request.user,
+        created_by_id=request.user.id,
         date__range=[start_date, end_date]
     ).values('category__name').annotate(
         total=Sum('amount')
@@ -415,3 +422,69 @@ def expense_reports(request):
         'start_date': start_date,
         'end_date': end_date
     })
+
+@login_required
+def generate_expense_sheet(request, pk):
+    """Generate an Expense Sheet document from an Expense"""
+    try:
+        expense = get_object_or_404(Expense, pk=pk)
+        
+        # Log detailed expense information
+        logger.info(f"Attempting to generate expense sheet for Expense {pk}")
+        logger.info(f"Expense details: Title: {expense.title}, Amount: {expense.amount}, Date: {expense.date}")
+        logger.info(f"Expense Category: {expense.category}")
+        logger.info(f"Expense Profile: {expense.profile}")
+        logger.info(f"Expense Created By: {expense.created_by}")
+        
+        # Check permissions
+        if not request.user.is_superuser:
+            if hasattr(request, 'profile') and request.profile:
+                if expense.profile and expense.profile != request.profile:
+                    logger.warning(f"Permission denied: Profile mismatch for Expense {pk}")
+                    messages.error(request, "You don't have permission to generate an expense sheet.")
+                    return redirect('expenses:expense_detail', pk=pk)
+            elif expense.created_by != request.user:
+                logger.warning(f"Permission denied: User mismatch for Expense {pk}")
+                messages.error(request, "You don't have permission to generate an expense sheet.")
+                return redirect('expenses:expense_detail', pk=pk)
+        
+        # Check if document already exists
+        existing_doc = Document.objects.filter(expense=expense, document_type='EXPENSE_SHEET').first()
+        if existing_doc:
+            logger.info(f"Expense Sheet already exists for Expense {pk}")
+            messages.info(request, "An Expense Sheet document already exists for this expense.")
+            return redirect('documents:expense_sheet_detail', pk=existing_doc.pk)
+        
+        # Create the document
+        try:
+            document = Document.objects.create(
+                client=None,  # Client is not required
+                document_type='EXPENSE_SHEET',
+                description=f"Expense Sheet for {expense.title}",
+                subtotal=expense.amount,
+                tax_rate=Decimal('0.00'),
+                tax_amount=Decimal('0.00'),
+                total_amount=expense.amount,
+                document_date=expense.date or timezone.now().date(),
+                status='DRAFT',
+                expense=expense,
+                created_by_id=request.user.id
+            )
+            logger.info(f"Successfully generated Expense Sheet for Expense {pk}. Document ID: {document.pk}")
+            messages.success(request, "Expense Sheet document generated successfully.")
+            return redirect('documents:expense_sheet_detail', pk=document.pk)
+        except Exception as e:
+            logger.error(f"Failed to generate Expense Sheet for Expense {pk}: {str(e)}")
+            messages.error(request, f"Failed to generate Expense Sheet: {str(e)}")
+            return redirect('expenses:expense_detail', pk=pk)
+    
+    except Exception as e:
+        # Log the full error details
+        logger.error(f"Comprehensive error in generate_expense_sheet for Expense {pk}: {str(e)}")
+        logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        # Provide a user-friendly error message
+        messages.error(request, f"Failed to generate Expense Sheet. Please contact support. Error: {str(e)}")
+        return redirect('expenses:expense_detail', pk=pk)

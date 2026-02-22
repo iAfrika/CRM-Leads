@@ -36,42 +36,24 @@
     gap: 0.5rem;
 }
 
-.action-button, 
-.document-actions .action-button, 
-.document-actions-group .action-button,
-.filter-group .action-button {
-    display: inline-flex !important;
-    align-items: center !important;
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    color: inherit !important;
-    text-decoration: none !important;
-    cursor: pointer !important;
-    font-size: inherit !important;
-    font-weight: inherit !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+.document-actions .action-button {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: currentColor;
+    text-decoration: none;
+    cursor: pointer;
 }
 
-.action-button:hover, 
-.document-actions .action-button:hover, 
-.document-actions-group .action-button:hover,
-.filter-group .action-button:hover {
-    background: none !important;
-    color: var(--primary-color) !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+.document-actions .action-button:hover {
+    color: var(--primary-color);
 }
 
-.action-button i, 
-.document-actions .action-button i, 
-.document-actions-group .action-button i,
-.filter-group .action-button i {
-    margin-right: 0.5rem !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
+.document-actions .action-button i {
+    margin-right: 0.5rem;
 }
 
 .btn-icon {
@@ -341,75 +323,4 @@
     text-align: center;
     color: #64748b;
     padding: 2rem !important;
-}
-
-/* Aggressive color specificity */
-.action-button-view,
-.action-button-view i,
-.action-button-view:link,
-.action-button-view:visited {
-    color: #48bb78 !important;
-    fill: #48bb78 !important;
-    stroke: #48bb78 !important;
-}
-.action-button-view:hover,
-.action-button-view:hover i {
-    color: #2f855a !important;
-    fill: #2f855a !important;
-    stroke: #2f855a !important;
-}
-
-.action-button-delete,
-.action-button-delete i,
-.action-button-delete:link,
-.action-button-delete:visited {
-    color: #f56565 !important;
-    fill: #f56565 !important;
-    stroke: #f56565 !important;
-}
-.action-button-delete:hover,
-.action-button-delete:hover i {
-    color: #c53030 !important;
-    fill: #c53030 !important;
-    stroke: #c53030 !important;
-}
-
-.action-button-send,
-.action-button-send i,
-.action-button-send:link,
-.action-button-send:visited {
-    color: #4299e1 !important;
-    fill: #4299e1 !important;
-    stroke: #4299e1 !important;
-}
-.action-button-send:hover,
-.action-button-send:hover i {
-    color: #2b6cb0 !important;
-    fill: #2b6cb0 !important;
-    stroke: #2b6cb0 !important;
-}
-
-/* Ultra-specific delete button color */
-.action-button-delete,
-.action-button-delete *,
-.action-button-delete i,
-.action-button-delete svg,
-.action-button-delete:link,
-.action-button-delete:visited,
-button.action-button-delete,
-button.action-button-delete:not([disabled]) {
-    color: #f56565 !important;
-    fill: #f56565 !important;
-    stroke: #f56565 !important;
-    border-color: #f56565 !important;
-}
-.action-button-delete:hover,
-.action-button-delete:hover *,
-.action-button-delete:hover i,
-.action-button-delete:hover svg,
-button.action-button-delete:hover {
-    color: #c53030 !important;
-    fill: #c53030 !important;
-    stroke: #c53030 !important;
-    border-color: #c53030 !important;
-}
+} 

@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.css" rel="stylesheet">
+<style>
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .chart-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+    .chart-card h4 {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    .chart-card canvas {
+        flex-grow: 1;
+        max-height: 300px;
+    }
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .kpi-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .kpi-card h5 {
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .kpi-card .kpi-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #343a40;
+    }
+    .kpi-card .kpi-change {
+        font-size: 0.8rem;
+        margin-top: 5px;
+    }
+    .kpi-card .kpi-change.success {
+        color: #28a745;
+    }
+    .kpi-card .kpi-change.danger {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Analytics Dashboard</h1>
+
+    <div class="kpi-grid">
+        <!-- Total Revenue KPI -->
+        <div class="kpi-card">
+            <h5>Total Revenue</h5>
+            <div class="kpi-value">${{ total_revenue|floatformat:2 }}</div>
+            {% if revenue_change >= 0 %}
+                <div class="kpi-change success">
+                    {{ revenue_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            {% else %}
+                <div class="kpi-change danger">
+                    {{ revenue_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Total Expenses KPI -->
+        <div class="kpi-card">
+            <h5>Total Expenses</h5>
+            <div class="kpi-value">${{ total_expenses|floatformat:2 }}</div>
+            {% if expenses_change <= 0 %}
+                <div class="kpi-change success">
+                    {{ expenses_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            {% else %}
+                <div class="kpi-change danger">
+                    {{ expenses_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Net Profit KPI -->
+        <div class="kpi-card">
+            <h5>Net Profit</h5>
+            <div class="kpi-value">${{ net_profit|floatformat:2 }}</div>
+            {% if net_profit >= 0 %}
+                <div class="kpi-change success">
+                    {{ profit_margin|floatformat:1 }}% Margin
+                </div>
+            {% else %}
+                <div class="kpi-change danger">
+                    {{ profit_margin|floatformat:1 }}% Margin
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Total Leads KPI -->
+        <div class="kpi-card">
+            <h5>Total Leads</h5>
+            <div class="kpi-value">{{ total_leads }}</div>
+            {% if leads_change >= 0 %}
+                <div class="kpi-change success">
+                    {{ leads_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            {% else %}
+                <div class="kpi-change danger">
+                    {{ leads_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Lead Conversion KPI -->
+        <div class="kpi-card">
+            <h5>Lead Conversion</h5>
+            <div class="kpi-value">{{ lead_conversion_rate|floatformat:1 }}%</div>
+            {% if conversion_change >= 0 %}
+                <div class="kpi-change success">
+                    {{ conversion_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            {% else %}
+                <div class="kpi-change danger">
+                    {{ conversion_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Total Projects KPI -->
+        <div class="kpi-card">
+            <h5>Total Projects</h5>
+            <div class="kpi-value">{{ total_projects }}</div>
+            {% if projects_change >= 0 %}
+                <div class="kpi-change success">
+                    {{ projects_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+            {% else %}
+                <div class="kpi-change danger">
+                    {{ projects_change|floatformat:1 }}% 
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="analytics-grid mb-4">
+        <!-- Monthly Revenue Chart -->
+        <div class="chart-card">
+            <h4>Monthly Revenue</h4>
+            <canvas id="monthlyRevenueChart"></canvas>
+        </div>
+
+        <!-- Lead Conversion Chart -->
+        <div class="chart-card">
+            <h4>Lead Conversion</h4>
+            <canvas id="leadConversionChart"></canvas>
+        </div>
+
+        <!-- Project Status Chart -->
+        <div class="chart-card">
+            <h4>Project Status</h4>
+            <canvas id="projectStatusChart"></canvas>
+        </div>
+
+        <!-- Expense Breakdown Chart -->
+        <div class="chart-card">
+            <h4>Expense Breakdown</h4>
+            <canvas id="expenseBreakdownChart"></canvas>
+        </div>
+
+        <!-- Client Acquisition Chart -->
+        <div class="chart-card">
+            <h4>Client Acquisition</h4>
+            <canvas id="clientAcquisitionChart"></canvas>
+        </div>
+
+        <!-- Placeholder for future chart -->
+        <div class="chart-card">
+            <h4>Future Chart</h4>
+            <canvas id="futureChart"></canvas>
+        </div>
+
+        <!-- Placeholder for future chart -->
+        <div class="chart-card">
+            <h4>Future Chart</h4>
+            <canvas id="futureChart2"></canvas>
+        </div>
+
+        <!-- Placeholder for future chart -->
+        <div class="chart-card">
+            <h4>Future Chart</h4>
+            <canvas id="futureChart3"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Monthly Revenue Chart
+        const monthlyRevenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+        const monthlyRevenueData = {
+            labels: JSON.parse('{{ monthly_revenue_labels|safe }}'),
+            datasets: [{
+                label: 'Monthly Revenue',
+                data: JSON.parse('{{ monthly_revenue_data|safe }}'),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+        new Chart(monthlyRevenueCtx, {
+            type: 'line',
+            data: monthlyRevenueData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue ($)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Lead Conversion Chart
+        const leadConversionCtx = document.getElementById('leadConversionChart').getContext('2d');
+        const leadConversionData = JSON.parse('{{ lead_conversion_data|safe }}');
+        new Chart(leadConversionCtx, {
+            type: 'bar',
+            data: {
+                labels: leadConversionData.labels,
+                datasets: leadConversionData.datasets.map(dataset => ({
+                    label: dataset.label,
+                    data: dataset.data,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(255, 99, 132, 0.5)'
+                    ]
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+
+        // Project Status Chart
+        const projectStatusCtx = document.getElementById('projectStatusChart').getContext('2d');
+        const projectStatusData = {
+            labels: JSON.parse('{{ project_status_labels|safe }}'),
+            datasets: [{
+                label: 'Project Status',
+                data: JSON.parse('{{ project_status_data|safe }}'),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1,
+                hoverOffset: 15
+            }]
+        };
+        new Chart(projectStatusCtx, {
+            type: 'doughnut',
+            data: projectStatusData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',  
+                layout: {
+                    padding: {
+                        top: 10,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        fullWidth: false,
+                        labels: {
+                            boxWidth: 20,
+                            padding: 10,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.formattedValue + ' projects';
+                                return label;
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                }
+            }
+        });
+
+        // Expense Breakdown Chart
+        const expenseBreakdownCtx = document.getElementById('expenseBreakdownChart').getContext('2d');
+        const expenseData = JSON.parse('{{ expense_data|safe }}');
+        new Chart(expenseBreakdownCtx, {
+            type: 'pie',
+            data: {
+                labels: expenseData.labels,
+                datasets: expenseData.datasets.map(dataset => ({
+                    label: dataset.label,
+                    data: dataset.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(75, 192, 192, 0.5)'
+                    ]
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+
+        // Client Acquisition Chart
+        const clientAcquisitionCtx = document.getElementById('clientAcquisitionChart').getContext('2d');
+        const clientAcquisitionData = {
+            labels: JSON.parse('{{ client_acquisition_labels|safe }}'),
+            datasets: [{
+                label: 'New Clients',
+                data: JSON.parse('{{ client_acquisition_data|safe }}'),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+        new Chart(clientAcquisitionCtx, {
+            type: 'line',
+            data: clientAcquisitionData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Clients'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

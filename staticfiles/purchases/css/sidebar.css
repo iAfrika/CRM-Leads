@@ -93,6 +93,10 @@
     color: var(--text-primary);
 }
 
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .expenses-sidebar {

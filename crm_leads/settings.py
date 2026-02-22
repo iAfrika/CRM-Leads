@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from .logging_config import LOGGING
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -48,11 +49,10 @@ INSTALLED_APPS = [
     # Your apps
     'registration.apps.RegistrationConfig',  
     'authentication',
-    'dashboard',
     'leads.apps.LeadsConfig',  # Explicitly use the AppConfig
     'project_management',
     'clients.apps.ClientsConfig',
-    'products',
+    'products.apps.ProductsConfig',  # Use the AppConfig version
     'sales',
     'documents',
     'expenses',
@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'projects',
     'site_admin.apps.SiteAdminConfig',
     'communication',
+    'dashboard.apps.DashboardConfig',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'authentication.middleware.ProfileAuthenticationMiddleware',
+    'registration.middleware.CompanyContextMiddleware',  # Company context and database switching
     'site_admin.middleware.SiteAdminMiddleware',
 ]
 
@@ -95,6 +97,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'registration.context_processors.company_context',  # Company context
             ],
         },
     },
@@ -113,6 +116,12 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Database router for company-specific databases
+DATABASE_ROUTERS = ['registration.db_router.CompanyDatabaseRouter']
+
+# Company database storage
+COMPANY_DATABASE = 'default'  # Will be set dynamically per request
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -195,6 +204,9 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# Logging configuration
+LOGGING = LOGGING
 
 # Company Settings
 COMPANY_NAME = 'ImageAfrika CRM'

@@ -1,197 +1,244 @@
-/* quote_preview.css */
-
-:root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --border-color: #e0e0e0;
-    --bg-color: #fff;
-    --text-color: #333;
-  }
-  
-  body {
-    font-family: 'Nunito', Arial, sans-serif;
-    color: var(--text-color);
-    line-height: 1.6;
+/* Crescent Controls Invoice Styles */
+body {
+    font-family: 'Nunito', sans-serif;
     margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-  }
-  
-  .quote-content {
+    padding: 20px;
+    color: #333;
     max-width: 1000px;
-    margin: 20px auto;
-    padding: 30px;
-    background-color: var(--bg-color);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-  }
-  
-  h2 {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--secondary-color);
-    padding-bottom: 10px;
-    margin-top: 0;
-    font-size: 24px;
-  }
-  
-  h3 {
-    color: var(--primary-color);
-    font-size: 18px;
+    margin: 0 auto;
+}
+
+.header {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.colored-bar {
+    height: 0.1rem;
+    width: 100%;
+    display: flex;
+}
+
+.orange-bar {
+    background-color: #F7841D;
+    width: 80%;
+}
+
+.pink-bar {
+    background-color: #E31C79;
+    width: 20%;
+}
+
+.logo-container {
+    display: flex;
     margin-top: 20px;
+    align-items: center;
+}
+
+.logo img{
+    width: 10rem;
+    height: 7rem;
+    border-radius: 50%;
+    position: relative;
+}
+
+.company-info {
+    margin-left: 20px;
+}
+
+.presented-by {
+    margin-bottom: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.company-name {
+    color: #F7841D;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.company-address {
+    margin: 3px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.contact-info {
+    margin: 3px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.email {
+    color: #0c19da;
+    text-decoration: none;
+}
+
+.document-details {
+    display: flex;
+    justify-content: space-between;
+    margin: 30px 0;
+}
+
+.left-details {
+    width: 60%;
+}
+
+.right-details {
+    width: 40%;
+    text-align: right;
+}
+
+.document-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.document-subtitle {
+    display: flex;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
     margin-bottom: 10px;
-  }
-  
-  .client-info {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-left: 4px solid var(--secondary-color);
+    align-self: center;
+    
+}
+
+.document-number {
+    font-size: 1.5rem;
+    color: #666;
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 5px;
+    align-items: baseline;
+}
+
+.detail-label {
+    width: 100px;
+    color: #666;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.detail-value {
+    flex-grow: 1;
+    font-weight: bold;
+}
+
+.separator {
+    border-top: 1px solid #000;
     margin: 20px 0;
-  }
-  
-  .quote-items {
+}
+
+table {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
-  }
-  
-  .quote-items th {
-    background-color: var(--primary-color);
-    color: white;
-    text-align: left;
-    padding: 12px 8px;
-  }
-  
-  .quote-items td {
-    padding: 12px 8px;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .quote-items tfoot tr {
-    background-color: #f8f9fa;
-  }
-  
-  .quote-items tfoot td {
-    padding: 12px 8px;
-    font-weight: bold;
-  }
-  
-  .text-right {
-    text-align: right;
-  }
-  
-  .terms-conditions {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    margin: 20px 0;
-  }
-  
-  .terms-conditions ol {
-    padding-left: 20px;
-  }
-  
-  .quote-actions {
-    margin-top: 30px;
-    display: flex;
-    gap: 10px;
-  }
-  
-  .btn {
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
-    display: inline-block;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .btn-primary {
-    background-color: var(--secondary-color);
-    color: white;
-  }
-  
-  .btn-secondary {
-    background-color: var(--primary-color);
-    color: white;
-  }
-  
-  .btn:hover {
-    opacity: 0.9;
-  }
-  
-  /* Company information at the top */
-  .company-info {
-    display: flex;
-    justify-content: space-between;
     margin-bottom: 30px;
-  }
-  
-  .company-logo {
-    max-width: 200px;
-  }
-  
-  .company-details {
-    text-align: right;
-  }
-  
-  /* Recreate the header style similar to the PDF */
-  .document-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-color);
-  }
-  
-  .document-header h2 {
-    margin: 0;
-    color: var(--primary-color);
-    border-bottom: none;
-    font-size: 24px;
-    text-transform: uppercase;
-  }
-  
-  /* Payment terms section */
-  .payment-terms {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-left: 4px solid var(--secondary-color);
-  }
-  
-  /* Bank details section */
-  .bank-details {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #c4168f;
-    border: 1px solid var(--border-color);
+    border: 1.5px solid #000;
     border-radius: 5px;
-  }
-  
-  .bank-details h3 {
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+th {
+    background-color: #6d6b696b;
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #000;
+    font-weight: bold;
+}
+
+td {
+    padding: 10px;
+    border: 1px solid #000;
+}
+
+.number-cell {
+    text-align: right;
+}
+
+.center-cell {
+    text-align: center;
+}
+
+.summary-row {
+    font-weight: bold;
+}
+
+.total-label {
+    text-align: right;
+    font-weight: bold;
+    padding-right: 10px;
+}
+
+.total-value {
+    text-align: right;
+    font-weight: bold;
+}
+
+.grand-total {
+    font-size: 16px;
+}
+
+.payment-terms {
+    margin: 20px 0;
+}
+
+.bank-details {
+    margin-top: 30px;
+    border-top: 1px solid #ccc;
+    padding-top: 15px;
+}
+
+.bank-details h3 {
     margin-top: 0;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .quote-content {
-      padding: 15px;
+    margin-bottom: 10px;
+}
+
+.bank-details p {
+    margin: 5px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .document-details {
+        flex-direction: column;
     }
     
-    .quote-items th, 
-    .quote-items td {
-      padding: 8px 4px;
-      font-size: 14px;
+    .left-details, .right-details {
+        width: 100%;
+    }
+    
+    .right-details {
+        text-align: left;
+        margin-top: 20px;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-container {
+        flex-direction: column;
     }
     
     .company-info {
-      flex-direction: column;
+        margin-left: 0;
+        margin-top: 15px;
     }
     
-    .company-details {
-      text-align: left;
-      margin-top: 15px;
+    table {
+        font-size: 12px;
     }
-  }
+    
+    th, td {
+        padding: 5px;
+    }
+}

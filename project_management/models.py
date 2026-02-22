@@ -6,7 +6,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import string
 import random
+import re
 from decimal import Decimal
+from people.models import Person
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -26,7 +28,7 @@ class Project(models.Model):
 
     # Basic Information
     name = models.CharField(max_length=200)
-    code = models.CharField(max_length=50, unique=True, help_text="Unique project code/reference number")
+    code = models.CharField(max_length=50, unique=True, blank=True, help_text="Unique project code/reference number")
     description = models.TextField(blank=True)
     client = models.ForeignKey('clients.Client', on_delete=models.SET_NULL, null=True, related_name='projects')
     
@@ -45,8 +47,8 @@ class Project(models.Model):
     actual_cost = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     
     # Team
-    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='managed_projects')
-    team_members = models.ManyToManyField(User, related_name='assigned_projects', blank=True)
+    manager = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, related_name='managed_projects')
+    team_members = models.ManyToManyField(Person, related_name='assigned_projects', blank=True)
     
     # Additional Information
     tags = models.CharField(max_length=200, blank=True, help_text="Comma-separated tags")
@@ -67,8 +69,41 @@ class Project(models.Model):
     def __str__(self):
         return f"{self.code} - {self.name}"
 
+    def save(self, *args, **kwargs):
+        # Auto-generate project code if not set
+        if not self.code:
+            # Get the last project to determine the next number
+            last_project = Project.objects.order_by('-id').first()
+            if last_project and last_project.code:
+                try:
+                    # Extract numbers from the code (e.g., "CC-P0001" -> 1)
+                    numbers = re.findall(r'\d+', last_project.code)
+                    last_number = int(numbers[-1]) if numbers else 0
+                    new_number = last_number + 1
+                except (ValueError, IndexError):
+                    new_number = 1
+            else:
+                new_number = 1
+            
+            # Generate code in format CC-P0001
+            self.code = f"CC-P{new_number:04d}"
+            
+            # Ensure uniqueness
+            while Project.objects.filter(code=self.code).exists():
+                new_number += 1
+                self.code = f"CC-P{new_number:04d}"
+        
+        super().save(*args, **kwargs)
+
     def get_absolute_url(self):
         return reverse('project_management:project_detail', args=[str(self.id)])
+
+    def get_delete_url(self):
+        """
+        Returns the URL for deleting this specific project.
+        Used in templates for dynamic delete modal configuration.
+        """
+        return reverse('project_management:project_delete_with_pk', kwargs={'pk': self.pk})
 
     @property
     def total_income(self):
@@ -121,7 +156,7 @@ class Project(models.Model):
     
     def get_project_account(self):
         """Get the financial account associated with this project"""
-        return self.accounts.first()
+        return self.banking_accounts.first()
     
     def get_financial_summary(self):
         """Get the financial summary for this project"""
@@ -216,6 +251,11 @@ def create_project_account(sender, instance, created, **kwargs):
     """Create a financial account when a new project is created"""
     if created:
         from banking.models import Account
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Get owner ID
+        owner_id = instance.manager_id if instance.manager_id else User.objects.filter(is_superuser=True).first().id
         
         # Check if a main company account exists, create one if not
         main_account = Account.objects.filter(is_main_company_account=True).first()
@@ -223,7 +263,7 @@ def create_project_account(sender, instance, created, **kwargs):
             main_account = Account.objects.create(
                 account_number=f"COMP{''.join(random.choice(string.digits) for _ in range(10))}",
                 account_type='COMPANY',
-                owner=instance.manager or User.objects.filter(is_superuser=True).first(),
+                owner_id=owner_id,
                 pin='1234',  # Default PIN, should be changed
                 is_main_company_account=True
             )
@@ -232,7 +272,7 @@ def create_project_account(sender, instance, created, **kwargs):
         Account.objects.create(
             account_number=generate_account_number(),
             account_type='PROJECT',
-            owner=instance.manager or User.objects.filter(is_superuser=True).first(),
+            owner_id=owner_id,
             pin='1234',  # Default PIN, should be changed
             project=instance
         )

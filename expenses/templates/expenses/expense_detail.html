@@ -108,6 +108,11 @@
                 <a href="{% url 'expenses:expense_list' %}" class="btn btn-secondary">
                     Back to Expenses
                 </a>
+                {% if perms.documents.add_document %}
+                <a href="{% url 'expenses:generate_expense_sheet' expense.pk %}" class="btn btn-primary">
+                    Generate Expense Sheet
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>

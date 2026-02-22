@@ -1,37 +1,521 @@
-{% extends "base.html" %}
 {% load static %}
-
+{% load humanize %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/documents/document_form.css' %}">
+<link rel="stylesheet" href="{% static 'css/document_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<link rel="stylesheet" href="{% static 'css/documents/status_update.css' %}">
+<style>
+    /* Hide sidebar for document edit view */
+    .app-sidebar {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .app-header {
+        left: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* Action Buttons Styling - Matching detail view */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 100;
+    }
+    
+    .action-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        color: white;
+    }
+    
+    .action-btn i {
+        font-size: 18px;
+    }
+    
+    .btn-print {
+        background: #3498db;
+    }
+    
+    .btn-print:hover {
+        background: #2980b9;
+    }
+    
+    .btn-cancel {
+        background: #e74c3c;
+    }
+    
+    .btn-cancel:hover {
+        background: #c0392b;
+    }
+    
+    .btn-save {
+        background: #27ae60;
+    }
+    
+    .btn-save:hover {
+        background: #229954;
+    }
+    
+    /* Editable field styling */
+    .editable-field {
+        border: 1px dashed #3498db;
+        padding: 4px 8px;
+        background-color: #f0f8ff;
+        border-radius: 3px;
+        transition: all 0.2s;
+        display: inline-block;
+        min-width: 150px;
+    }
+    
+    .editable-field:hover {
+        background-color: #e8f4ff;
+        border-color: #2980b9;
+    }
+    
+    .editable-field input,
+    .editable-field select,
+    .editable-field textarea {
+        width: 100%;
+        padding: 4px 8px;
+        border: 1px solid #3498db;
+        border-radius: 3px;
+        font-size: 14px;
+        font-family: 'Nunito', sans-serif;
+    }
+    
+    .editable-field textarea {
+        height: 30px;
+        resize: vertical;
+    }
+    
+    .editable-field input:focus,
+    .editable-field select:focus {
+        outline: none;
+        border-color: #2980b9;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+    
+    /* Table input styling */
+    .table input[type="text"],
+    .table input[type="number"] {
+        padding: 6px;
+        border: 1px solid #3498db;
+        border-radius: 3px;
+        background: #f0f8ff;
+        font-family: 'Nunito', sans-serif;
+    }
+    
+    .table input[type="text"]:focus,
+    .table input[type="number"]:focus {
+        outline: none;
+        border-color: #2980b9;
+        background: white;
+    }
+    
+    /* Remove button styling */
+    .btn-danger {
+        background: #e74c3c;
+        border: none;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .btn-danger:hover {
+        background: #c0392b;
+    }
+    
+    /* Add item button */
+    .btn-success {
+        background: #27ae60;
+        border: none;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .btn-success:hover {
+        background: #229954;
+    }
+    
+
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <h1>{% if object %}Edit{% else %}New{% endif %} Document</h1>
-    </div>
-
-    <form method="post" class="document-form">
-        {% csrf_token %}
-        
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <div class="field-errors">
-                {% for error in field.errors %}
-                <span class="error">{{ error }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
+<form method="post" class="document-form">
+    {% csrf_token %}
+    
+    <!-- Hidden fields for required form data -->
+    <input type="hidden" name="document_type" value="{{ object.document_type }}">
+    <input type="hidden" name="tax_rate" value="{{ object.tax_rate }}">
+    <input type="hidden" name="total_amount" value="{{ object.total_amount }}">
+    
+    {% if form.errors %}
+    <div class="alert alert-danger" style="margin: 20px; padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+        <strong>Form Errors:</strong>
+        <ul>
+        {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <li>{{ field }}: {{ error }}</li>
+            {% endfor %}
         {% endfor %}
-
-        <div class="form-actions">
-            <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">Save Document</button>
+        </ul>
+    </div>
+    {% endif %}
+    
+    <div class="document-detail-container">
+        <!-- Action Buttons - Vertical Stack (Matching Detail View) -->
+        <div class="action-buttons">
+            <button type="button" class="action-btn btn-print" onclick="window.print()" title="Print">
+                <i class="fas fa-print"></i>
+            </button>
+            <a href="{% url 'documents:document_detail' object.id %}" class="action-btn btn-cancel" title="Cancel">
+                <i class="fas fa-times"></i>
+            </a>
+            <button type="submit" class="action-btn btn-save" title="Save">
+                <i class="fas fa-save"></i>
+            </button>
         </div>
-    </form>
-</div>
+
+        <div class="header">
+            <div class="colored-bar">
+                <div class="orange-bar"></div>
+                <div class="pink-bar"></div>
+            </div>
+        </div>
+        
+        <div class="quote-content">
+            <!-- Company Header Section -->
+            <div class="company-info">
+                <div class="logo-container">
+                    <div class="logo">
+                        {% if active_company.logo %}
+                        <img src="{{ active_company.logo.url }}" alt="{{ active_company.name }} Logo" style="max-width: 250px; max-height: 150px; object-fit: contain;">
+                        {% else %}
+                        <img src="#" alt="Logo" style="opacity: 0.3;">
+                        {% endif %}
+                    </div>
+                    <div class="company-info">
+                        <p class="presented-by">Presented by</p>
+                        <h1 class="company-name">{{ active_company.name|default:"Company Name" }}</h1>
+                        <p class="company-address">{{ active_company.physical_address|default:"company physical address," }}</p>
+                        <p class="contact-info">Tel: {{ active_company.phone_number|default:"phone number" }}</p>
+                        <p class="contact-info"><a href="mailto:{{ active_company.email }}" class="email">{{ active_company.email|default:"email address" }}</a></p>
+                    </div>
+                </div>
+
+                <!-- Document details -->
+                <div class="document-details">
+                    <div class="left-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Revision:</span>
+                            <span class="detail-value">{{ object.edit_count|default:0 }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Modified:</span>
+                            <span class="detail-value">{% now "d/m/Y" %}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">To:</span>
+                            <span class="editable-field">
+                                {{ form.client }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">C/o:</span>
+                            <span id="detail-value"><strong>{{ object.client.contact_person }}</strong></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Project:</span>
+                            <span class="editable-field" style="display: block; width: 100%;">
+                                {{ form.description }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Prepared by:</span>
+                            <span id="detail-value">{{ request.user.get_full_name|default:request.user.username }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Due Date:</span>
+                            <span class="editable-field">
+                                {{ form.due_date }}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tax pin:</span>
+                            <span class="detail-value">{{ active_company.tax_pin|default:"" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="right-details">
+                        <div class="document-title">
+                            {% if object.document_type == 'QUOTE' %}
+                                QUOTE
+                            {% else %}
+                                {{ object.get_document_type_display }}
+                            {% endif %}
+                        </div>
+                        <div class="document-number">
+                            {% if object.document_type == 'QUOTE' and object.quote %}
+                                {{ object.quote.quote_number }}
+                            {% else %}
+                                {{ object.get_document_number }}
+                            {% endif %}
+                        </div>
+                        <div class="status-section">
+                            <p><strong>Status:</strong></p>
+                            <div class="editable-field">
+                                {{ form.status }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="separator"></div>
+                <div class="document-subtitle">{{ object.description }}</div>
+
+                <div class="document-items">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ITEM</th>
+                                <th>DESCRIPTION</th>
+                                <th>QTY</th>
+                                <th>UOM</th>
+                                <th>RATES</th>
+                                <th>TOTAL</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="items-tbody">
+                            {% if object.document_type == 'QUOTE' %}
+                                {% for item in object.quote.items.all %}
+                                <tr class="item-row">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <input type="hidden" name="item_id[]" value="{{ item.id }}">
+                                        <input type="text" name="item_description[]" value="{{ item.description }}" class="form-control" style="min-width: 200px;">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="item_quantity[]" value="{{ item.quantity }}" step="0.01" class="form-control item-quantity" style="width: 80px;">
+                                    </td>
+                                    <td>pcs</td>
+                                    <td>
+                                        <input type="number" name="item_price[]" value="{{ item.unit_price }}" step="0.01" class="form-control item-price" style="width: 120px;">
+                                    </td>
+                                    <td class="item-total">{{ item.get_total|floatformat:2|intcomma }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-danger remove-item" title="Remove">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                {% for item in object.items.all %}
+                                <tr class="item-row">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <input type="hidden" name="item_id[]" value="{{ item.id }}">
+                                        <input type="text" name="item_description[]" value="{{ item.description }}" class="form-control" style="min-width: 200px;">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="item_quantity[]" value="{{ item.quantity }}" step="0.01" class="form-control item-quantity" style="width: 80px;">
+                                    </td>
+                                    <td>pcs</td>
+                                    <td>
+                                        <input type="number" name="item_price[]" value="{{ item.unit_price }}" step="0.01" class="form-control item-price" style="width: 120px;">
+                                    </td>
+                                    <td class="item-total">{{ item.total|floatformat:2|intcomma }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-danger remove-item" title="Remove">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="7">
+                                    <button type="button" class="btn btn-sm btn-success" id="add-item-btn">
+                                        <i class="fas fa-plus"></i> Add Item
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-right">
+                                    <strong>SUB TOTAL</strong>
+                                </td>
+                                <td id="subtotal-display">{{ object.subtotal|floatformat:2|intcomma }}</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-right">
+                                    <strong>VAT {% if object.tax_rate %}({{ object.tax_rate }}%){% endif %}</strong>
+                                    <label style="margin-left: 15px; font-weight: normal;">
+                                        {{ form.apply_vat }} Apply VAT
+                                    </label>
+                                </td>
+                                <td id="vat-display">{% if object.apply_vat %}{{ object.tax_amount|floatformat:2|intcomma }}{% else %}N/A{% endif %}</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-right">
+                                    <strong>GRAND TOTAL</strong>
+                                </td>
+                                <td id="total-display">{{ object.total_amount|floatformat:2|intcomma }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <!-- Payment Terms Section -->
+                <div class="payment-terms">
+                    <p><strong>Payment terms:</strong> 70% with LPO 30% on completion</p>
+                    <h3>BANK DETAILS</h3>
+                    <p>BANK NAME: KENYA COMMERCIAL BANK LIMITED</p>
+                    <p>ACCOUNT NAME: CRESCENT CONTROLS</p>
+                    <p>ACCOUNT NUMBER: 1298790468</p>
+                    <p>SWIFT CODE: KCBLKENX01338</p>
+                </div>
+            </div>
+            
+            <!-- Footer - Only shown in web view -->
+            <div class="document-footer">
+                <p>Quote generated on {{ object.created_at|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.getElementById('items-tbody');
+    const addBtn = document.getElementById('add-item-btn');
+    const applyVatCheckbox = document.querySelector('input[name="apply_vat"]');
+    const taxRate = {{ object.tax_rate|default:16 }};
+    
+    // Add new item row
+    addBtn.addEventListener('click', function() {
+        const newRow = document.createElement('tr');
+        newRow.className = 'item-row';
+        newRow.innerHTML = `
+            <td>${tbody.querySelectorAll('.item-row').length + 1}</td>
+            <td>
+                <input type="hidden" name="item_id[]" value="new">
+                <input type="text" name="item_description[]" value="" class="form-control" style="min-width: 200px;">
+            </td>
+            <td>
+                <input type="number" name="item_quantity[]" value="1" step="0.01" class="form-control item-quantity" style="width: 80px;">
+            </td>
+            <td>pcs</td>
+            <td>
+                <input type="number" name="item_price[]" value="0" step="0.01" class="form-control item-price" style="width: 120px;">
+            </td>
+            <td class="item-total">0.00</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-danger remove-item" title="Remove">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(newRow);
+        updateRowNumbers();
+        attachRowListeners(newRow);
+    });
+    
+    // Remove item row
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-item')) {
+            const row = e.target.closest('.item-row');
+            row.remove();
+            updateRowNumbers();
+            calculateTotals();
+        }
+    });
+    
+    // Update row numbers
+    function updateRowNumbers() {
+        tbody.querySelectorAll('.item-row').forEach((row, index) => {
+            row.querySelector('td:first-child').textContent = index + 1;
+        });
+    }
+    
+    // Calculate item total
+    function calculateItemTotal(row) {
+        const qty = parseFloat(row.querySelector('.item-quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const total = qty * price;
+        row.querySelector('.item-total').textContent = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        return total;
+    }
+    
+    // Calculate all totals
+    function calculateTotals() {
+        let subtotal = 0;
+        tbody.querySelectorAll('.item-row').forEach(row => {
+            subtotal += calculateItemTotal(row);
+        });
+        
+        const applyVat = applyVatCheckbox ? applyVatCheckbox.checked : false;
+        const vat = applyVat ? subtotal * (taxRate / 100) : 0;
+        const total = subtotal + vat;
+        
+        document.getElementById('subtotal-display').textContent = subtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('vat-display').textContent = applyVat ? vat.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : 'N/A';
+        document.getElementById('total-display').textContent = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    
+    // Attach listeners to row
+    function attachRowListeners(row) {
+        row.querySelector('.item-quantity').addEventListener('input', calculateTotals);
+        row.querySelector('.item-price').addEventListener('input', calculateTotals);
+    }
+    
+    // Attach listeners to existing rows
+    tbody.querySelectorAll('.item-row').forEach(attachRowListeners);
+    
+    // VAT checkbox listener
+    if (applyVatCheckbox) {
+        applyVatCheckbox.addEventListener('change', calculateTotals);
+    }
+    
+    // Initial calculation
+    calculateTotals();
+});
+</script>
 {% endblock %} 

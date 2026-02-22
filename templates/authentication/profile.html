@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'authentication/css/profile_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-dashboard-grid">
+    <div class="profile-card profile-card-header">
+        {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="profile-avatar">
+        {% else %}
+            <div class="profile-default-avatar">{{ profile.name|first|upper }}</div>
+        {% endif %}
+        <h1 class="profile-name">{{ profile.name }}</h1>
+        <p class="profile-email">{{ user.email }}</p>
+        <p class="profile-role">Role: {{ request.session.user_role|default:"Staff" }}</p>
+    </div>
+
+    <div class="profile-card profile-actions-card">
+        <div class="profile-actions">
+            <a href="/dashboard/" class="profile-btn">Dashboard</a>
+            <a href="{% url 'authentication:logout' %}" class="profile-btn profile-btn-logout">Logout</a>
+            <!-- Add other relevant actions if needed -->
+        </div>
+    </div>
+
+    <!-- Statistics Charts -->
+    <div class="profile-card profile-chart-card">
+        <h4>Leads Over Time</h4>
+        <canvas id="leadsChart"></canvas>
+    </div>
+    
+    <div class="profile-card profile-chart-card">
+        <h4>Projects Over Time</h4>
+        <canvas id="projectsChart"></canvas>
+    </div>
+
+    <!-- Optional: Add other sections/cards here -->
+
+</div>
+{% endblock %}
+
+{% block app_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Leads Chart
+        const leadsCtx = document.getElementById('leadsChart');
+        if (leadsCtx) {
+            new Chart(leadsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Leads',
+                        data: [12, 19, 3, 5, 2, 3],
+                        borderColor: '#8E44AD',
+                        backgroundColor: 'rgba(142, 68, 173, 0.2)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Projects Chart
+        const projectsCtx = document.getElementById('projectsChart');
+        if (projectsCtx) {
+            new Chart(projectsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Projects',
+                        data: [5, 8, 3, 7, 2, 6],
+                        backgroundColor: '#7E57C2',
+                        borderColor: '#7E57C2',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

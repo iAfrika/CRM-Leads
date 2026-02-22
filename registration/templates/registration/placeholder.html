@@ -1,0 +1,25 @@
+{% extends "registration/base_registration.html" %}
+{% load static %}
+
+{% block title %}Subscription Plans{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <section class="registration-header">
+        <h1>Subscription Plans</h1>
+        <p>{{ message }}</p>
+    </section>
+    
+    <section class="registration-card">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> The subscription plans feature is currently being updated. Please check back later.
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{% url 'registration:registration_home' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

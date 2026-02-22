@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'purchases/css/purchase_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<style>
+    .share-options {
+        display: flex;
+        justify-content: space-around;
+        gap: 16px;
+    }
+    
+    .share-options .btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+    
+    .btn-telegram {
+        background-color: #0088cc;
+        color: white;
+    }
+    
+    .btn-email {
+        background-color: #4a90e2;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="document-detail-container">
+    <div class="document-header">
+        <h1>Purchase Order #{{ document.id|stringformat:"05d" }}</h1>
+        <div class="document-actions">
+            {% if perms.documents.change_document %}
+            <div class="btn-group">
+                <a href="#" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="#" class="btn btn-outline-danger">
+                    <i class="fas fa-trash"></i> Delete
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="document-details">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Purchase Details</h4>
+                <table class="table table-borderless">
+                    <tr>
+                        <th>Description</th>
+                        <td>{{ document.description }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <td>{{ document.document_date|date:"F d, Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            <span class="badge 
+                                {% if document.status == 'DRAFT' %}badge-secondary
+                                {% elif document.status == 'COMPLETED' %}badge-success
+                                {% else %}badge-warning
+                                {% endif %}">
+                                {{ document.status }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h4>Financial Information</h4>
+                <table class="table table-borderless">
+                    <tr>
+                        <th>Subtotal</th>
+                        <td>{{ document.subtotal|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tax Rate</th>
+                        <td>{{ document.tax_rate }}%</td>
+                    </tr>
+                    <tr>
+                        <th>Tax Amount</th>
+                        <td>{{ document.tax_amount|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Amount</th>
+                        <td><strong>{{ document.total_amount|intcomma }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {% if document.purchase %}
+        <div class="original-purchase-details">
+            <h4>Original Purchase Details</h4>
+            <table class="table">
+                <tr>
+                    <th>Purchase Title</th>
+                    <td>{{ document.purchase.title }}</td>
+                </tr>
+                <tr>
+                    <th>Purchase Category</th>
+                    <td>{{ document.purchase.category.name }}</td>
+                </tr>
+                <tr>
+                    <th>Purchase Date</th>
+                    <td>{{ document.purchase.date|date:"F d, Y" }}</td>
+                </tr>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="document-footer">
+        <div class="share-options">
+            <a href="#" class="btn btn-telegram">
+                <i class="fab fa-telegram"></i> Share on Telegram
+            </a>
+            <a href="#" class="btn btn-email">
+                <i class="fas fa-envelope"></i> Email Document
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add any specific scripts for the purchase order detail view
+</script>
+{% endblock %}

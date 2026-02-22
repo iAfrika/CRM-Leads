@@ -4,7 +4,7 @@ from django.urls import reverse_lazy, reverse
 from .models import Quote, Document, QuoteItem, Client, Expenditure, InvoiceItem
 from .forms import QuoteForm
 from django.http import JsonResponse, FileResponse, HttpResponse, HttpResponseNotAllowed
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from decimal import Decimal
 from clients.models import Client
 import json
@@ -23,26 +23,44 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 import requests
 
-def generate_quote_number():
-    # Get today's date in YYYYMMDD format
-    today = timezone.now().strftime('%Y%m%d')
+def generate_quote_number(request=None):
+    # Get company initials from the request context
+    from registration.models import Company, CompanyUser
     
-    # Get the last quote number for today
-    last_quote = Quote.objects.filter(
-        quote_number__startswith=f'Q{today}'
-    ).order_by('-quote_number').first()
+    # Try to get company initials from request
+    company_initials = 'CC'
+    if request and hasattr(request, 'company') and request.company and request.company.initials:
+        company_initials = request.company.initials
+    elif request and request.user.is_authenticated:
+        # Fallback: get from session
+        active_company_id = request.session.get('active_company_id')
+        if active_company_id:
+            try:
+                company = Company.objects.get(id=active_company_id)
+                if company.initials:
+                    company_initials = company.initials
+            except Company.DoesNotExist:
+                pass
     
-    if last_quote:
-        # Extract the sequence number and increment it
-        try:
-            seq_num = int(last_quote.quote_number[-3:]) + 1
-        except ValueError:
-            seq_num = 1
-    else:
-        seq_num = 1
+    # Get the last quote to determine the next number
+    # Find the highest existing quote number for this company
+    import re
+    highest_num = 0
     
-    # Format: Q + YYYYMMDD + 3-digit sequence number
-    return f'Q{today}{seq_num:03d}'
+    # Get all quotes and extract their numbers
+    for quote in Quote.objects.all():
+        if quote.quote_number:
+            # Extract number from quote_number (e.g., "QCC0004" -> 4)
+            numbers = re.findall(r'\d+', quote.quote_number)
+            if numbers:
+                num = int(numbers[-1])
+                if num > highest_num:
+                    highest_num = num
+    
+    seq_num = highest_num + 1
+    
+    # Format: QCC + 4-digit sequence number (e.g., QCC0001)
+    return f'Q{company_initials}{seq_num:04d}'
 
 @require_POST
 def quote_create(request):
@@ -52,7 +70,7 @@ def quote_create(request):
         print("POST keys:", request.POST.keys())
         
         # Use request.POST to access form data
-        quote_number = request.POST.get('quote_number') or generate_quote_number()
+        quote_number = request.POST.get('quote_number') or generate_quote_number(request)
         
         # Parse the valid_until date
         try:
@@ -63,16 +81,20 @@ def quote_create(request):
                 'error': 'Invalid date format for valid_until'
             }, status=400)
         
+        # Get apply_vat value (default to True if not provided)
+        apply_vat = request.POST.get('apply_vat', 'true').lower() == 'true'
+        
         # Create the quote
         quote = Quote.objects.create(
             client_id=request.POST['client'],
             quote_number=quote_number,
             title=request.POST['title'],
             description=request.POST.get('description', ''),
-            subtotal=Decimal(str(request.POST['subtotal'])),
-            tax_rate=Decimal(str(request.POST['tax_rate'])),
-            tax_amount=Decimal(str(request.POST['tax_amount'])),
-            total_amount=Decimal(str(request.POST['total_amount'])),
+            subtotal=Decimal(request.POST['subtotal']).quantize(Decimal('0.01')),
+            apply_vat=apply_vat,
+            tax_rate=Decimal(request.POST['tax_rate']).quantize(Decimal('0.01')),
+            tax_amount=Decimal(request.POST['tax_amount']).quantize(Decimal('0.01')),
+            total_amount=Decimal(request.POST['total_amount']).quantize(Decimal('0.01')),
             valid_until=valid_until,
             terms=request.POST.get('terms', '')
         )
@@ -80,32 +102,21 @@ def quote_create(request):
         # Parse items from JSON
         if 'items' in request.POST:
             try:
-                print("Items JSON:", request.POST['items'])
                 items_data = json.loads(request.POST['items'])
-                print("Parsed items data:", items_data)
                 
                 for item_data in items_data:
-                    print("Creating item:", item_data)
                     QuoteItem.objects.create(
                         quote=quote,
                         description=item_data['description'],
-                        quantity=Decimal(str(item_data['quantity'])),
-                        unit_price=Decimal(str(item_data['unit_price'])),
-                        discount=Decimal(str(item_data.get('discount', 0)))
+                        quantity=Decimal(str(item_data['quantity'])).quantize(Decimal('0.01')),
+                        unit_price=Decimal(str(item_data['unit_price'])).quantize(Decimal('0.01')),
+                        discount=Decimal(str(item_data.get('discount', 0))).quantize(Decimal('0.01'))
                     )
-            except json.JSONDecodeError as e:
-                print("JSON decode error:", e)
+            except (json.JSONDecodeError, decimal.InvalidOperation) as e:
                 return JsonResponse({
                     'success': False,
-                    'error': f'Invalid JSON format for items: {str(e)}'
+                    'error': f'Invalid data format: {str(e)}'
                 }, status=400)
-            except Exception as e:
-                print("Error creating items:", e)
-                # Don't return error here, just log it
-                import traceback
-                traceback.print_exc()
-        else:
-            print("No items found in POST data")
         
         # Create a document record for this quote
         document = Document.objects.create(
@@ -113,12 +124,14 @@ def quote_create(request):
             client_id=quote.client_id,
             description=quote.description,
             subtotal=quote.subtotal,
+            apply_vat=quote.apply_vat,
             tax_rate=quote.tax_rate,
             tax_amount=quote.tax_amount,
             total_amount=quote.total_amount,
             document_date=timezone.now().date(),
             status='DRAFT',
-            quote=quote  # Ensure quote is saved before creating document
+            quote=quote,  # Ensure quote is saved before creating document
+            created_by_id=request.user.id if request.user.is_authenticated else None
         )
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -225,7 +238,20 @@ class DocumentListView(ListView):
     model = Document
     template_name = 'documents/document_list.html'
     context_object_name = 'documents'
-    paginate_by = 20
+    
+    def get_paginate_by(self, queryset):
+        """
+        Get the number of items per page from the request parameter.
+        """
+        per_page = self.request.GET.get('per_page', '10')
+        try:
+            per_page = int(per_page)
+            # Limit the range to prevent performance issues
+            if per_page in [10, 20, 50, 100]:
+                return per_page
+            return 10
+        except (ValueError, TypeError):
+            return 10
     
     def get_queryset(self):
         queryset = Document.objects.all().order_by('-created_at')
@@ -302,8 +328,20 @@ def delete_document(request, pk):
         try:
             document = get_object_or_404(Document, pk=pk)
             
+            # If deleting an invoice that was generated from a quote, reset the quote status
+            if document.document_type == 'INVOICE' and document.quote:
+                # Reset the quote status to SENT so it can be invoiced again
+                document.quote.status = 'SENT'
+                document.quote.save()
+                
+                # Also reset the quote document status if it exists
+                quote_doc = Document.objects.filter(quote=document.quote, document_type='QUOTE').first()
+                if quote_doc:
+                    quote_doc.status = 'SENT'
+                    quote_doc.save()
+            
             # Check if the document is associated with a quote or invoice
-            if hasattr(document, 'quote'):
+            if hasattr(document, 'quote') and document.document_type == 'QUOTE':
                 document.quote.delete()
             elif hasattr(document, 'invoice'):
                 document.invoice.delete()
@@ -529,18 +567,96 @@ def generate_invoice_from_quote(request, quote_id):
             'error': str(e)
         }, status=500)
 
+def generate_invoice_from_document(request, pk):
+    """Generate invoice from a document (wrapper for document-based URLs)"""
+    document = get_object_or_404(Document, pk=pk)
+    if document.document_type == 'QUOTE' and document.quote:
+        # Check if invoice already exists
+        existing_invoice = Document.objects.filter(quote=document.quote, document_type='INVOICE').first()
+        if existing_invoice:
+            messages.info(request, 'Invoice already exists for this quote')
+            return redirect('documents:document_detail', pk=existing_invoice.id)
+        
+        try:
+            invoice = document.quote.convert_to_invoice()
+            messages.success(request, f'Invoice {invoice.invoice_number} created successfully')
+            return redirect('documents:document_detail', pk=invoice.id)
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('documents:document_detail', pk=pk)
+    else:
+        messages.error(request, 'Can only generate invoices from quotes')
+        return redirect('documents:document_detail', pk=pk)
+
 class DocumentUpdateView(UpdateView):
     model = Document
     template_name = 'documents/document_form.html'
-    fields = ['description', 'client', 'document_type', 'status', 'total_amount', 'tax_rate', 'due_date']
+    fields = ['description', 'client', 'document_type', 'status', 'apply_vat', 'tax_rate', 'total_amount', 'due_date']
+    
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        
+        # If document is INVOICED, disable all fields except status
+        if self.object.status == 'INVOICED':
+            for field_name in form.fields:
+                if field_name != 'status':
+                    form.fields[field_name].disabled = True
+                    form.fields[field_name].widget.attrs['readonly'] = True
+        
+        return form
     
     def get_success_url(self):
-        return reverse_lazy('documents:document_list')
+        return reverse_lazy('documents:document_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        # Add any additional processing here if needed
-        return response
+        # Get the original object to compare changes
+        original = Document.objects.get(pk=self.object.pk)
+        original_status = original.status
+        
+        # Save the form first
+        self.object = form.save(commit=False)
+        
+        # Prevent manual status change to INVOICED without actual invoice
+        if self.object.status == 'INVOICED' and original_status != 'INVOICED':
+            # Check if invoice actually exists
+            if self.object.document_type == 'QUOTE':
+                has_invoice = Document.objects.filter(
+                    quote=self.object.quote, 
+                    document_type='INVOICE'
+                ).exists()
+                
+                if not has_invoice:
+                    messages.error(self.request, 'Cannot set status to INVOICED manually. Please use the "Generate Invoice" button.')
+                    return redirect('documents:document_detail', pk=self.object.pk)
+        
+        # Recalculate tax and total based on apply_vat
+        if self.object.apply_vat:
+            self.object.tax_amount = self.object.subtotal * (self.object.tax_rate / 100)
+        else:
+            self.object.tax_amount = 0
+        self.object.total_amount = self.object.subtotal + self.object.tax_amount
+        
+        # If status changed, update related Quote status as well
+        if original_status != self.object.status and self.object.document_type == 'QUOTE' and self.object.quote:
+            self.object.quote.status = self.object.status
+            self.object.quote.save()
+        
+        # Save the object
+        self.object.save()
+        
+        # Check if any field other than status changed
+        fields_to_check = ['description', 'client_id', 'document_type', 'apply_vat', 'tax_rate', 'total_amount', 'due_date']
+        has_non_status_changes = any(
+            getattr(original, field) != getattr(self.object, field) 
+            for field in fields_to_check
+        )
+        
+        # Only increment edit count if non-status fields changed
+        if has_non_status_changes:
+            self.object.increment_edit_count()
+        
+        messages.success(self.request, 'Document updated successfully.')
+        return redirect(self.get_success_url())
 
 def document_download(request, pk):
     document = get_object_or_404(Document, pk=pk)
@@ -647,6 +763,60 @@ def invoice_list(request):
         'total_revenue': total_revenue
     })
 
+@login_required
+@require_POST
+def update_document_status(request, pk):
+    """
+    Update the status of a document via AJAX
+    """
+    try:
+        document = get_object_or_404(Document, pk=pk)
+        new_status = request.POST.get('status')
+        
+        # Validate the new status
+        valid_statuses = dict(Document.STATUS_CHOICES)
+        if new_status not in valid_statuses:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid status provided'
+            }, status=400)
+        
+        # Check if the status transition is valid based on business logic
+        old_status = document.status
+        
+        # Define valid status transitions
+        valid_transitions = {
+            'DRAFT': ['SENT', 'CANCELLED'],
+            'SENT': ['PAID', 'OVERDUE', 'CANCELLED'],
+            'PAID': [],  # Cannot change from PAID
+            'OVERDUE': ['PAID', 'CANCELLED'],
+            'CANCELLED': [],  # Cannot change from CANCELLED
+            'COMPLETED': []  # Cannot change from COMPLETED
+        }
+        
+        if new_status not in valid_transitions.get(old_status, []) and new_status != old_status:
+            return JsonResponse({
+                'success': False,
+                'error': f'Cannot change status from {old_status} to {new_status}'
+            }, status=400)
+        
+        # Update the status
+        document.status = new_status
+        document.save(update_fields=['status'])
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Status updated to {valid_statuses[new_status]}',
+            'new_status': new_status,
+            'new_status_display': valid_statuses[new_status]
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
 def generate_document_pdf(request, pk):
     try:
         document = get_object_or_404(Document, pk=pk)
@@ -668,8 +838,47 @@ def quote_preview(request, quote_id=None):
     """
     Render the quote preview template.
     If quote_id is provided, it shows the existing quote.
+    If POST request, store data in session for preview.
     If not, it shows an empty template for real-time preview.
     """
+    if request.method == 'POST':
+        # Handle preview data from quote creation form
+        try:
+            # Store the preview data in session
+            preview_data = {
+                'client_id': request.POST.get('client'),
+                'quote_number': request.POST.get('quote_number'),
+                'title': request.POST.get('title'),
+                'description': request.POST.get('description'),
+                'subtotal': request.POST.get('subtotal'),
+                'tax_rate': request.POST.get('tax_rate', '16'),
+                'tax_amount': request.POST.get('tax_amount'),
+                'total_amount': request.POST.get('total_amount'),
+                'valid_until': request.POST.get('valid_until'),
+                'terms': request.POST.get('terms'),
+                'items': json.loads(request.POST.get('items', '[]'))
+            }
+            
+            request.session['preview_quote'] = preview_data
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': reverse('documents:quote_preview_template')
+                })
+            else:
+                return redirect('documents:quote_preview_template')
+                
+        except Exception as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'error': str(e)
+                }, status=400)
+            else:
+                messages.error(request, f'Error creating preview: {str(e)}')
+                return redirect('documents:quote_create')
+    
     context = {}
     
     if quote_id:
@@ -679,7 +888,7 @@ def quote_preview(request, quote_id=None):
             
             # Calculate item totals for display
             for item in quote_items:
-                item.total = item.quantity * item.unit_price * (1 - item.discount / 100)
+                item.total = item.get_total()
             
             context = {
                 'quote': quote,
@@ -762,3 +971,54 @@ def quote_preview_template(request):
         # If any error occurs, redirect back to quote create page
         messages.error(request, f"Error generating preview: {str(e)}")
         return redirect('documents:quote_create')
+
+@require_GET
+def chart_data(request):
+    """
+    Provide chart data for quotes and invoices
+    """
+    quotes = Document.objects.filter(document_type='QUOTE')
+    invoices = Document.objects.filter(document_type='INVOICE')
+
+    chart_data = {
+        'quotes_count': quotes.count(),
+        'invoices_count': invoices.count(),
+        'quotes_total_value': float(quotes.aggregate(total=Sum('total_amount'))['total'] or 0),
+        'invoices_total_value': float(invoices.aggregate(total=Sum('total_amount'))['total'] or 0)
+    }
+
+    return JsonResponse(chart_data)
+
+@login_required
+def expense_sheet_detail(request, pk):
+    """View for displaying an Expense Sheet document"""
+    document = get_object_or_404(Document, pk=pk, document_type='EXPENSE_SHEET')
+    
+    # Check permissions
+    if not request.user.is_superuser:
+        if hasattr(request, 'profile') and request.profile:
+            if document.expense and document.expense.profile != request.profile:
+                messages.error(request, "You don't have permission to view this expense sheet.")
+                return redirect('expenses:expense_list')
+        elif document.created_by != request.user:
+            messages.error(request, "You don't have permission to view this expense sheet.")
+            return redirect('expenses:expense_list')
+    
+    return render(request, 'documents/expense_sheet_detail.html', {'document': document})
+
+@login_required
+def purchase_order_detail(request, pk):
+    """View for displaying a Purchase Order document"""
+    document = get_object_or_404(Document, pk=pk, document_type='PURCHASE_ORDER')
+    
+    # Check permissions
+    if not request.user.is_superuser:
+        if hasattr(request, 'profile') and request.profile:
+            if document.purchase and document.purchase.profile != request.profile:
+                messages.error(request, "You don't have permission to view this purchase order.")
+                return redirect('purchases:purchase_list')
+        elif document.created_by != request.user:
+            messages.error(request, "You don't have permission to view this purchase order.")
+            return redirect('purchases:purchase_list')
+    
+    return render(request, 'documents/purchase_order_detail.html', {'document': document})

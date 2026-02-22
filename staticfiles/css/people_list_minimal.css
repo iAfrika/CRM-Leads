@@ -62,6 +62,10 @@
   --transition-slow: 350ms ease;
 }
 
+body {
+  font-family: 'Nunito', sans-serif;
+}
+
 /* Base Layout */
 .people-container {
   max-width: 1800px;

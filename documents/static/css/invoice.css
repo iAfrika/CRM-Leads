@@ -89,12 +89,16 @@ body {
 .right-details {
     width: 40%;
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .document-title {
     font-size: 3rem;
     font-weight: bold;
     margin-bottom: 5px;
+    text-align: right;
 }
 
 .document-subtitle {
@@ -110,6 +114,12 @@ body {
 .document-number {
     font-size: 1.5rem;
     color: #666;
+    text-align: right;
+}
+
+.status-section {
+    text-align: right;
+    margin-top: 10px;
 }
 
 .detail-row {

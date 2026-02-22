@@ -1,5 +1,6 @@
-function showDetailsModal(clientId, name, contactPerson, email, phone, address, notes) {
+function showDetailsModal(clientId, name, contactPerson, email, phone, address, notes, clientIdCode) {
     document.getElementById('detailsClientName').textContent = name;
+    document.getElementById('detailsClientId').textContent = clientIdCode || 'Not assigned';
     document.getElementById('detailsContactPerson').textContent = contactPerson || 'No contact person';
     document.getElementById('detailsEmail').textContent = email || 'No email';
     document.getElementById('detailsPhone').textContent = phone || 'No phone';

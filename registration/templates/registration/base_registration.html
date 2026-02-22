@@ -178,14 +178,14 @@
         <div class="nav-links">
             <a href="{% url 'registration:registration_home' %}">Home</a>
             <a href="{% url 'registration:subscription_plans' %}">Pricing</a>
-            <a href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+            <a href="{% url 'dashboard:main_dashboard' %}">Dashboard</a>
         </div>
         
         <div class="nav-actions">
             <a href="{% url 'authentication:login' %}" class="login-button">
                 <i class="fas fa-sign-in-alt"></i> Login
             </a>
-            <a href="{% url 'registration:register_company' %}" class="register-button">
+            <a href="{% url 'authentication:login' %}" class="register-button">
                 <i class="fas fa-user-plus"></i> Register
             </a>
         </div>

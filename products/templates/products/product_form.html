@@ -1,341 +1,67 @@
-{% extends "products/base_products.html" %}
+{% extends 'base.html' %}
 {% load static %}
 
-{% block product_content %}
-<div class="card">
-    <div class="header-actions">
-        <h1>
-            <i class="fas fa-box"></i>
-            {% if product %}Edit{% else %}Add{% endif %} Product
-        </h1>
-    </div>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <form method="post" class="product-form" action="{% if product %}{% url 'products:product_update' product.id %}{% else %}{% url 'products:product_create' %}{% endif %}" novalidate>
-        {% csrf_token %}
-        
-        {% if form.non_field_errors %}
-        <div class="error-message form-wide-error">
-            {% for error in form.non_field_errors %}
-            <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <div class="form-grid">
-            <div class="form-group">
-                <label for="{{ form.name.id_for_label }}" class="form-label">Product Name *</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <div class="error-message">
-                    {% for error in form.name.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.item_code.id_for_label }}" class="form-label">Item Code</label>
-                {{ form.item_code }}
-                {% if form.item_code.errors %}
-                <div class="error-message">
-                    {% for error in form.item_code.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <div class="help-text">Leave blank for auto-generation</div>
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
-                {{ form.category }}
-                {% if form.category.errors %}
-                <div class="error-message">
-                    {% for error in form.category.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
-                {{ form.status }}
-                {% if form.status.errors %}
-                <div class="error-message">
-                    {% for error in form.status.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.buying_price.id_for_label }}" class="form-label">Buying Price (KES) *</label>
-                {{ form.buying_price }}
-                {% if form.buying_price.errors %}
-                <div class="error-message">
-                    {% for error in form.buying_price.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.selling_price.id_for_label }}" class="form-label">Selling Price (KES) *</label>
-                {{ form.selling_price }}
-                {% if form.selling_price.errors %}
-                <div class="error-message">
-                    {% for error in form.selling_price.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.current_stock.id_for_label }}" class="form-label">Current Stock *</label>
-                {{ form.current_stock }}
-                {% if form.current_stock.errors %}
-                <div class="error-message">
-                    {% for error in form.current_stock.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="{{ form.reorder_level.id_for_label }}" class="form-label">Reorder Level *</label>
-                {{ form.reorder_level }}
-                {% if form.reorder_level.errors %}
-                <div class="error-message">
-                    {% for error in form.reorder_level.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group full-width">
-                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-                {{ form.description }}
-                {% if form.description.errors %}
-                <div class="error-message">
-                    {% for error in form.description.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <a href="{% url 'products:product_list' %}" class="btn btn-secondary">
-                <i class="fas fa-times"></i> Cancel
-            </a>
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-save"></i> Save Product
-            </button>
-        </div>
-    </form>
-</div>
-{% endblock %}
+{% block title %}{{ action }} Product{% endblock %}
 
 {% block extra_css %}
-{{ block.super }}
-<style>
-    .product-form {
-        max-width: 100%;
-    }
-    
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .full-width {
-        grid-column: 1 / -1;
-    }
-    
-    .form-group {
-        margin-bottom: 0;
-    }
-    
-    .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #64748b;
-        margin-bottom: 0.5rem;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        color: #1e293b;
-        background: white;
-        transition: all 0.2s;
-    }
-    
-    .form-control:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    select.form-control {
-        padding-right: 2rem;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.5rem center;
-        background-repeat: no-repeat;
-        background-size: 1.5em 1.5em;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-    }
-    
-    textarea.form-control {
-        min-height: 100px;
-        resize: vertical;
-    }
-    
-    .help-text {
-        font-size: 0.75rem;
-        color: #64748b;
-        margin-top: 0.25rem;
-    }
-    
-    .error-message {
-        color: #dc2626;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-    
-    .form-wide-error {
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background-color: rgba(239, 68, 68, 0.1);
-        border-radius: 0.375rem;
-    }
-    
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e2e8f0;
-    }
-    
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    
-    .btn-primary {
-        background: #3b82f6;
-        color: white;
-        border: none;
-    }
-    
-    .btn-primary:hover {
-        background: #2563eb;
-    }
-    
-    .btn-secondary {
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .btn-secondary:hover {
-        background: #e2e8f0;
-        color: #1e293b;
-    }
+<link rel="stylesheet" href="{% static 'products/css/product-form-new.css' %}">
+{% endblock %}
 
-    .messages {
-        margin-bottom: 1.5rem;
-    }
+{% block content %}
+<div class="product-form-container">
+    <div class="product-form-card">
+        <div class="card-body p-4">
+            <h1 class="product-form-header">
+                <i class="fas fa-box-open me-2"></i>{{ action }} Product
+            </h1>
 
-    .alert {
-        padding: 0.75rem 1rem;
-        border-radius: 0.375rem;
-        margin-bottom: 0.5rem;
-    }
+            <form method="post" novalidate class="product-form">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="mb-4 form-group{% if field.errors %} has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="form-label">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="text-danger">*</span>
+                        {% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <div class="form-text">
+                        <i class="fas fa-info-circle me-1"></i>{{ field.help_text }}
+                    </div>
+                    {% endif %}
+                    {% if field.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in field.errors %}
+                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
 
-    .alert-success {
-        background-color: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
-    }
-
-    .alert-error {
-        background-color: #fee2e2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-</style>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to List</span>
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span>{{ action }} Product</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.product-form');
-    const requiredFields = ['name', 'category', 'buying_price', 'selling_price', 'current_stock', 'reorder_level'];
-    
-    form.addEventListener('submit', function(e) {
-        let hasError = false;
-        
-        requiredFields.forEach(field => {
-            const input = document.getElementById(`id_${field}`);
-            const errorDiv = input.nextElementSibling;
-            
-            if (!input.value.trim()) {
-                e.preventDefault();
-                hasError = true;
-                
-                if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-                    const newErrorDiv = document.createElement('div');
-                    newErrorDiv.className = 'error-message';
-                    newErrorDiv.innerHTML = '<p>This field is required.</p>';
-                    input.parentNode.insertBefore(newErrorDiv, input.nextSibling);
-                }
-            } else if (errorDiv && errorDiv.classList.contains('error-message')) {
-                errorDiv.remove();
-            }
-        });
-        
-        if (hasError) {
-            const firstError = form.querySelector('.error-message');
-            if (firstError) {
-                firstError.previousElementSibling.focus();
-            }
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add form validation and enhancement here if needed
     });
-});
 </script>
-{% endblock %} 
+{% endblock %}

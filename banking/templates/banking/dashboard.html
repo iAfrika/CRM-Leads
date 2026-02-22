@@ -39,7 +39,17 @@
         {% for account in accounts %}
             <div class="account-card">
                 <div class="account-type">{{ account.get_account_type_display }}</div>
-                <div class="account-project">{{ account.project.name }}</div>
+                <div class="account-project">
+                    {% if account.project %}
+                        {{ account.project.name }}
+                    {% else %}
+                        {% if account.is_main_company_account %}
+                            Main Company Account
+                        {% else %}
+                            General Account
+                        {% endif %}
+                    {% endif %}
+                </div>
                 <div class="account-number">{{ account.account_number }}</div>
                 <div class="account-balance">${{ account.balance|floatformat:2|intcomma }}</div>
                 <div class="account-actions">

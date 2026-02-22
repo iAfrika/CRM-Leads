@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const steps = document.querySelectorAll('.form-step');
     const stepIndicators = document.querySelectorAll('.steps .step');
     
+    console.log('DOM loaded', { 
+        formFound: !!form, 
+        stepsFound: steps.length, 
+        indicatorsFound: stepIndicators.length 
+    });
+    
     // Initialize the form if it exists
     if (form && steps.length > 0) {
         initForm();
@@ -24,10 +30,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add event listeners to the next buttons
         const nextButtons = document.querySelectorAll('.btn-next');
+        console.log('Next buttons found:', nextButtons.length);
         nextButtons.forEach(button => {
             button.addEventListener('click', function() {
+                console.log('Next button clicked, current step:', currentStep);
                 if (validateStep(currentStep)) {
+                    console.log('Step validated, moving to next step');
                     nextStep();
+                } else {
+                    console.log('Step validation failed');
                 }
             });
         });
@@ -69,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {number} stepIndex The index of the step to show
      */
     function showStep(stepIndex) {
+        console.log('Showing step:', stepIndex);
         // Hide all steps
         steps.forEach(step => step.style.display = 'none');
         
@@ -107,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
      * Move to the next step in the form
      */
     function nextStep() {
+        console.log('nextStep called, current step:', currentStep, 'total steps:', steps.length);
         if (currentStep < steps.length - 1) {
             showStep(currentStep + 1);
         }
@@ -176,15 +189,18 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function validateStep(stepIndex) {
         const stepFields = steps[stepIndex].querySelectorAll('input, select, textarea');
+        console.log('Validating step', stepIndex, 'with', stepFields.length, 'fields');
         let isValid = true;
         
         // Validate each field in the step
         stepFields.forEach(field => {
             if (!validateField(field)) {
+                console.log('Field validation failed:', field.id);
                 isValid = false;
             }
         });
         
+        console.log('Step validation result:', isValid);
         return isValid;
     }
     

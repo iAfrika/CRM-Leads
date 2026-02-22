@@ -505,230 +505,6 @@ body {
   background-color: var(--status-closed-bg);
 }
 
-/* Dark mode adjustments */
-html.dark-mode .lead-status {
-  color: #ffffff !important;
-}
-
-html.dark-mode .lead-status i {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-html.dark-mode .lead-status.new {
-  background-color: rgba(12, 45, 107, 0.4);
-}
-
-html.dark-mode .lead-status.contacted {
-  background-color: rgba(11, 74, 95, 0.4);
-}
-
-html.dark-mode .lead-status.qualified {
-  background-color: rgba(21, 128, 61, 0.4);
-}
-
-html.dark-mode .lead-status.proposal {
-  background-color: rgba(37, 99, 235, 0.4);
-}
-
-html.dark-mode .lead-status.negotiation {
-  background-color: rgba(245, 158, 11, 0.4);
-}
-
-html.dark-mode .lead-status.lost {
-  background-color: rgba(220, 38, 38, 0.4);
-}
-
-html.dark-mode .lead-status.closed {
-  background-color: rgba(34, 197, 94, 0.4);
-}
-
-/* Notes & Documents */
-.note-item, .document-item {
-  background-color: var(--card-bg);
-  border-radius: var(--border-radius-sm);
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-  box-shadow: var(--shadow-sm);
-  border-left: 3px solid var(--primary-light);
-  transition: var(--transition);
-}
-
-.note-item:hover, .document-item:hover {
-  box-shadow: var(--shadow);
-  transform: translateY(-2px);
-}
-
-.note-header, .document-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-sm);
-  padding-bottom: var(--spacing-xs);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-.note-meta, .document-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.note-meta strong, .document-meta strong {
-  color: var(--info-value-color);
-  font-weight: 600;
-  font-size: 0.875rem;
-  margin-bottom: 0.125rem;
-}
-
-.note-meta small, .document-meta small {
-  color: var(--meta-text-color);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.note-content, .document-content {
-  font-size: 0.875rem;
-  color: var(--note-text-color);
-  line-height: 1.6;
-}
-
-.document-download {
-  background-color: var(--download-btn-bg) !important;
-  color: var(--download-btn-text) !important;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: var(--transition);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.document-download i {
-  color: var(--download-btn-icon);
-  font-size: 1rem;
-  opacity: 0.9;
-}
-
-.document-download:hover {
-  background-color: var(--download-btn-hover-bg) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-.document-download:hover i {
-  opacity: 1;
-}
-
-/* Dark mode adjustments */
-html.dark-mode .document-download {
-  background-color: rgba(30, 64, 175, 0.7) !important;
-  color: #e2e8f0 !important;
-}
-
-html.dark-mode .document-download:hover {
-  background-color: rgba(30, 58, 138, 0.8) !important;
-  color: #f8fafc !important;
-}
-
-/* Timeline */
-.timeline {
-  position: relative;
-  padding-left: 1.5rem;
-  margin-left: 0;
-}
-
-.timeline:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0.6875rem;
-  width: 2px;
-  background-color: var(--timeline-line-color);
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: var(--spacing-md);
-}
-
-.timeline-item:last-child {
-  margin-bottom: 0;
-}
-
-.timeline-item:before {
-  content: '';
-  position: absolute;
-  left: -1.5rem;
-  top: 0.25rem;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--timeline-dot-color);
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
-}
-
-.timeline-content {
-  background-color: var(--card-bg);
-  padding: 0.75rem;
-  border-radius: var(--border-radius-sm);
-  box-shadow: var(--shadow-sm);
-  border-left: 3px solid var(--primary-light);
-}
-
-.timeline-header {
-  margin-bottom: var(--spacing-xs);
-  padding-bottom: var(--spacing-xs);
-  border-bottom: 1px solid var(--timeline-border-color);
-}
-
-.timeline-title {
-  font-size: 0.875rem;
-  color: var(--timeline-header-color);
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-}
-
-.timeline-title i {
-  margin-right: var(--spacing-xs);
-  color: var(--primary-color);
-}
-
-.timeline-date {
-  font-size: 0.75rem;
-  color: var(--timeline-date-color);
-  font-weight: 500;
-}
-
-.timeline-body {
-  font-size: 0.825rem;
-  color: var(--timeline-content-color);
-  margin-top: var(--spacing-xs);
-  padding-top: var(--spacing-xs);
-  border-top: 1px solid var(--timeline-border-color);
-  line-height: 1.6;
-}
-
-.timeline-body p {
-  margin: 0 0 var(--spacing-xs) 0;
-}
-
-.timeline-body small {
-  display: block;
-  margin-top: 0.25rem;
-  color: var(--timeline-date-color);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -1158,278 +934,99 @@ textarea.form-control {
   background-color: var(--primary-light);
 }
 
-/* Dark Mode Styles */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #121826;
-    --card-bg: #1e2536;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
-  }
-  
-  /* Links */
-  a:not(.btn) {
-    color: #60a5fa !important;
-  }
-  
-  a:not(.btn):hover {
-    color: #93c5fd !important;
-  }
-  
-  /* Card and border adjustments */
-  .lead-card {
-    border-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .lead-info-item {
-    background-color: rgba(255, 255, 255, 0.02);
-    border-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .lead-info-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .lead-description {
-    background-color: rgba(255, 255, 255, 0.02);
-    border-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  /* Note and document items */
-  .note-item, .document-item {
-    border-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .note-header, .document-header, 
-  .lead-card-header, .timeline-body {
-    border-color: rgba(255, 255, 255, 0.05);
-  }
-  
-  /* Button adjustments for better contrast */
-  .btn-secondary {
-    background-color: rgba(96, 165, 250, 0.2);
-    color: #93c5fd;
-  }
-  
-  .btn-secondary:hover {
-    background-color: rgba(96, 165, 250, 0.3);
-  }
-  
-  /* Info values */
-  .lead-info-value a {
-    color: #e2e8f0;
-  }
-  
-  .lead-info-value a i {
-    color: var(--primary-light);
-    opacity: 0.7;
-  }
-  
-  .lead-info-value a:hover {
-    color: #f8fafc;
-  }
-  
-  /* Status adjustments for dark mode */
-  .lead-status.new,
-  .lead-status.contacted,
-  .lead-status.qualified,
-  .lead-status.proposal,
-  .lead-status.negotiation,
-  .lead-status.closed,
-  .lead-status.lost {
-    color: #f1f5f9;
-  }
-  
-  .lead-status.new {
-    background-color: rgba(12, 45, 107, 0.4);
-  }
-  
-  .lead-status.contacted {
-    background-color: rgba(11, 74, 95, 0.4);
-  }
-  
-  .lead-status.qualified {
-    background-color: rgba(21, 128, 61, 0.4);
-  }
-  
-  .lead-status.proposal {
-    background-color: rgba(37, 99, 235, 0.4);
-  }
-  
-  .lead-status.negotiation {
-    background-color: rgba(245, 158, 11, 0.4);
-  }
-  
-  .lead-status.lost {
-    background-color: rgba(220, 38, 38, 0.4);
-  }
-  
-  .lead-status.closed {
-    background-color: rgba(34, 197, 94, 0.4);
-  }
-  
-  /* Tags */
-  .lead-tag {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-secondary);
-  }
-  
-  /* Modal backdrop */
-  .modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.7);
-  }
-  
-  /* Timeline dot */
-  .timeline-item:before {
-    border-color: var(--card-bg);
-  }
-  
-  /* Scrollbar */
-  .lead-card-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .lead-card-body::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .lead-card-body::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 1.5rem;
+  margin-left: 0;
 }
 
-/* Add dark mode overrides to preserve dark mode appearance */
-html.dark-mode .lead-info-label,
-html.dark-mode .lead-info-value,
-html.dark-mode .lead-info-description p,
-html.dark-mode .note-meta strong,
-html.dark-mode .document-meta strong,
-html.dark-mode .note-content,
-html.dark-mode .document-content,
-html.dark-mode .timeline-header h4,
-html.dark-mode .timeline-body,
-html.dark-mode .empty-state,
-html.dark-mode .empty-state p {
-  color: var(--text-primary);
+.timeline:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.6875rem;
+  width: 2px;
+  background-color: var(--timeline-line-color);
 }
 
-html.dark-mode .lead-note-date,
-html.dark-mode .lead-document-meta,
-html.dark-mode .note-meta small,
-html.dark-mode .document-meta small,
-html.dark-mode .timeline-date,
-html.dark-mode .timeline-body small {
-  color: var(--text-secondary);
+.timeline-item {
+  position: relative;
+  margin-bottom: var(--spacing-md);
 }
 
-/* Timeline dark mode overrides */
-html.dark-mode .timeline:before {
-  background-color: rgba(67, 97, 238, 0.2);
+.timeline-item:last-child {
+  margin-bottom: 0;
 }
 
-html.dark-mode .timeline-item:before {
-  border: 2px solid var(--card-bg);
-  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
+.timeline-item:before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--timeline-dot-color);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
 }
 
-html.dark-mode .timeline-title {
-  color: var(--text-primary);
-}
-
-html.dark-mode .timeline-title i {
-  color: var(--primary-light);
-}
-
-html.dark-mode .timeline-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-html.dark-mode .timeline-body {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Dark mode overrides for lead name */
-html.dark-mode .lead-detail-name {
-  color: #e2e8f0;
-}
-
-html.dark-mode .lead-detail-name::after {
-  background-color: rgba(30, 64, 175, 0.7);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-html.dark-mode .lead-detail-name:hover::after {
-  background-color: rgba(30, 58, 138, 0.8);
-}
-
-/* Dark mode overrides for lead information */
-html.dark-mode .section-title,
-html.dark-mode .lead-info-label,
-html.dark-mode .lead-info-value {
-  color: var(--text-primary);
-}
-
-html.dark-mode .lead-info-item {
+.timeline-content {
   background-color: var(--card-bg);
-  border-color: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--primary-light);
 }
 
-html.dark-mode .lead-info-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+.timeline-header {
+  margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--timeline-border-color);
 }
 
-html.dark-mode .lead-tag {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+.timeline-title {
+  font-size: 0.875rem;
+  color: var(--timeline-header-color);
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
-html.dark-mode .lead-tag i {
-  color: var(--primary-light);
+.timeline-title i {
+  margin-right: var(--spacing-xs);
+  color: var(--primary-color);
 }
 
-html.dark-mode .lead-detail-company {
-  color: var(--text-secondary);
+.timeline-date {
+  font-size: 0.75rem;
+  color: var(--timeline-date-color);
+  font-weight: 500;
 }
 
-html.dark-mode .lead-detail-company::before {
-  color: var(--primary-light);
+.timeline-body {
+  font-size: 0.825rem;
+  color: var(--timeline-content-color);
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--timeline-border-color);
+  line-height: 1.6;
 }
 
-html.dark-mode .lead-detail-tags .lead-status,
-html.dark-mode .lead-detail-tags .lead-tag {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+.timeline-body p {
+  margin: 0 0 var(--spacing-xs) 0;
 }
 
-html.dark-mode .lead-detail-tags .lead-status i,
-html.dark-mode .lead-detail-tags .lead-tag i {
-  color: var(--primary-light);
+.timeline-body small {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--timeline-date-color);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-html.dark-mode .lead-detail-tags .lead-status:hover,
-html.dark-mode .lead-detail-tags .lead-tag:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
-}
-
-/* Dark mode adjustments for lead card header */
-html.dark-mode .lead-card-header {
-  background-color: rgba(30, 41, 59, 0.5);
-  border-bottom-color: rgba(226, 232, 240, 0.1);
-}
-
-html.dark-mode .lead-name {
-  color: #e2e8f0;
-}
-
-html.dark-mode .lead-card-header::before {
-  background: linear-gradient(to right, rgba(30, 64, 175, 0.7), rgba(67, 97, 238, 0.7));
-}
+/* Removed dark mode styles */
+/* All dark mode styles have been deleted to ensure no dark mode implementation */

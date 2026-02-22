@@ -1,34 +1,15 @@
 from django import forms
-from .models import (
-    Category, 
-    Product, 
-    InventoryTransaction, 
-    Supplier, 
-    Purchase, 
-    PurchaseItem
-)
+from .models import Product, Category, Supplier, InventoryTransaction, Purchase, PurchaseItem
 
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter category name'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Enter category description'
-            })
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter category name'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter category description'}),
         }
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['name'].required = True
-        self.fields['description'].required = False
-    
+
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if name:
@@ -91,9 +72,10 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['item_code'].required = False
+        self.fields['category'].required = False
         
         # Add required field indicators
-        for field in ['name', 'category', 'buying_price', 'selling_price', 'current_stock', 'reorder_level']:
+        for field in ['name', 'buying_price', 'selling_price', 'current_stock', 'reorder_level']:
             self.fields[field].required = True
     
     def clean(self):
@@ -272,4 +254,4 @@ PurchaseItemFormSet = forms.inlineformset_factory(
     form=PurchaseItemForm,
     extra=1,
     can_delete=True
-) 
+)

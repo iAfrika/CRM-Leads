@@ -27,22 +27,17 @@ from authentication.views import update_theme  # Add this import
 def landing_page(request):
     return render(request, 'landing.html')
 
-def register_company(request):
-    return render(request, 'company_registration.html')
-
 urlpatterns = [
     path('', landing_page, name='landing_page'),
-    path('register/', register_company, name='register_company'),
     path('admin/', admin.site.urls),
     # Include authentication URLs
     path('auth/', include('authentication.urls')),
     # Include all app URLs used in the sidebar
-    path('dashboard/', include('dashboard.urls')),
+    path('dashboard/', include('dashboard.urls')),  # Added this line
     path('people/', include('people.urls')),
     path('clients/', include('clients.urls')),
     path('leads/', include('leads.urls')),
     path('project_management/', include('project_management.urls')),
-    path('products/', include('products.urls')),
     path('sales/', include('sales.urls')),
     path('purchases/', include('purchases.urls')),
     path('expenses/', include('expenses.urls')),
@@ -50,6 +45,7 @@ urlpatterns = [
     path('documents/', include('documents.urls')),
     path('reports/', include('reports.urls')),
     path('site_admin/', include('site_admin.urls')),
+    path('products/', include('products.urls')),
     # Registration URLs
     path('registration/', include('registration.urls', namespace='registration')),
     path('communication/', include('communication.urls')),  # Add communication app URLs

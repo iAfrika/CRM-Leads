@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit User Role - {{ company_user.user.get_full_name|default:company_user.user.username }}{% endblock %}
+
+{% block header_title %}Edit User Role{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/user_management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="user-management-container">
+    <div class="page-header">
+        <h2>
+            <i class="fas fa-user-cog" style="color: var(--primary-color);"></i>
+            Edit User Role
+        </h2>
+        <div class="header-actions">
+            <a href="{% url 'registration:user_profile' company.id company_user.user.id %}" class="btn btn-outline-info">
+                <i class="fas fa-user"></i> View Profile
+            </a>
+            <a href="{% url 'registration:company_users' company.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-info-circle me-2"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-user-cog me-2"></i>Edit User Role & Permissions</h5>
+            <p class="mb-0 text-muted">Update role for <strong>{{ company_user.user.get_full_name|default:company_user.user.username }}</strong> at <strong>{{ company.name }}</strong></p>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'registration:edit_company_user' company.id company_user.user.id %}">
+                {% csrf_token %}
+                
+                <!-- User Information Display -->
+                <div class="user-info-section mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">User</label>
+                                <div class="user-display-card">
+                                    <div class="d-flex align-items-center">
+                                        {% if company_user.user.profile and company_user.user.profile.avatar %}
+                                            <img src="{{ company_user.user.profile.avatar.url }}" 
+                                                 alt="{{ company_user.user.get_full_name|default:company_user.user.username }}" 
+                                                 class="rounded-circle me-3" 
+                                                 style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="user-placeholder rounded-circle me-3" style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold">{{ company_user.user.get_full_name|default:company_user.user.username }}</div>
+                                            <div class="text-muted">{{ company_user.user.email }}</div>
+                                            <small class="text-muted">@{{ company_user.user.username }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Company</label>
+                                <div class="company-display-card">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-building fa-2x text-primary me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">{{ company.name }}</div>
+                                            <small class="text-muted">{{ company.email }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Role Selection -->
+                <div class="mb-4">
+                    <label for="role" class="form-label">
+                        <i class="fas fa-user-tag me-1"></i>Role
+                    </label>
+                    <select name="role" id="role" class="form-select">
+                        {% for role_value, role_name in roles %}
+                        <option value="{{ role_value }}" {% if company_user.role == role_value %}selected{% endif %}>
+                            {{ role_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">
+                        <small>
+                            <strong>Admin:</strong> Full access to company data and user management<br>
+                            <strong>Manager:</strong> Can manage specific areas and view reports<br>
+                            <strong>Staff:</strong> Basic access to assigned tasks and data<br>
+                            <strong>Viewer:</strong> Read-only access to company information
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Active Status -->
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                               {% if company_user.is_active %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">
+                            <i class="fas fa-toggle-on me-1"></i>Active Status
+                        </label>
+                    </div>
+                    <div class="form-text">
+                        <small>If unchecked, the user will not be able to access this company's data.</small>
+                    </div>
+                </div>
+                
+                <!-- Notes -->
+                <div class="mb-4">
+                    <label for="notes" class="form-label">
+                        <i class="fas fa-sticky-note me-1"></i>Notes
+                    </label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3" 
+                              placeholder="Add any notes about this user's role or responsibilities...">{{ company_user.notes|default:'' }}</textarea>
+                    <div class="form-text">
+                        <small>Optional notes about the user's role, responsibilities, or any special considerations.</small>
+                    </div>
+                </div>
+                
+                <!-- Current Status Display -->
+                <div class="current-status-section mb-4">
+                    <h6><i class="fas fa-info-circle me-2"></i>Current Status</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="status-item">
+                                <strong>Current Role:</strong><br>
+                                <span class="badge role-{{ company_user.role }}">
+                                    {{ company_user.get_role_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="status-item">
+                                <strong>Status:</strong><br>
+                                {% if company_user.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="status-item">
+                                <strong>Added On:</strong><br>
+                                {{ company_user.created_at|date:"M j, Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{% url 'registration:user_profile' company.id company_user.user.id %}" class="btn btn-outline-info">
+                        <i class="fas fa-user"></i> View Profile
+                    </a>
+                    <a href="{% url 'registration:company_users' company.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

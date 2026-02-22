@@ -4,9 +4,12 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.http import JsonResponse
+import asyncio
+import logging
 
-from .models import Email
+from .models import Email, TelegramSession, TelegramChat, TelegramMessage, TelegramContact
 from .forms import EmailForm, EmailSettingsForm
+from .telegram_client import TelegramClientManager
 
 class TelebirdIntroView(View):
     def get(self, request):
@@ -218,15 +221,287 @@ class TelebirdEmailDeleteView(LoginRequiredMixin, View):
 
 class TelebirdTelegramClientView(LoginRequiredMixin, View):
     def get(self, request):
-        # Placeholder for Telegram client view
-        # In a real implementation, you'd fetch Telegram messages, contacts, etc.
+        # Get user's Telegram session
+        telegram_session = getattr(request.user, 'telegram_session', None)
+        
+        # Get Telegram chats and messages
+        chats = []
+        messages = []
+        active_chat = None
+        
+        if telegram_session and telegram_session.is_authenticated:
+            # Get user's chats
+            chats = TelegramChat.objects.filter(
+                user=request.user,
+                is_archived=False
+            ).order_by('-last_message_date')[:20]
+            
+            # Get active chat
+            chat_id = request.GET.get('chat_id')
+            if chat_id:
+                try:
+                    active_chat = TelegramChat.objects.get(
+                        id=chat_id,
+                        user=request.user
+                    )
+                    # Get messages for this chat
+                    messages = TelegramMessage.objects.filter(
+                        chat=active_chat,
+                        is_deleted=False
+                    ).order_by('sent_at')[:50]
+                except TelegramChat.DoesNotExist:
+                    pass
+            elif chats.exists():
+                active_chat = chats.first()
+                messages = TelegramMessage.objects.filter(
+                    chat=active_chat,
+                    is_deleted=False
+                ).order_by('sent_at')[:50]
+        
+        # Get contacts
+        contacts = TelegramContact.objects.filter(
+            user=request.user
+        ).order_by('first_name')[:50]
+        
         context = {
             'active_tab': 'telegram',
-            'messages': [],  # Fetch Telegram messages
-            'contacts': [],  # Fetch Telegram contacts
+            'telegram_session': telegram_session,
+            'chats': chats,
+            'messages': messages,
+            'contacts': contacts,
+            'active_chat': active_chat,
+            'is_authenticated': telegram_session.is_authenticated if telegram_session else False,
         }
         
         return render(request, 'communication/telegram/telegram_client.html', context)
+    
+    def post(self, request):
+        """Handle AJAX requests for sync and other operations"""
+        action = request.POST.get('action')
+        
+        if action == 'sync_contacts':
+            return self._sync_contacts(request)
+        elif action == 'sync_chats':
+            return self._sync_chats(request)
+        elif action == 'sync_messages':
+            return self._sync_messages(request)
+        elif action == 'test_connection':
+            return self._test_connection(request)
+        elif action == 'create_chat':
+            return self._create_chat(request)
+        
+        return JsonResponse({'error': 'Invalid action'}, status=400)
+    
+    def _sync_contacts(self, request):
+        """Sync Telegram contacts"""
+        try:
+            session = getattr(request.user, 'telegram_session', None)
+            if not session or not session.is_authenticated:
+                return JsonResponse({
+                    'error': 'Telegram not connected. Please authenticate first.'
+                }, status=400)
+            
+            # Use the management command functionality
+            from .management.commands.telegram_client import Command as TelegramCommand
+            command = TelegramCommand()
+            
+            # Create fake options for the command
+            options = {
+                'user': request.user.username,
+                'limit': 100
+            }
+            
+            try:
+                command.sync_contacts(options)
+                contact_count = TelegramContact.objects.filter(user=request.user).count()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Successfully synced contacts',
+                    'count': contact_count
+                })
+            except Exception as e:
+                logging.error(f"Sync contacts error: {e}")
+                return JsonResponse({
+                    'error': f'Sync failed: {str(e)}'
+                }, status=500)
+                
+        except Exception as e:
+            logging.error(f"Sync contacts error: {e}")
+            return JsonResponse({
+                'error': 'Failed to sync contacts'
+            }, status=500)
+    
+    def _sync_chats(self, request):
+        """Sync Telegram chats"""
+        try:
+            session = getattr(request.user, 'telegram_session', None)
+            if not session or not session.is_authenticated:
+                return JsonResponse({
+                    'error': 'Telegram not connected. Please authenticate first.'
+                }, status=400)
+                
+            from .management.commands.telegram_client import Command as TelegramCommand
+            command = TelegramCommand()
+            
+            options = {
+                'user': request.user.username,
+                'limit': 50
+            }
+            
+            try:
+                command.sync_chats(options)
+                chat_count = TelegramChat.objects.filter(user=request.user).count()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Successfully synced chats',
+                    'count': chat_count
+                })
+            except Exception as e:
+                logging.error(f"Sync chats error: {e}")
+                return JsonResponse({
+                    'error': f'Sync failed: {str(e)}'
+                }, status=500)
+                
+        except Exception as e:
+            logging.error(f"Sync chats error: {e}")
+            return JsonResponse({
+                'error': 'Failed to sync chats'
+            }, status=500)
+    
+    def _sync_messages(self, request):
+        """Sync recent Telegram messages"""
+        try:
+            session = getattr(request.user, 'telegram_session', None)
+            if not session or not session.is_authenticated:
+                return JsonResponse({
+                    'error': 'Telegram not connected. Please authenticate first.'
+                }, status=400)
+                
+            from .management.commands.telegram_client import Command as TelegramCommand
+            command = TelegramCommand()
+            
+            options = {
+                'user': request.user.username,
+                'limit': 100
+            }
+            
+            try:
+                command.sync_messages(options)
+                message_count = TelegramMessage.objects.filter(user=request.user).count()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Successfully synced messages',
+                    'count': message_count
+                })
+            except Exception as e:
+                logging.error(f"Sync messages error: {e}")
+                return JsonResponse({
+                    'error': f'Sync failed: {str(e)}'
+                }, status=500)
+                
+        except Exception as e:
+            logging.error(f"Sync messages error: {e}")
+            return JsonResponse({
+                'error': 'Failed to sync messages'
+            }, status=500)
+    
+    def _test_connection(self, request):
+        """Test Telegram connection"""
+        try:
+            session = getattr(request.user, 'telegram_session', None)
+            if not session:
+                return JsonResponse({
+                    'error': 'No Telegram session found. Please set up your Telegram credentials first.'
+                }, status=400)
+                
+            if not session.is_authenticated:
+                return JsonResponse({
+                    'error': 'Telegram session not authenticated. Please authenticate first.'
+                }, status=400)
+                
+            from .management.commands.telegram_client import Command as TelegramCommand
+            command = TelegramCommand()
+            
+            options = {
+                'user': request.user.username
+            }
+            
+            try:
+                command.test_connection(options)
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Telegram connection successful'
+                })
+            except Exception as e:
+                logging.error(f"Test connection error: {e}")
+                return JsonResponse({
+                    'error': f'Connection test failed: {str(e)}'
+                }, status=500)
+                
+        except Exception as e:
+            logging.error(f"Test connection error: {e}")
+            return JsonResponse({
+                'error': 'Connection test failed'
+            }, status=500)
+    
+    def _create_chat(self, request):
+        """Create a new chat with a contact"""
+        try:
+            contact_id = request.POST.get('contact_id')
+            if not contact_id:
+                return JsonResponse({
+                    'error': 'Contact ID is required'
+                }, status=400)
+            
+            # Find the contact
+            try:
+                contact = TelegramContact.objects.get(
+                    user=request.user,
+                    telegram_id=contact_id
+                )
+            except TelegramContact.DoesNotExist:
+                return JsonResponse({
+                    'error': 'Contact not found'
+                }, status=404)
+            
+            # Check if chat already exists
+            existing_chat = TelegramChat.objects.filter(
+                user=request.user,
+                contact=contact,
+                chat_type='private'
+            ).first()
+            
+            if existing_chat:
+                return JsonResponse({
+                    'success': True,
+                    'chat_id': existing_chat.id,
+                    'message': 'Chat already exists'
+                })
+            
+            # Create new chat
+            chat = TelegramChat.objects.create(
+                user=request.user,
+                contact=contact,
+                telegram_chat_id=contact.telegram_id,  # For private chats, use contact's telegram_id
+                title=f"{contact.first_name} {contact.last_name or ''}".strip(),
+                chat_type='private'
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'chat_id': chat.id,
+                'message': 'Chat created successfully'
+            })
+            
+        except Exception as e:
+            logging.error(f"Create chat error: {e}")
+            return JsonResponse({
+                'error': f'Failed to create chat: {str(e)}'
+            }, status=500)
 
 class EmailSettingsView(LoginRequiredMixin, View):
     def get(self, request):

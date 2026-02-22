@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Companies List{% endblock %}
+
+{% block header_title %}Companies List{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/company.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-building me-3"></i>Companies Dashboard</h2>
+                <p class="mb-0 opacity-75">Manage and view all registered companies</p>
+            </div>
+            <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Add New Company
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-info-circle me-2"></i>{{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if companies %}
+        <div class="stats-row">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="stat-number">{{ companies|length }}</div>
+                    <div class="stat-label">Total Companies Registered</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="companies-grid">
+            {% for company in companies %}
+            <div class="company-card">
+                <div class="company-header">
+                    <div class="company-logo">
+                        {% if company.logo %}
+                            <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo">
+                        {% else %}
+                            <i class="fas fa-building"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h5 class="company-name">{{ company.name }}</h5>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            Registered {{ company.created_at|date:"M d, Y" }}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="company-info">
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <span>{{ company.phone_number|default:"Phone not provided" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>{{ company.email|default:"Email not provided" }}</span>
+                    </div>
+                    {% if company.physical_address %}
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ company.physical_address|truncatechars:40 }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="company-actions">
+                    <a href="{% url 'registration:company_details' company.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>Details
+                    </a>
+                    <a href="{% url 'registration:company_users' company.id %}" class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-users me-1"></i>Users
+                    </a>
+                    {% if user.is_staff or request.session.user_role == 'admin' %}
+                    <a href="{% url 'registration:edit_company' company.id %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-building fa-4x mb-3"></i>
+            <h4>No Companies Registered Yet</h4>
+            <p>Get started by registering your first company to begin managing your business operations.</p>
+            <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Register First Company
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'dashboard:main_dashboard' %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

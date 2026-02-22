@@ -1,11 +1,58 @@
 
 {% load static %}
+{% load humanize %}
 
 {% block title %}Quote Preview{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/invoice.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    .quote-actions {
+        margin-top: 30px;
+        padding: 20px;
+        text-align: center;
+        border-top: 2px solid #dee2e6;
+        background-color: #f8f9fa;
+    }
+    
+    .quote-actions .btn {
+        margin: 0 10px;
+        padding: 10px 20px;
+        font-size: 14px;
+        border-radius: 5px;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .quote-actions .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .quote-actions .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .quote-actions .btn-primary:hover {
+        background-color: #0056b3;
+        color: white;
+    }
+    
+    .quote-actions .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .quote-actions .btn-secondary:hover {
+        background-color: #545b62;
+        color: white;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -22,14 +69,19 @@
         <!-- company details -->
 
         <div class="logo-container">
-            <div class="logo"><img src="#" alt="Logo"></div>
+            <div class="logo">
+                {% if active_company.logo %}
+                <img src="{{ active_company.logo.url }}" alt="{{ active_company.name }} Logo" style="max-width: 250px; max-height: 150px; object-fit: contain;">
+                {% else %}
+                <img src="#" alt="Logo" style="opacity: 0.3;">
+                {% endif %}
+            </div>
             <div class="company-info">
                 <p class="presented-by">Presented by</p>
-                <h1 class="company-name">Company Name</h1>
-                <p class="company-address">company physical address,</p>
-                <p class="company-address">Street/road, City, Country</p>
-                <p class="contact-info">Tel: phone number, cell number</p>
-                <p class="contact-info"><a href="mailto:email address" class="email">email address</a></p>
+                <h1 class="company-name">{{ active_company.name|default:"Company Name" }}</h1>
+                <p class="company-address">{{ active_company.physical_address|default:"company physical address," }}</p>
+                <p class="contact-info">Tel: {{ active_company.phone_number|default:"phone number" }}</p>
+                <p class="contact-info"><a href="mailto:{{ active_company.email }}" class="email">{{ active_company.email|default:"email address" }}</a></p>
             </div>
         </div>
 
@@ -39,7 +91,7 @@
             <div class="left-details">
                 <div class="detail-row">
                     <span class="detail-label">Revision:</span>
-                    <span class="detail-value">edit count</span>
+                    <span class="detail-value">0</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Modified:</span>
@@ -59,20 +111,20 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Prepared by:</span>
-                    <span id="detail-value">{{ quote.prepared_by }}</span>  <!--# to be chaned to authenticated user in session -->
+                    <span id="detail-value">{{ request.user.get_full_name|default:request.user.username }}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Validity:</span>
+                    <span class="detail-label">Due Date:</span>
                     <span class="detail-value">{{ quote.valid_until|date:"d/m/Y" }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Tax pin:</span>
-                    <span class="detail-value">{{ quote.tax_pin }}</span>
+                    <span class="detail-value">{{ active_company.tax_pin|default:"" }}</span>
                 </div>
             </div>
             
             <div class="right-details">
-                <div class="document-title">{{ document.document_type }}</div>
+                <div class="document-title">QUOTE</div>
                 <div class="document-number">{{ quote.quote_number }}</div>
             </div>
         </div>
@@ -100,8 +152,8 @@
                     <td>{{ item.description }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>{{ item.uom|default:"pcs" }}</td>
-                    <td>{{ item.unit_price_display }}</td>
-                    <td>{{ item.total_display }}</td>
+                    <td>{{ item.unit_price|floatformat:2|intcomma }}</td>
+                    <td>{{ item.total|floatformat:2|intcomma }}</td>
                 </tr>
                 {% endfor %}
             {% else %}
@@ -111,8 +163,8 @@
                     <td>{{ item.description }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>{{ item.uom|default:"pcs" }}</td>
-                    <td>KES {{ item.unit_price|floatformat:2 }}</td>
-                    <td>KES {{ item.get_total|floatformat:2 }}</td>
+                    <td>{{ item.unit_price|floatformat:2|intcomma }}</td>
+                    <td>{{ item.get_total|floatformat:2|intcomma }}</td>
                 </tr>
                 {% endfor %}
             {% endif %}
@@ -120,15 +172,15 @@
         <tfoot>
             <tr>
                 <td colspan="5" class="text-right"><strong>SUB TOTAL:</strong></td>
-                <td>{% if quote.subtotal_display %}{{ quote.subtotal_display }}{% else %}KES {{ quote.subtotal|floatformat:2 }}{% endif %}</td>
+                <td>{{ quote.subtotal|floatformat:2|intcomma }}</td>
             </tr>
             <tr>
-                <td colspan="5" class="text-right"><strong>VAT ({{ quote.tax_rate }}%):</strong></td>
-                <td>{% if quote.tax_amount_display %}{{ quote.tax_amount_display }}{% else %}KES {{ quote.tax_amount|floatformat:2 }}{% endif %}</td>
+                <td colspan="5" class="text-right"><strong>VAT{% if quote.tax_rate %} ({{ quote.tax_rate }}%){% endif %}</strong></td>
+                <td>{% if quote.apply_vat and quote.tax_amount %}{{ quote.tax_amount|floatformat:2|intcomma }}{% else %}N/A{% endif %}</td>
             </tr>
             <tr>
                 <td colspan="5" class="text-right"><strong>GRAND TOTAL:</strong></td>
-                <td>{% if quote.total_amount_display %}{{ quote.total_amount_display }}{% else %}KES {{ quote.total_amount|floatformat:2 }}{% endif %}</td>
+                <td>{{ quote.total_amount|floatformat:2|intcomma }}</td>
             </tr>
         </tfoot>
     </table>
@@ -165,11 +217,12 @@
     
     <!-- Action Buttons -->
     <div class="quote-actions">
-        <a href="javascript:history.back()" class="btn btn-primary">Back to Quote Form</a>
+        <a href="{% url 'documents:quote_create' %}?continue_editing=1" class="btn btn-primary">Back to Quote Form</a>
         {% if quote.id %}
         <a href="{% url 'documents:quote_detail' quote.id %}" class="btn btn-primary">Back to Quote</a>
         <a href="{% url 'documents:generate_quote_pdf' quote.id %}" class="btn btn-secondary" target="_blank">Download PDF</a>
         {% endif %}
+        <button onclick="window.close()" class="btn btn-secondary">Close Preview</button>
     </div>
 </div>
 {% endblock %}

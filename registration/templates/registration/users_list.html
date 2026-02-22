@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Registered Users{% endblock %}
+
+{% block header_title %}All Users{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/user_management.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="user-management-container">
+    <div class="page-header">
+        <h2>
+            <i class="fas fa-users" style="color: var(--primary-color);"></i>
+            All Registered Users
+        </h2>
+        <div class="header-actions">
+            <a href="{% url 'registration:registration_home' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Registration
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas fa-info-circle me-2"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Search Users</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search_query }}" placeholder="Search by name, username, or email...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status Filter</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Users</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Users</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Users</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--success-color);">{{ active_users }}</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--danger-color);">{{ inactive_users }}</div>
+            <div class="stat-label">Inactive Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color: var(--info-color);">{{ users|length }}</div>
+            <div class="stat-label">Filtered Results</div>
+        </div>
+    </div>
+
+    {% if users %}
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list me-2"></i>Users List ({{ users|length }})</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Companies</th>
+                                <th>Joined</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr class="{% if not user.is_active %}table-secondary{% endif %}">
+                                <td>
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            {% if user.profile and user.profile.avatar %}
+                                                <img src="{{ user.profile.avatar.url }}" 
+                                                     alt="{{ user.get_full_name|default:user.username }}" 
+                                                     class="rounded-circle" 
+                                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="user-placeholder rounded-circle" style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-user fa-sm"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="user-name">
+                                                {{ user.get_full_name|default:user.username }}
+                                                {% if user.is_staff %}
+                                                    <i class="fas fa-star text-warning ms-1" title="Staff Member"></i>
+                                                {% endif %}
+                                                {% if user.is_superuser %}
+                                                    <i class="fas fa-crown text-danger ms-1" title="Superuser"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user-username">@{{ user.username }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div style="font-weight: 500;">{{ user.email }}</div>
+                                        {% if user.profile and user.profile.phone %}
+                                            <small class="text-muted">{{ user.profile.phone }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.is_active %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Inactive
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.companyuser_set.all %}
+                                        <div class="companies-list">
+                                            {% for company_user in user.companyuser_set.all %}
+                                                <div class="company-item">
+                                                    <a href="{% url 'registration:user_profile' company_user.company.id user.id %}" 
+                                                       class="text-decoration-none">
+                                                        <small class="badge bg-light text-dark">
+                                                            {{ company_user.company.name }}
+                                                            <span class="text-muted">({{ company_user.get_role_display }})</span>
+                                                        </small>
+                                                    </a>
+                                                </div>
+                                                {% if not forloop.last %}<br>{% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">No companies</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div>
+                                        <div style="font-weight: 500;">{{ user.date_joined|date:"M j, Y" }}</div>
+                                        <small class="text-muted">{{ user.date_joined|date:"g:i A" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.last_login %}
+                                        <div>
+                                            <div style="font-weight: 500;">{{ user.last_login|date:"M j, Y" }}</div>
+                                            <small class="text-muted">{{ user.last_login|date:"g:i A" }}</small>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Never</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        {% if user.companyuser_set.first %}
+                                            <a href="{% url 'registration:user_profile' user.companyuser_set.first.company.id user.id %}" 
+                                               class="btn btn-sm btn-outline-info" 
+                                               title="View Profile">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                        {% endif %}
+                                        {% if user.companyuser_set.all %}
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                        type="button" 
+                                                        data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    {% for company_user in user.companyuser_set.all %}
+                                                    <li>
+                                                        <a class="dropdown-item" 
+                                                           href="{% url 'registration:user_profile' company_user.company.id user.id %}">
+                                                            <i class="fas fa-building me-2"></i>{{ company_user.company.name }}
+                                                        </a>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="empty-state">
+                <i class="fas fa-users fa-4x"></i>
+                <h4>No Users Found</h4>
+                {% if search_query %}
+                    <p>No users found matching "{{ search_query }}". Try adjusting your search criteria.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'registration:users_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list"></i> Show All Users
+                        </a>
+                    </div>
+                {% else %}
+                    <p>There are no registered users in the system yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Quick Stats Info -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-info-circle me-2"></i>System Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-item">
+                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                        <h5>{{ total_users }}</h5>
+                        <p class="text-muted">Total Users</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-item">
+                        <i class="fas fa-user-check fa-2x text-success mb-2"></i>
+                        <h5>{{ active_users }}</h5>
+                        <p class="text-muted">Active Users</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-item">
+                        <i class="fas fa-building fa-2x text-info mb-2"></i>
+                        <h5>{% with companies_count=users.0.companyuser_set.all.count %}{{ companies_count|default:0 }}{% endwith %}</h5>
+                        <p class="text-muted">Total Companies</p>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-item">
+                        <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                        <h5>{{ users|length }}</h5>
+                        <p class="text-muted">Current Results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

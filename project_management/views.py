@@ -10,6 +10,10 @@ from .forms import (
     ProjectForm, ProjectDocumentForm, ProjectNoteForm,
     ProjectMilestoneForm, ProjectFilterForm, TransactionForm
 )
+import logging
+
+# Create a logger for this module
+logger = logging.getLogger(__name__)
 
 @login_required
 def project_list(request):
@@ -125,16 +129,63 @@ def project_update(request, pk):
 
 @login_required
 @permission_required('project_management.delete_project', raise_exception=True)
-def project_delete(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+def project_delete(request, pk=None):
+    """
+    Delete a project with AJAX support and comprehensive error handling.
+    
+    Supports both GET and POST methods with optional primary key.
+    Returns JSON response for AJAX requests.
+    """
     if request.method == 'POST':
-        project.delete()
-        messages.success(request, 'Project deleted successfully.')
-        return redirect('project_management:list')
-    return render(request, 'project_management/project_confirm_delete.html', {
-        'project': project,
-        'title': f'Delete Project: {project.name}'
-    })
+        # Determine project ID from URL parameter or POST data
+        project_id = pk or request.POST.get('project_id')
+        
+        try:
+            project = get_object_or_404(Project, pk=project_id)
+            
+            # Additional permission check
+            if not request.user.has_perm('project_management.delete_project', project):
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'You do not have permission to delete this project.'
+                }, status=403)
+            
+            # Optional: Log project deletion
+            logger.info(f"Project deleted: {project.name} by {request.user.username}")
+            
+            # Store project name before deletion for response
+            project_name = project.name
+            
+            # Delete the project
+            project.delete()
+            
+            # Return success response
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Project "{project_name}" was successfully deleted.',
+                'id': project_id
+            })
+        
+        except ProtectedError:
+            # Handle cases where project has related objects preventing deletion
+            return JsonResponse({
+                'status': 'error',
+                'message': 'This project cannot be deleted due to existing related records.'
+            }, status=400)
+        
+        except Exception as e:
+            # Catch-all for unexpected errors
+            logger.error(f"Project deletion error: {str(e)}")
+            return JsonResponse({
+                'status': 'error',
+                'message': 'An unexpected error occurred while deleting the project.'
+            }, status=500)
+    
+    # Handle GET requests or invalid methods
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method.'
+    }, status=405)
 
 @login_required
 def project_dashboard(request):

@@ -10,6 +10,7 @@ urlpatterns = [
     path('<int:pk>/', views.expense_detail, name='expense_detail'),
     path('<int:pk>/update/', views.expense_update, name='expense_update'),
     path('<int:pk>/delete/', views.expense_delete, name='expense_delete'),
+    path('<int:pk>/generate-expense-sheet/', views.generate_expense_sheet, name='generate_expense_sheet'),
     
     # Category URLs
     path('categories/', views.category_list, name='category_list'),

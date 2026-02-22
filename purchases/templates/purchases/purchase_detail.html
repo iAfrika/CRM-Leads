@@ -30,6 +30,11 @@
                         <a href="{% url 'purchases:purchase_list' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Back to List
                         </a>
+                        {% if perms.documents.add_document %}
+                        <a href="{% url 'purchases:generate_purchase_order' purchase.pk %}" class="btn btn-primary">
+                            Generate Purchase Order
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

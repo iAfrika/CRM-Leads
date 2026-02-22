@@ -93,7 +93,7 @@ def lead_detail(request, pk):
             if note_form.is_valid():
                 note = note_form.save(commit=False)
                 note.lead = lead
-                note.created_by = request.user
+                note.created_by_id = request.user.id
                 note.save()
                 messages.success(request, 'Note added successfully.')
                 return redirect('leads:lead_detail', pk=pk)
@@ -106,7 +106,7 @@ def lead_detail(request, pk):
             if document_form.is_valid():
                 document = document_form.save(commit=False)
                 document.lead = lead
-                document.created_by = request.user
+                document.created_by_id = request.user.id
                 document.save()
                 messages.success(request, 'Document uploaded successfully.')
                 return redirect('leads:lead_detail', pk=pk)
@@ -118,7 +118,7 @@ def lead_detail(request, pk):
             if activity_form.is_valid():
                 activity = activity_form.save(commit=False)
                 activity.lead = lead
-                activity.created_by = request.user
+                activity.created_by_id = request.user.id
                 activity.save()
                 messages.success(request, 'Activity added successfully.')
                 return redirect('leads:lead_detail', pk=pk)
@@ -140,7 +140,7 @@ def lead_create(request):
         form = LeadForm(request.POST)
         if form.is_valid():
             lead = form.save(commit=False)
-            lead.created_by = request.user
+            lead.created_by_id = request.user.id
             lead.save()
             messages.success(request, f'Lead "{lead.title or lead.company_name}" created successfully.')
             return redirect('leads:lead_detail', pk=lead.pk)
@@ -211,7 +211,7 @@ def lead_convert(request, pk):
             lead=lead,
             activity_type='converted',
             description=f'Lead converted to client: {client.name}',
-            created_by=request.user
+            created_by_id=request.user.id
         )
         
         messages.success(request, f'Lead successfully converted to client: {client.name}')
@@ -355,7 +355,7 @@ class LeadDetailView(LoginRequiredMixin, DetailView):
                 try:
                     note = note_form.save(commit=False)
                     note.lead = lead
-                    note.created_by = request.user
+                    note.created_by_id = request.user.id
                     note.save()
                     messages.success(request, 'Note added successfully.')
                     return redirect('leads:lead_detail', pk=lead.pk)
@@ -374,7 +374,7 @@ class LeadDetailView(LoginRequiredMixin, DetailView):
                 try:
                     document = document_form.save(commit=False)
                     document.lead = lead
-                    document.created_by = request.user
+                    document.created_by_id = request.user.id
                     document.save()
                     messages.success(request, 'Document uploaded successfully.')
                     return redirect('leads:lead_detail', pk=lead.pk)
@@ -397,8 +397,8 @@ class LeadCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_message = "Lead created successfully."
 
     def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        form.instance.modified_by = self.request.user
+        form.instance.created_by_id = self.request.user.id
+        form.instance.modified_by_id = self.request.user.id
         return super().form_valid(form)
 
 class LeadUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -411,7 +411,7 @@ class LeadUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return reverse_lazy('leads:lead_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        form.instance.modified_by = self.request.user
+        form.instance.modified_by_id = self.request.user.id
         return super().form_valid(form)
 
 class LeadDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -515,7 +515,7 @@ class LeadNoteCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         lead = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
         form.instance.lead = lead
-        form.instance.created_by = self.request.user
+        form.instance.created_by_id = self.request.user.id
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -584,7 +584,7 @@ class LeadDocumentCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         lead = get_object_or_404(Lead, pk=self.kwargs.get('lead_pk'))
         form.instance.lead = lead
-        form.instance.created_by = self.request.user
+        form.instance.created_by_id = self.request.user.id
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -653,7 +653,7 @@ def add_note(request, pk):
             note = LeadNote.objects.create(
                 lead=lead,
                 content=content,
-                created_by=request.user
+                created_by_id=request.user.id
             )
             
             # Create activity record
@@ -661,14 +661,14 @@ def add_note(request, pk):
                 lead=lead,
                 activity_type='note',
                 description=f"Added a new note",
-                created_by=request.user
+                created_by_id=request.user.id
             )
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
                     'content': note.content,
-                    'created_by': note.created_by.username,
+                    'created_by': request.user.username,
                     'created_at': note.created_at.strftime('%b %d, %Y %H:%M')
                 })
             
@@ -697,7 +697,7 @@ def add_document(request, pk):
                 lead=lead,
                 file=file,
                 description=description,
-                created_by=request.user
+                created_by_id=request.user.id
             )
             
             # Create activity record
@@ -705,7 +705,7 @@ def add_document(request, pk):
                 lead=lead,
                 activity_type='document',
                 description=f"Uploaded document: {file.name}",
-                created_by=request.user
+                created_by_id=request.user.id
             )
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -714,7 +714,7 @@ def add_document(request, pk):
                     'file_name': document.file.name,
                     'file_url': document.file.url,
                     'description': document.description,
-                    'created_by': document.created_by.username,
+                    'created_by': request.user.username,
                     'created_at': document.created_at.strftime('%b %d, %Y')
                 })
             
@@ -736,7 +736,7 @@ def delete_note(request, pk):
     lead = note.lead
     
     # Check if the user is authorized to delete this note
-    if note.created_by == request.user:
+    if note.created_by_id == request.user.id:
         note.delete()
         
         # Create activity record
@@ -744,7 +744,7 @@ def delete_note(request, pk):
             lead=lead,
             activity_type='note',
             description=f"Deleted a note",
-            created_by=request.user
+            created_by_id=request.user.id
         )
         
         messages.success(request, "Note deleted successfully.")

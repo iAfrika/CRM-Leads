@@ -196,8 +196,146 @@ body {
   
   /* Print styles - to hide web-only elements when printing */
   @media print {
-    .document-actions, .document-footer {
-      display: none;
+    /* Hide browser default headers and footers */
+    @page {
+      margin: 0.3cm;
+    }
+    
+    /* Ensure colored bar is visible */
+    .header,
+    .colored-bar,
+    .orange-bar,
+    .pink-bar {
+      display: flex !important;
+      visibility: visible !important;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    
+    /* Reduce spacing to fit on one page */
+    body {
+      background: white;
+      padding: 5px !important;
+      margin: 0 !important;
+    }
+    
+    .document-detail-container {
+      box-shadow: none;
+      margin: 0 !important;
+      padding: 10px !important;
+    }
+    
+    .header {
+      margin-bottom: 10px !important;
+    }
+    
+    .logo-container {
+      margin-top: 10px !important;
+    }
+    
+    .document-details {
+      margin: 15px 0 !important;
+    }
+    
+    .separator {
+      margin: 10px 0 !important;
+    }
+    
+    .document-subtitle {
+      margin-bottom: 10px !important;
+    }
+    
+    .document-items {
+      margin-bottom: 15px !important;
+    }
+    
+    .table th, .table td {
+      padding: 5px !important;
+      font-size: 13px !important;
+    }
+    
+    .payment-terms {
+      margin-top: 15px !important;
+      font-size: 12px !important;
+    }
+    
+    .payment-terms h3 {
+      margin-top: 8px !important;
+      margin-bottom: 5px !important;
+      font-size: 14px !important;
+    }
+    
+    .payment-terms p {
+      margin: 3px 0 !important;
+    }
+    
+    .detail-row {
+      margin-bottom: 3px !important;
+      font-size: 13px !important;
+    }
+    
+    /* Hide action buttons and web-only elements */
+    .document-actions, 
+    .document-footer,
+    .action-buttons,
+    .btn-danger,
+    .btn-success,
+    #add-item-btn,
+    .remove-item,
+    .status-section,
+    .status-badge {
+      display: none !important;
+    }
+    
+    /* Hide ACTION column header and cells */
+    .table th:last-child,
+    .table td:last-child,
+    .table tbody tr td:last-child {
+      display: none !important;
+    }
+    
+    /* Hide the "Add Item" row in table footer */
+    .table tfoot tr:first-child {
+      display: none !important;
+    }
+    
+    /* Remove editable field styling */
+    .editable-field {
+      border: none !important;
+      padding: 0 !important;
+      background-color: transparent !important;
+      display: inline !important;
+      min-width: auto !important;
+    }
+    
+    /* Make all form inputs look like plain text */
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea,
+    .editable-field input,
+    .editable-field select,
+    .editable-field textarea,
+    .table input[type="text"],
+    .table input[type="number"] {
+      border: none !important;
+      padding: 0 !important;
+      background: transparent !important;
+      font-size: inherit !important;
+      color: #333 !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      width: auto !important;
+    }
+    
+    /* Remove focus styles */
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none !important;
+      box-shadow: none !important;
     }
     
     .document-detail-container {

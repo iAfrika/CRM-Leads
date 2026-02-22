@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Case, When, Value, F, ExpressionWrapper, fields, Avg, Q
 from django.utils import timezone
 from ..models import Project, ProjectMilestone
 
@@ -71,40 +71,101 @@ def project_dashboard(request):
 @login_required
 @permission_required('project_management.view_project_analytics', raise_exception=True)
 def project_analytics(request):
-    # Get project completion trends
+    from django.db.models import F, ExpressionWrapper, fields, Avg, Q
+    from django.utils import timezone
+    import datetime
+
+    # Get project completion trends with duration analysis
     completion_trend = Project.objects.filter(
         status='completed'
+    ).annotate(
+        duration=ExpressionWrapper(
+            F('end_date') - F('start_date'),
+            output_field=fields.DurationField()
+        )
     ).values('end_date__month').annotate(
-        count=Count('id')
+        count=Count('id'),
+        avg_duration=Avg('duration')
     ).order_by('end_date__month')
 
-    # Get budget vs actual cost comparison
+    # Get budget vs actual cost comparison with variance analysis
     budget_vs_actual = Project.objects.values('name').annotate(
         budget=Sum('budget'),
-        actual=Sum('actual_cost')
+        actual=Sum('actual_cost'),
+        variance=ExpressionWrapper(
+            F('budget') - F('actual_cost'),
+            output_field=fields.FloatField()
+        ),
+        variance_percentage=ExpressionWrapper(
+            (F('budget') - F('actual_cost')) * 100.0 / F('budget'),
+            output_field=fields.FloatField()
+        )
     ).filter(budget__isnull=False, actual_cost__isnull=False)
 
-    # Get project status distribution
+    # Get milestone completion analysis
+    milestone_analysis = ProjectMilestone.objects.values('project__name').annotate(
+        total_milestones=Count('id'),
+        completed_milestones=Count('id', filter=Q(is_completed=True)),
+        completion_rate=ExpressionWrapper(
+            Count('id', filter=Q(is_completed=True)) * 100.0 / Count('id'),
+            output_field=fields.FloatField()
+        ),
+        overdue_milestones=Count('id', filter=Q(
+            is_completed=False,
+            due_date__lt=timezone.now().date()
+        ))
+    )
+
+    # Get resource utilization metrics
+    resource_utilization = Project.objects.filter(
+        status='in_progress'
+    ).values(
+        'team_members__first_name',
+        'team_members__last_name'
+    ).annotate(
+        assigned_projects=Count('id'),
+        total_budget_managed=Sum('budget'),
+        active_milestones=Count('milestones', filter=Q(
+            milestones__is_completed=False,
+            milestones__due_date__gte=timezone.now().date()
+        ))
+    ).order_by('-assigned_projects')
+
+    # Get project health metrics
+    project_health = Project.objects.filter(
+        status='in_progress'
+    ).annotate(
+        budget_health=Case(
+            When(actual_cost__gt=F('budget'), then=Value('over_budget')),
+            When(actual_cost__lte=0.8 * F('budget'), then=Value('under_budget')),
+            default=Value('on_track'),
+            output_field=fields.CharField(),
+        ),
+        schedule_health=Case(
+            When(end_date__lt=timezone.now().date(), then=Value('delayed')),
+            When(end_date__gt=timezone.now().date() + datetime.timedelta(days=30), then=Value('on_track')),
+            default=Value('at_risk'),
+            output_field=fields.CharField(),
+        )
+    ).values('budget_health', 'schedule_health').annotate(
+        count=Count('id')
+    )
+
+    # Get project status and priority distributions
     status_distribution = Project.objects.values('status').annotate(
         count=Count('id')
     ).order_by('status')
 
-    # Get priority distribution
     priority_distribution = Project.objects.values('priority').annotate(
         count=Count('id')
     ).order_by('priority')
 
     # Get client project distribution
     client_distribution = Project.objects.values('client__name').annotate(
-        count=Count('id')
+        count=Count('id'),
+        total_budget=Sum('budget'),
+        total_revenue=Sum('actual_cost')
     ).order_by('-count')[:10]
-
-    # Get team member workload
-    team_workload = Project.objects.filter(
-        status='in_progress'
-    ).values('team_members__username').annotate(
-        count=Count('id')
-    ).order_by('-count')
 
     context = {
         'completion_trend': completion_trend,
@@ -112,7 +173,9 @@ def project_analytics(request):
         'status_distribution': status_distribution,
         'priority_distribution': priority_distribution,
         'client_distribution': client_distribution,
-        'team_workload': team_workload,
+        'resource_utilization': resource_utilization,
+        'milestone_analysis': milestone_analysis,
+        'project_health': project_health,
         'title': 'Project Analytics'
     }
-    return render(request, 'project_management/project_analytics.html', context) 
+    return render(request, 'project_management/project_analytics.html', context)

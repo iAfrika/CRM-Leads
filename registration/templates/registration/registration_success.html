@@ -1,0 +1,69 @@
+{% extends "registration/base_registration.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'registration/css/register_company.css' %}">
+<style>
+    .success-icon {
+        font-size: 4rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+    .success-container {
+        text-align: center;
+        padding: 2rem;
+    }
+    .success-message {
+        margin-bottom: 2rem;
+    }
+    .next-steps {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 2rem;
+        text-align: left;
+    }
+    .next-steps h3 {
+        margin-bottom: 1rem;
+    }
+    .next-steps ul {
+        padding-left: 1.5rem;
+    }
+    .next-steps li {
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Registration Successful{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <section class="registration-card">
+        <div class="success-container">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Registration Successful!</h1>
+            <div class="success-message">
+                <p>Thank you for registering with our CRM system. Your account has been created successfully.</p>
+                <p>You've selected the <strong>{{ plan|title }} Plan</strong>.</p>
+            </div>
+            
+            <a href="{% url 'landing_page' %}" class="btn btn-primary">
+                Go to Dashboard
+            </a>
+            
+            <div class="next-steps">
+                <h3>Next Steps</h3>
+                <ul>
+                    <li>Check your email for confirmation and important information</li>
+                    <li>Complete your company profile</li>
+                    <li>Set up additional users (if included in your plan)</li>
+                    <li>Explore the CRM features</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

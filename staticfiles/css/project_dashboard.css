@@ -50,6 +50,7 @@
 body {
     background-color: #f5f7ff;
     color: var(--text-color);
+    font-family: 'Nunito', sans-serif;
 }
 
 .dashboard-container {

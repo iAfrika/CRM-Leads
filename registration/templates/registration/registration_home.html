@@ -16,6 +16,36 @@
         <p>All-in-one solution for your business needs</p>
     </section>
     
+    <!-- Call To Action for Company Registration -->
+    <section class="registration-card" style="margin-bottom: 2rem;">
+        <h2>Company Registration</h2>
+        <p>Register your company to get started with our CRM system or view existing company registrations.</p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
+                <i class="fas fa-building"></i> Register New Company
+            </a>
+            <a href="{% url 'registration:company_details' %}" class="btn btn-outline">
+                <i class="fas fa-list"></i> View Registered Companies
+            </a>
+        </div>
+    </section>
+    
+    <!-- User Management Section @note staff is not elevated -->
+    {% if user.is_staff or user.is_superuser %}
+    <section class="registration-card" style="margin-bottom: 2rem;">
+        <h2>User Management</h2>
+        <p>Manage all registered users across the system. View profiles, edit roles, and monitor user activity.</p>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{% url 'registration:users_list' %}" class="btn btn-primary">
+                <i class="fas fa-users"></i> View All Users
+            </a>
+            <a href="{% url 'registration:register_user' %}" class="btn btn-outline">
+                <i class="fas fa-user-plus"></i> Register New User
+            </a>
+        </div>
+    </section>
+    {% endif %}
+    
     <!-- Feature Grid -->
     <section class="feature-grid">
         <div class="feature-card">
@@ -72,8 +102,8 @@
         <h2>Ready to streamline your business?</h2>
         <p>Join thousands of businesses already using CRM Leads to manage their operations efficiently.</p>
         <div style="display: flex; gap: 1rem;">
-            <a href="{% url 'registration:register_company' %}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Register Now
+            <a href="{% url 'authentication:login' %}" class="btn btn-primary">
+                <i class="fas fa-user"></i> Sign In
             </a>
             <a href="{% url 'registration:subscription_plans' %}" class="btn btn-outline">
                 <i class="fas fa-tag"></i> View Pricing
@@ -92,7 +122,7 @@
                 </div>
                 <div class="step">
                     <div class="step-circle">2</div>
-                    <div class="step-label">Choose your plan</div>
+                    <div class="step-label">Set up your profile</div>
                 </div>
                 <div class="step">
                     <div class="step-circle">3</div>
@@ -144,4 +174,4 @@
         });
     });
 </script>
-{% endblock %} 
+{% endblock %}

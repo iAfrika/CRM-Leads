@@ -1,0 +1,48 @@
+.chart-container {
+    position: relative;
+    height: 275px;
+    width: 100%;
+}
+
+.chart-container canvas {
+    max-height: 275px;
+    max-width: 100%;
+}
+
+.chart-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.chart-controls .form-select,
+.quotevsinvoicemetric .form-select {
+    display: none;
+}
+
+.chart-card {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.chart-card h2 {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.chart-card h2 select {
+    margin-left: 10px;
+    width: 120px;
+    text-align: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: red;
+}

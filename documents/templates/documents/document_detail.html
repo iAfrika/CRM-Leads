@@ -1,70 +1,140 @@
 {% load static %}
+{% load humanize %}
+<meta name="csrf-token" content="{{ csrf_token }}">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/document_detail.css' %}">
 <link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<link rel="stylesheet" href="{% static 'css/documents/status_update.css' %}">
 <style>
-    .share-options {
-        display: flex;
-        justify-content: space-around;
-        gap: 16px;
+    /* Hide sidebar for document detail view */
+    .app-sidebar {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .app-header {
+        left: 0 !important;
+        width: 100% !important;
     }
     
-    .share-options .btn {
+    /* Action Buttons Styling */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 100;
+    }
+    
+    .action-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 12px 16px;
-        border-radius: 8px;
-    }
-    
-    .btn-telegram {
-        background-color: #0088cc;
+        justify-content: center;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         color: white;
     }
     
-    .btn-email {
-        background-color: #4a90e2;
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         color: white;
+    }
+    
+    .action-btn i {
+        font-size: 18px;
+    }
+    
+    .btn-back {
+        background: #2c3e50;
+    }
+    
+    .btn-back:hover {
+        background: #1a252f;
+    }
+    
+    .btn-print {
+        background: #3498db;
+    }
+    
+    .btn-print:hover {
+        background: #2980b9;
+    }
+    
+    .btn-pdf {
+        background: #95a5a6;
+    }
+    
+    .btn-pdf:hover {
+        background: #7f8c8d;
+    }
+    
+    .btn-share {
+        background: #1abc9c;
+    }
+    
+    .btn-share:hover {
+        background: #16a085;
+    }
+    
+    .btn-invoice {
+        background: #27ae60;
+    }
+    
+    .btn-invoice:hover {
+        background: #229954;
+    }
+    
+    .btn-edit {
+        background: #f39c12;
+    }
+    
+    .btn-edit:hover {
+        background: #e67e22;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="document-detail-container">
-    <div class="document-header">
-        <h1>
-            {% if document.document_type == 'QUOTE' %}
-                Quote #{{ document.get_document_number }}
-            {% elif document.document_type == 'INVOICE' %}
-                Invoice #{{ document.invoice_number }}
-            {% endif %}
-        </h1>
-        <div class="document-actions">
-            <button class="btn btn-secondary" onclick="window.print()">
-                <i class="fas fa-print"></i> Print
-            </button>
-            <a href="{% url 'documents:document_download' document.id %}" class="btn btn-secondary">
-                <i class="fas fa-download"></i> Download PDF
-            </a>
-            <button id="shareDocumentBtn" class="btn btn-secondary" data-document-id="{{ document.id }}">
-                <i class="fas fa-share-alt"></i> Share
-            </button>
-            {% if document.document_type == 'QUOTE' and document.status == 'SENT' %}
-            <button class="btn btn-primary" id="generateInvoiceBtn" data-quote-id="{{ document.quote.id }}">
-                <i class="fas fa-file-invoice"></i> Generate Invoice
-            </button>
-            {% endif %}
-            {% if document.status == 'DRAFT' %}
-            <a href="{% url 'documents:document_edit' document.id %}" class="btn btn-primary">
-                <i class="fas fa-edit"></i> Edit
-            </a>
-            {% endif %}
-        </div>
+    <!-- Action Buttons - Vertical Stack -->
+    <div class="action-buttons">
+        <a href="{% url 'documents:document_list' %}" class="action-btn btn-back" title="Back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <button class="action-btn btn-print" onclick="window.print()" title="Print">
+            <i class="fas fa-print"></i>
+        </button>
+        <a href="{% url 'documents:document_download' document.id %}" class="action-btn btn-pdf" title="PDF">
+            <i class="fas fa-download"></i>
+        </a>
+        <button id="shareDocumentBtn" class="action-btn btn-share" data-document-id="{{ document.id }}" title="Share">
+            <i class="fas fa-share-alt"></i>
+        </button>
+        {% if document.status == 'SENT' and document.document_type == 'QUOTE' and document.status != 'INVOICED' %}
+        <a href="{% url 'documents:generate_invoice' document.id %}" class="action-btn btn-invoice" title="Generate Invoice">
+            <i class="fas fa-file-invoice"></i>
+        </a>
+        {% endif %}
+        {% if document.status != 'PAID' and document.status != 'CANCELLED' and document.status != 'COMPLETED' and document.status != 'INVOICED' %}
+        <a href="{% url 'documents:document_edit' document.id %}" class="action-btn btn-edit" title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
     </div>
-
-   
-
 
 <div class="header">
     <div class="colored-bar">
@@ -76,17 +146,20 @@
     
     <!-- Company Header Section -->
     <div class="company-info">
-        <!-- company details -->
-
         <div class="logo-container">
-            <div class="logo"><img src="#" alt="Logo"></div>
+            <div class="logo">
+                {% if active_company.logo %}
+                <img src="{{ active_company.logo.url }}" alt="{{ active_company.name }} Logo" style="max-width: 250px; max-height: 150px; object-fit: contain;">
+                {% else %}
+                <img src="#" alt="Logo" style="opacity: 0.3;">
+                {% endif %}
+            </div>
             <div class="company-info">
                 <p class="presented-by">Presented by</p>
-                <h1 class="company-name">Company Name</h1>
-                <p class="company-address">company physical address,</p>
-                <p class="company-address">Street/road, City, Country</p>
-                <p class="contact-info">Tel: phone number, cell number</p>
-                <p class="contact-info"><a href="mailto:email address" class="email">email address</a></p>
+                <h1 class="company-name">{{ active_company.name|default:"Company Name" }}</h1>
+                <p class="company-address">{{ active_company.physical_address|default:"company physical address," }}</p>
+                <p class="contact-info">Tel: {{ active_company.phone_number|default:"phone number" }}</p>
+                <p class="contact-info"><a href="mailto:{{ active_company.email }}" class="email">{{ active_company.email|default:"email address" }}</a></p>
             </div>
         </div>
 
@@ -96,7 +169,7 @@
             <div class="left-details">
                 <div class="detail-row">
                     <span class="detail-label">Revision:</span>
-                    <span class="detail-value">edit count</span>
+                    <span class="detail-value">{{ document.edit_count|default:0 }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Modified:</span>
@@ -112,26 +185,52 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Project:</span>
-                    <span id="detail-value"><strong>{% if document.description %}{{ document.description }}{% else %}{% endif %}</strong></span>
+                    <span id="detail-value"><strong>{% if document.description %}{{ document.description }}{% endif %}</strong></span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Prepared by:</span>
-                    <span id="detail-value">{% if document.created_by %}{{ document.created_by.get_full_name|default:document.created_by.username }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}</span>  <!--# to be chaned to authenticated user in session -->
+                    <span id="detail-value">{{ request.user.get_full_name|default:request.user.username }}</span>
                 </div>
+                {% if document.due_date %}
                 <div class="detail-row">
-                    <span class="detail-label">Validity:</span>
-                    <span class="detail-value">{{ quote.valid_until|date:"d/m/Y" }}</span>
+                    <span class="detail-label">Due Date:</span>
+                    <span class="detail-value">{{ document.due_date|date:"d/m/Y" }}</span>
                 </div>
+                {% endif %}
+                {% if document.document_type == 'INVOICE' and document.quote %}
+                <div class="detail-row">
+                    <span class="detail-label">Quote Ref:</span>
+                    <span class="detail-value"><strong>{{ document.quote.quote_number }}</strong></span>
+                </div>
+                {% endif %}
                 <div class="detail-row">
                     <span class="detail-label">Tax pin:</span>
-                    <span class="detail-value">{{ quote.tax_pin }}</span>
+                    <span class="detail-value">{{ active_company.tax_pin|default:"" }}</span>
                 </div>
             </div>
             
             <div class="right-details">
-                <div class="document-title">{{ document.document_type }}</div>
-                <div class="document-number">{{ document.get_document_number }}</div>
-                <p><strong>Status:</strong> <span class="status-badge status-{{ document.status|lower }}">{{ document.get_status_display }}</span></p>
+                <div class="document-title">
+                    {% if document.document_type == 'QUOTE' %}
+                        QUOTE
+                    {% else %}
+                        {{ document.get_document_type_display }}
+                    {% endif %}
+                </div>
+                <div class="document-number">
+                    {% if document.document_type == 'QUOTE' and document.quote %}
+                        {{ document.quote.quote_number }}
+                    {% else %}
+                        {{ document.get_document_number }}
+                    {% endif %}
+                </div>
+                <div class="status-section">
+                    <p><strong>Status:</strong> 
+                        <span class="status-badge status-{{ document.status|lower }}" id="current-status-badge">
+                            {{ document.get_status_display }}
+                        </span>
+                    </p>
+                </div>
             </div>
         </div>
         
@@ -158,8 +257,8 @@
                             <td>{{ item.description }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>pcs</td>
-                            <td>{{ item.unit_price|floatformat:2 }}</td>
-                            <td>{{ item.get_total|floatformat:2 }}</td>
+                            <td>{{ item.unit_price|floatformat:2|intcomma }}</td>
+                            <td>{{ item.get_total|floatformat:2|intcomma }}</td>
                         </tr>
                         {% endfor %}
                     {% else %}
@@ -169,8 +268,8 @@
                             <td>{{ item.description }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>pcs</td>
-                            <td>{{ item.unit_price|floatformat:2 }}</td>
-                            <td>{{ item.total|floatformat:2 }}</td>
+                            <td>{{ item.unit_price|floatformat:2|intcomma }}</td>
+                            <td>{{ item.total|floatformat:2|intcomma }}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -180,19 +279,19 @@
                         <td colspan="5" class="text-right">
                             <strong>SUB TOTAL</strong>
                         </td>
-                        <td>{{ document.subtotal|floatformat:2 }}</td>
+                        <td>{{ document.subtotal|floatformat:2|intcomma }}</td>
                     </tr>
                     <tr>
                         <td colspan="5" class="text-right">
                             <strong>VAT{% if document.tax_rate %} ({{ document.tax_rate }}%){% endif %}</strong>
                         </td>
-                        <td>{{ document.tax_amount|floatformat:2 }}</td>
+                        <td>{% if document.apply_vat %}{{ document.tax_amount|floatformat:2|intcomma }}{% else %}N/A{% endif %}</td>
                     </tr>
                     <tr>
                         <td colspan="5" class="text-right">
                             <strong>GRAND TOTAL</strong>
                         </td>
-                        <td>{{ document.total_amount|floatformat:2 }}</td>
+                        <td>{{ document.total_amount|floatformat:2|intcomma }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -241,152 +340,7 @@
 
 {% endblock %}
 
-
-
-
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const generateInvoiceBtn = document.getElementById('generateInvoiceBtn');
-    if (generateInvoiceBtn) {
-        generateInvoiceBtn.addEventListener('click', async function() {
-            try {
-                const quoteId = this.dataset.quoteId;
-                const response = await fetch(`/documents/quote/${quoteId}/generate-invoice/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    alert('Error generating invoice: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to generate invoice. Please try again.');
-            }
-        });
-    }
-    
-    // Share Document functionality
-    const shareDocumentBtn = document.getElementById('shareDocumentBtn');
-    const shareModal = document.getElementById('shareDocumentModal');
-    const shareForm = document.getElementById('shareDocumentForm');
-    
-    if (shareDocumentBtn) {
-        shareDocumentBtn.addEventListener('click', function() {
-            console.log('Share button clicked');
-            // Reset modal
-            if (shareForm) {
-                shareForm.style.display = 'none';
-            }
-            document.querySelector('.share-options').style.display = 'flex';
-            document.querySelector('.telegram-details').style.display = 'none';
-            document.querySelector('.email-details').style.display = 'none';
-            
-            // Set document ID
-            document.getElementById('shareDocumentId').value = this.dataset.documentId;
-            
-            // Show modal
-            const bootstrapModal = new bootstrap.Modal(shareModal);
-            bootstrapModal.show();
-        });
-    }
-    
-    const shareMethodButtons = document.querySelectorAll('.share-options button');
-    shareMethodButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const shareMethod = this.dataset.shareMethod;
-            
-            // Hide share options
-            document.querySelector('.share-options').style.display = 'none';
-            
-            // Show form
-            shareForm.style.display = 'block';
-            document.getElementById('shareMethod').value = shareMethod;
-            
-            // Show specific details
-            if (shareMethod === 'telegram') {
-                document.querySelector('.telegram-details').style.display = 'block';
-            } else if (shareMethod === 'email') {
-                document.querySelector('.email-details').style.display = 'block';
-            }
-        });
-    });
-    
-    if (shareForm) {
-        shareForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            fetch("{% url 'documents:share_document' %}", {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Document shared successfully!');
-                    const bootstrapModal = bootstrap.Modal.getInstance(shareModal);
-                    bootstrapModal.hide();
-                } else {
-                    alert('Failed to share document: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while sharing the document.');
-            });
-        });
-    }
-});
-</script>
-
-<!-- Share Document Modal -->
-<div id="shareDocumentModal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Share Document</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="share-options">
-                    <button class="btn btn-telegram" data-share-method="telegram">
-                        <i class="fab fa-telegram"></i> Share via Telegram
-                    </button>
-                    <button class="btn btn-email" data-share-method="email">
-                        <i class="fas fa-envelope"></i> Share via Email
-                    </button>
-                </div>
-                <form id="shareDocumentForm" class="mt-3" style="display:none;">
-                    <input type="hidden" name="document_id" id="shareDocumentId">
-                    <input type="hidden" name="share_method" id="shareMethod">
-                    
-                    <div class="form-group telegram-details" style="display:none;">
-                        <label for="telegramUsername">Telegram Username</label>
-                        <input type="text" class="form-control" id="telegramUsername" name="telegram_username" placeholder="@username">
-                    </div>
-                    
-                    <div class="form-group email-details" style="display:none;">
-                        <label for="recipientEmail">Recipient Email</label>
-                        <input type="email" class="form-control" id="recipientEmail" name="recipient_email" placeholder="Enter email address">
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary mt-2">Send</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %} 
+<script src="{% static 'js/documents/status_update.js' %}"></script>
+<script src="{% static 'js/documents/document_detail.js' %}"></script>
+{% endblock %}

@@ -11,7 +11,7 @@
         <h1 class="page-title"><i class="fas fa-university"></i> Banking</h1>
         <div class="banking-actions">
             <a href="{% url 'banking:create_account' %}" class="btn primary-btn">
-                <i class="fas fa-plus-circle"></i> New Account
+                <i class="fas fa-link"></i> Link Account
             </a>
         </div>
     </div>
@@ -29,7 +29,7 @@
                     </li>
                     <li>
                         <a href="{% url 'banking:create_account' %}" class="{% if '/create-account/' in request.path %}active{% endif %}">
-                            <i class="fas fa-plus-circle"></i> Create Account
+                            <i class="fas fa-link"></i> Link Account
                         </a>
                     </li>
                     <li>

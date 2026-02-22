@@ -1,6 +1,3 @@
-/* Import Nunito font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
-
 /* People App CSS - Modern Minimalist Design */
 :root {
     /* Modern Color variables */
@@ -26,7 +23,7 @@
     --input-height: 44px;
     
     /* Font variables */
-    --font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     
     /* Transition speeds */
     --transition-speed: 0.2s;
@@ -40,7 +37,7 @@
 }
 
 body {
-    font-family: var(--font-family);
+    font-family: 'Nunito', var(--font-family);
     font-size: 14px;
     color: var(--text-color);
     background-color: #f5f7fb;

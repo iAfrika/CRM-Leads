@@ -16,7 +16,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(ContactHistory)
 class ContactHistoryAdmin(admin.ModelAdmin):
-    list_display = ('person', 'contact_type', 'subject', 'date_sent', 'sent_by')
+    list_display = ('person', 'contact_type', 'subject', 'date_sent', 'sent_by_id')
     list_filter = ('contact_type', 'date_sent')
     search_fields = ('person__first_name', 'person__last_name', 'subject', 'message')
     date_hierarchy = 'date_sent'

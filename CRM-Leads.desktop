@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CRM-Leads Server
+Comment=Start CRM-Leads Django Development Server
+Exec=bash /tmp/CRM-Leads/RUN_SERVER.sh
+Icon=utilities-terminal
+Terminal=true
+Categories=Development;WebDevelopment;
+StartupNotify=true

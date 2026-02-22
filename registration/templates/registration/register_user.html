@@ -15,6 +15,17 @@
                 <h2 class="mb-0">Create Your Account</h2>
             </div>
             <div class="card-body">
+                {% if messages %}
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
                 <!-- Steps Indicator -->
                 <div class="steps-indicator">
                     <div class="step active">
@@ -130,11 +141,11 @@
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="{% url 'registration:home' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'registration:registration_home' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-2"></i> Back
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            Continue <i class="fas fa-arrow-right ms-2"></i>
+                            Create Account <i class="fas fa-check ms-2"></i>
                         </button>
                     </div>
                 </form>

@@ -518,4 +518,8 @@
     .sidebar-nav a i {
         margin-right: 0.5rem;
     }
-} 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+}

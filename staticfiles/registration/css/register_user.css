@@ -1,0 +1,246 @@
+/* Registration User Management Styles */
+:root {
+    --primary-color: #4a6cf7;
+    --primary-hover: #3a5bdb;
+    --success-color: #48bb78;
+    --danger-color: #f56565;
+    --warning-color: #ed8936;
+    --info-color: #63b3ed;
+    --light-bg: #f9fafb;
+    --border-color: #e2e8f0;
+    --text-color: #2d3748;
+    --text-muted: #718096;
+    --white: #ffffff;
+    --border-radius: 8px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+    min-width: 120px;
+}
+
+/* Section Headers */
+.card-body h6 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Form Styling */
+.form-label {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: var(--white);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
+    outline: none;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--danger-color);
+    margin-top: 0.25rem;
+}
+
+/* Alert Styling */
+.alert {
+    border-radius: var(--border-radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+}
+
+.alert-info {
+    background-color: #ebf8ff;
+    border-color: #bee3f8;
+    color: #2c5282;
+}
+
+.alert-danger {
+    background-color: #fed7d7;
+    border-color: #feb2b2;
+    color: #c53030;
+}
+
+.alert-success {
+    background-color: #c6f6d5;
+    border-color: #9ae6b4;
+    color: #2f855a;
+}
+
+.alert h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.alert ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
+
+/* Button Styling */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--text-muted);
+    border-color: var(--border-color);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--light-bg);
+    border-color: var(--text-muted);
+    color: var(--text-color);
+}
+
+/* Card Styling */
+.card {
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    background-color: var(--white);
+}
+
+.card-header {
+    background-color: var(--light-bg);
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 12px 12px 0 0;
+}
+
+.card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+}
+
+.card-header p {
+    margin: 0.5rem 0 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.page-header h2 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1.25rem;
+    }
+}
+
+/* Messages */
+.messages .alert {
+    display: flex;
+    align-items: center;
+}
+
+/* Icon spacing */
+.text-muted i {
+    color: var(--text-muted) !important;
+}

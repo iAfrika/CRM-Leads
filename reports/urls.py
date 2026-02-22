@@ -41,6 +41,9 @@ urlpatterns = [
     path('export/<int:report_id>/excel/', views.export_report_excel, name='export_report_excel'),
     path('export/<int:report_id>/csv/', views.export_report_csv, name='export_report_csv'),
     
+    # Analytics
+    path('analytics/', views.analytics, name='analytics'),
+    
     # Settings
     path('settings/', views.settings, name='settings'),
     

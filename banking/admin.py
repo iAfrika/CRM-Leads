@@ -3,9 +3,9 @@ from .models import Account, Transaction, Debt, Tax
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ('account_number', 'account_type', 'owner', 'balance', 'is_active', 'created_at')
+    list_display = ('account_number', 'account_type', 'owner_id', 'balance', 'is_active', 'created_at')
     list_filter = ('account_type', 'is_active')
-    search_fields = ('account_number', 'owner__username')
+    search_fields = ('account_number',)
     readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Transaction)

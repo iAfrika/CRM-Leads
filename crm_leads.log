@@ -1,0 +1,264 @@
+INFO 2025-04-03 13:55:06,489 views Attempting to generate purchase order for Purchase 2
+INFO 2025-04-03 13:55:06,490 views Purchase details: test 2, Amount: 6000000.00, Date: 2025-04-03
+ERROR 2025-04-03 13:55:06,497 views Failed to generate Purchase Order for Purchase 2: NOT NULL constraint failed: documents_document.client_id
+INFO 2025-04-03 13:58:19,436 views Attempting to generate expense sheet for Expense 2
+INFO 2025-04-03 13:58:19,437 views Expense details: test2, Amount: 4000000.00, Date: 2025-04-03
+ERROR 2025-04-03 13:58:19,441 views Failed to generate Expense Sheet for Expense 2: Invalid field name(s) for model Client: 'created_by'.
+INFO 2025-04-03 13:58:27,558 views Attempting to generate expense sheet for Expense 2
+INFO 2025-04-03 13:58:27,567 views Expense details: test2, Amount: 4000000.00, Date: 2025-04-03
+ERROR 2025-04-03 13:58:27,573 views Failed to generate Expense Sheet for Expense 2: Invalid field name(s) for model Client: 'created_by'.
+INFO 2025-04-03 13:59:52,226 views Attempting to generate expense sheet for Expense 2
+INFO 2025-04-03 13:59:52,227 views Expense details: test2, Amount: 4000000.00, Date: 2025-04-03
+INFO 2025-04-03 13:59:52,256 views Successfully generated Expense Sheet for Expense 2. Document ID: 14
+INFO 2025-04-03 14:22:30,383 views Attempting to generate expense sheet for Expense 2
+INFO 2025-04-03 14:22:30,384 views Expense details: test2, Amount: 4000000.00, Date: 2025-04-03
+INFO 2025-04-03 14:22:30,388 views Expense Sheet already exists for Expense 2
+INFO 2025-04-03 14:24:04,263 views Attempting to generate purchase order for Purchase 2
+INFO 2025-04-03 14:24:04,263 views Purchase details: test 2, Amount: 6000000.00, Date: 2025-04-03
+ERROR 2025-04-03 14:24:04,268 views Failed to generate Purchase Order for Purchase 2: NOT NULL constraint failed: documents_document.client_id
+INFO 2025-04-03 14:24:11,368 views Attempting to generate purchase order for Purchase 2
+INFO 2025-04-03 14:24:11,369 views Purchase details: test 2, Amount: 6000000.00, Date: 2025-04-03
+ERROR 2025-04-03 14:24:11,375 views Failed to generate Purchase Order for Purchase 2: NOT NULL constraint failed: documents_document.client_id
+INFO 2025-04-03 14:25:32,596 views Attempting to generate purchase order for Purchase 2
+INFO 2025-04-03 14:25:32,597 views Purchase details: Title: test 2, Amount: 6000000.00, Date: 2025-04-03
+INFO 2025-04-03 14:25:32,599 views Purchase Category: test category
+INFO 2025-04-03 14:25:32,600 views Purchase Profile: None
+INFO 2025-04-03 14:25:32,601 views Purchase Created By: admin
+ERROR 2025-04-03 14:25:32,622 views Comprehensive error in generate_purchase_order for Purchase 2: FOREIGN KEY constraint failed
+ERROR 2025-04-03 14:25:32,623 views Error type: IntegrityError
+ERROR 2025-04-03 14:25:32,693 views Traceback (most recent call last):
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 98, in inner
+    return func(*args, **kwargs)
+sqlite3.IntegrityError: FOREIGN KEY constraint failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\JIMM\CRM-Leads\purchases\views.py", line 361, in generate_purchase_order
+    document = Document.objects.create(
+        client=client,
+    ...<9 lines>...
+        created_by=request.user
+    )
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\query.py", line 679, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\documents\models.py", line 119, in save
+    super().save(*args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 892, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 998, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 1161, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 1202, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\query.py", line 1847, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1848, in execute_sql
+    self.connection.ops.fetch_returned_insert_columns(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+        self.returning_params,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\backends\base\operations.py", line 216, in fetch_returned_insert_columns
+    return cursor.fetchone()
+           ~~~~~~~~~~~~~~~^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 97, in inner
+    with self:
+         ^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 98, in inner
+    return func(*args, **kwargs)
+django.db.utils.IntegrityError: FOREIGN KEY constraint failed
+
+INFO 2025-04-03 14:25:47,477 views Attempting to generate expense sheet for Expense 2
+INFO 2025-04-03 14:25:47,477 views Expense details: Title: test2, Amount: 4000000.00, Date: 2025-04-03
+INFO 2025-04-03 14:25:47,479 views Expense Category: test expense
+INFO 2025-04-03 14:25:47,479 views Expense Profile: None
+INFO 2025-04-03 14:25:47,481 views Expense Created By: admin
+INFO 2025-04-03 14:25:47,484 views Expense Sheet already exists for Expense 2
+INFO 2025-04-03 14:29:50,564 views Attempting to generate purchase order for Purchase 2
+INFO 2025-04-03 14:29:50,565 views Purchase details: Title: test 2, Amount: 6000000.00, Date: 2025-04-03
+INFO 2025-04-03 14:29:50,569 views Purchase Category: test category
+INFO 2025-04-03 14:29:50,570 views Purchase Profile: None
+INFO 2025-04-03 14:29:50,573 views Purchase Created By: admin
+ERROR 2025-04-03 14:29:50,590 views Comprehensive error in generate_purchase_order for Purchase 2: FOREIGN KEY constraint failed
+ERROR 2025-04-03 14:29:50,591 views Error type: IntegrityError
+ERROR 2025-04-03 14:29:50,598 views Traceback (most recent call last):
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 98, in inner
+    return func(*args, **kwargs)
+sqlite3.IntegrityError: FOREIGN KEY constraint failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\JIMM\CRM-Leads\purchases\views.py", line 361, in generate_purchase_order
+    document = Document.objects.create(
+        client=client,
+    ...<9 lines>...
+        created_by=request.user
+    )
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\query.py", line 679, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\documents\models.py", line 119, in save
+    super().save(*args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 892, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 998, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 1161, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\base.py", line 1202, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\query.py", line 1847, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1848, in execute_sql
+    self.connection.ops.fetch_returned_insert_columns(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+        self.returning_params,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\backends\base\operations.py", line 216, in fetch_returned_insert_columns
+    return cursor.fetchone()
+           ~~~~~~~~~~~~~~~^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 97, in inner
+    with self:
+         ^^^^
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "D:\JIMM\CRM-Leads\venv\Lib\site-packages\django\db\utils.py", line 98, in inner
+    return func(*args, **kwargs)
+django.db.utils.IntegrityError: FOREIGN KEY constraint failed
+
+INFO 2025-04-03 14:31:54,812 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:31:54,813 views Generating Purchase Order - Purchase ID: 2
+ERROR 2025-04-03 14:31:54,816 views Error retrieving purchase: no such column: authentication_profile.theme
+INFO 2025-04-03 14:32:09,018 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:32:09,019 views Generating Purchase Order - Purchase ID: 2
+ERROR 2025-04-03 14:32:09,022 views Error retrieving purchase: no such column: authentication_profile.theme
+INFO 2025-04-03 14:34:07,013 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:34:07,014 views Generating Purchase Order - Purchase ID: 2
+ERROR 2025-04-03 14:34:07,017 views Error retrieving purchase: no such column: authentication_profile.theme
+INFO 2025-04-03 14:34:40,099 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:34:40,100 views Generating Purchase Order - Purchase ID: 2
+ERROR 2025-04-03 14:34:40,104 views Error retrieving purchase: no such column: authentication_profile.theme
+INFO 2025-04-03 14:36:04,855 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:36:04,856 views Generating Purchase Order - Purchase ID: 2
+ERROR 2025-04-03 14:36:04,858 views Error retrieving purchase: no such column: authentication_profile.theme
+INFO 2025-04-03 14:37:33,452 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:37:33,452 views Generating Purchase Order - Purchase ID: 2
+INFO 2025-04-03 14:37:33,455 views Purchase found: test 2 - 6000000.00 (2025-04-03)
+INFO 2025-04-03 14:37:33,455 views Purchase Details:
+INFO 2025-04-03 14:37:33,455 views   Title: test 2
+INFO 2025-04-03 14:37:33,456 views   Amount: 6000000.00
+INFO 2025-04-03 14:37:33,457 views   Date: 2025-04-03
+INFO 2025-04-03 14:37:33,457 views   Category: test category
+INFO 2025-04-03 14:37:33,458 views   Profile: None
+INFO 2025-04-03 14:37:33,460 views   Created By: admin
+INFO 2025-04-03 14:37:33,460 views Checking for existing Purchase Order for Purchase 2
+INFO 2025-04-03 14:37:33,462 views Existing Document Query: SELECT "documents_document"."id", "documents_document"."client_id", "documents_document"."document_type", "documents_document"."description", "documents_document"."invoice_number", "documents_document"."subtotal", "documents_document"."tax_rate", "documents_document"."tax_amount", "documents_document"."total_amount", "documents_document"."document_date", "documents_document"."due_date", "documents_document"."status", "documents_document"."file", "documents_document"."quote_id", "documents_document"."expense_id", "documents_document"."purchase_id", "documents_document"."sale_id", "documents_document"."created_at", "documents_document"."updated_at", "documents_document"."created_by_id", "documents_document"."updated_by_id", "documents_document"."quote_number", "documents_document"."receipt_number" FROM "documents_document" WHERE ("documents_document"."document_type" = PURCHASE_ORDER AND "documents_document"."purchase_id" = 2)
+INFO 2025-04-03 14:37:33,465 views Existing Document Query Result: None
+INFO 2025-04-03 14:37:33,467 views Client for Purchase Order: jim
+ERROR 2025-04-03 14:37:33,482 views Failed to create Purchase Order Document: FOREIGN KEY constraint failed
+INFO 2025-04-03 14:45:55,730 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:45:55,731 views Generating Purchase Order - Purchase ID: 2
+INFO 2025-04-03 14:45:55,734 views Purchase found: test 2 - 6000000.00 (2025-04-03)
+INFO 2025-04-03 14:45:55,735 views Purchase Details:
+INFO 2025-04-03 14:45:55,735 views   Title: test 2
+INFO 2025-04-03 14:45:55,736 views   Amount: 6000000.00
+INFO 2025-04-03 14:45:55,737 views   Date: 2025-04-03
+INFO 2025-04-03 14:45:55,737 views   Category: test category
+INFO 2025-04-03 14:45:55,738 views   Profile: None
+INFO 2025-04-03 14:45:55,741 views   Created By: admin
+ERROR 2025-04-03 14:45:55,745 views Failed to create Purchase Order Document: NOT NULL constraint failed: documents_document.client_id
+INFO 2025-04-03 14:47:25,011 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 14:47:25,011 views Generating Purchase Order - Purchase ID: 2
+INFO 2025-04-03 14:47:25,014 views Purchase found: test 2 - 6000000.00 (2025-04-03)
+INFO 2025-04-03 14:47:25,015 views Purchase Details:
+INFO 2025-04-03 14:47:25,015 views   Title: test 2
+INFO 2025-04-03 14:47:25,016 views   Amount: 6000000.00
+INFO 2025-04-03 14:47:25,016 views   Date: 2025-04-03
+INFO 2025-04-03 14:47:25,017 views   Category: test category
+INFO 2025-04-03 14:47:25,018 views   Profile: None
+INFO 2025-04-03 14:47:25,020 views   Created By: admin
+INFO 2025-04-03 14:47:25,029 views Successfully created Purchase Order Document. ID: 15
+INFO 2025-04-03 16:24:55,393 views Generating Purchase Order - Request User: admin
+INFO 2025-04-03 16:24:55,399 views Generating Purchase Order - Purchase ID: 1
+INFO 2025-04-03 16:24:55,408 views Purchase found: test purchase - 200000.00 (2025-03-25)
+INFO 2025-04-03 16:24:55,410 views Purchase Details:
+INFO 2025-04-03 16:24:55,412 views   Title: test purchase
+INFO 2025-04-03 16:24:55,413 views   Amount: 200000.00
+INFO 2025-04-03 16:24:55,414 views   Date: 2025-03-25
+INFO 2025-04-03 16:24:55,417 views   Category: test category
+INFO 2025-04-03 16:24:55,419 views   Profile: None
+INFO 2025-04-03 16:24:55,423 views   Created By: jimm
+INFO 2025-04-03 16:24:55,460 views Successfully created Purchase Order Document. ID: 16

@@ -246,6 +246,11 @@
     background-color: #4338ca;
 }
 
+/* Global styles */
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .reports-header {

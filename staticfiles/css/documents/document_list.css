@@ -36,26 +36,24 @@
     gap: 0.5rem;
 }
 
-.btn {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
+.document-actions .action-button {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: #3498db;
-    color: white;
+    background: none;
     border: none;
+    padding: 0;
+    margin: 0;
+    color: currentColor;
+    text-decoration: none;
+    cursor: pointer;
 }
 
-.btn-secondary {
-    background: #f8f9fa;
-    color: #2c3e50;
-    border: 1px solid var(--border-color);
+.document-actions .action-button:hover {
+    color: var(--primary-color);
+}
+
+.document-actions .action-button i {
+    margin-right: 0.5rem;
 }
 
 .btn-icon {

@@ -1,19 +1,41 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.validators import MinValueValidator
+from decimal import Decimal
+from django.core.validators import EmailValidator
 import uuid
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_categories')
-    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    is_active = models.BooleanField(default=True)
+
     class Meta:
-        verbose_name_plural = "Categories"
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
         ordering = ['name']
-    
+
+    def __str__(self):
+        return self.name
+
+class Supplier(models.Model):
+    name = models.CharField(max_length=255)
+    contact_person = models.CharField(max_length=255)
+    email = models.EmailField(validators=[EmailValidator()])
+    phone = models.CharField(max_length=20)
+    address = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    created_by_id = models.IntegerField(null=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Supplier'
+        verbose_name_plural = 'Suppliers'
+
     def __str__(self):
         return self.name
 
@@ -33,8 +55,8 @@ class Product(models.Model):
     current_stock = models.PositiveIntegerField(default=0)
     reorder_level = models.PositiveIntegerField(default=5)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_created_items')
-    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_updated_items')
+    created_by_id = models.IntegerField(null=True)
+    updated_by_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -77,7 +99,7 @@ class InventoryTransaction(models.Model):
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     reference_number = models.CharField(max_length=100, blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_inventory_transactions')
+    created_by_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -105,19 +127,6 @@ class InventoryTransaction(models.Model):
         
         super().save(*args, **kwargs)
 
-class Supplier(models.Model):
-    name = models.CharField(max_length=200)
-    contact_person = models.CharField(max_length=100, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_suppliers')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.name
-
 class Purchase(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -131,8 +140,8 @@ class Purchase(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     notes = models.TextField(blank=True, null=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_created_purchases')
-    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_updated_purchases')
+    created_by_id = models.IntegerField(null=True)
+    updated_by_id = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -150,7 +159,58 @@ class Purchase(models.Model):
 
 class PurchaseItem(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='purchase_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    class Meta:
+        ordering = ['id']
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.quantity} units"
+    
+    def save(self, *args, **kwargs):
+        # Calculate total amount if not provided
+        if not self.total_amount:
+            self.total_amount = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+class Sale(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    )
+    
+    client_name = models.CharField(max_length=200)
+    client_email = models.EmailField(blank=True, null=True)
+    client_phone = models.CharField(max_length=20, blank=True, null=True)
+    sale_date = models.DateField(default=timezone.now)
+    reference_number = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    notes = models.TextField(blank=True, null=True)
+    created_by_id = models.IntegerField(null=True)
+    updated_by_id = models.IntegerField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-sale_date']
+    
+    def __str__(self):
+        return f"SO-{self.reference_number}"
+    
+    def save(self, *args, **kwargs):
+        # Generate a reference number if not provided
+        if not self.reference_number:
+            self.reference_number = f"SO-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+class SaleItem(models.Model):
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_items')
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
@@ -171,7 +231,7 @@ class AuditLog(models.Model):
         ('delete', 'Delete'),
     )
     
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user_id = models.IntegerField(null=True)
     action = models.CharField(max_length=10, choices=ACTION_CHOICES)
     model_name = models.CharField(max_length=100)
     object_id = models.CharField(max_length=100)

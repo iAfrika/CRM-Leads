@@ -8,43 +8,6 @@ body {
     font-family: 'Nunito', sans-serif;
 }
 
-/* Leads app dark mode */
-html.dark-mode .timeline::before {
-    background-color: var(--border-color);
-}
-
-html.dark-mode .timeline-marker {
-    background-color: var(--dark-color);
-    border-color: var(--border-color);
-}
-
-html.dark-mode .timeline-content {
-    background-color: var(--card-bg);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-html.dark-mode .lead-card,
-html.dark-mode .lead-stats-card,
-html.dark-mode .lead-chart-container {
-    background-color: var(--card-bg);
-    border-color: var(--border-color);
-}
-
-html.dark-mode .lead-table th {
-    background-color: var(--hover-bg);
-    color: var(--light-text);
-    border-color: var(--border-color);
-}
-
-html.dark-mode .lead-table td {
-    border-color: var(--border-color);
-    color: var(--light-text);
-}
-
-html.dark-mode .lead-table tr:hover {
-    background-color: var(--hover-bg);
-}
-
 /* People app dark mode */
 html.dark-mode .person-card,
 html.dark-mode .contact-card,
@@ -298,4 +261,4 @@ html.dark-mode .highcharts-title text {
 html.dark-mode .apexcharts-legend-text,
 html.dark-mode .highcharts-legend-item text {
     color: var(--light-text) !important;
-} 
+}

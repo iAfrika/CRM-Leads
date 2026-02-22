@@ -7,7 +7,9 @@ from .models import Person, Role, ContactHistory
 from .forms import PersonForm, RoleAssignmentForm, ContactForm
 from .services.telegram_service import TelegramService
 from .services.email_service import EmailService
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect
 from django.conf import settings
 import os
 
@@ -18,8 +20,9 @@ def register_person(request):
         form = PersonForm(request.POST, request.FILES)
         if form.is_valid():
             person = form.save(commit=False)
-            person.registered_by = request.user
+            person.registered_by_id = request.user.id
             person.save()
+            form.save_m2m()  # Save many-to-many relationships
             messages.success(request, f"{person.full_name} has been registered successfully.")
             return redirect('people:person_detail', pk=person.pk)
         
@@ -165,6 +168,52 @@ def update_person(request, pk):
         'is_update': True
     })
 
+@login_required
+@require_POST
+@csrf_protect
+def delete_person(request, pk):
+    """
+    Delete a person record.
+    
+    This view handles the deletion of a person record with soft delete 
+    or hard delete based on system configuration.
+    """
+    try:
+        person = get_object_or_404(Person, pk=pk)
+        
+        # Optional: Add permission check
+        if not request.user.is_staff and not request.user.is_superuser:
+            return JsonResponse({
+                'status': 'error', 
+                'message': 'You do not have permission to delete people.'
+            }, status=403)
+        
+        # Soft delete or hard delete based on configuration
+        if getattr(settings, 'SOFT_DELETE_ENABLED', False):
+            # Soft delete: mark as inactive
+            person.is_active = False
+            person.save()
+        else:
+            # Hard delete
+            person.delete()
+        
+        return JsonResponse({
+            'status': 'success', 
+            'message': f'{person.full_name} has been deleted successfully.'
+        })
+    
+    except Person.DoesNotExist:
+        return JsonResponse({
+            'status': 'error', 
+            'message': 'Person not found.'
+        }, status=404)
+    
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error', 
+            'message': str(e)
+        }, status=500)
+
 # Add a debug view to check static files
 def debug_static(request):
     """Debug view to check static file paths"""
@@ -205,19 +254,3 @@ def debug_static(request):
     """
     
     return HttpResponse(output)
-
-                
-                
-                
-                
-                
-
-
-
-
-
-
-
-
-
-
