@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
+<<<<<<< HEAD
 {% load number_filters %}
+=======
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 
 {% block app_css %}
 <link rel="stylesheet" href="{% static 'dashboard/css/main_dashboard.css' %}">
@@ -140,7 +143,11 @@
                             <i class="bi bi-graph-up-arrow metric-title-icon"></i>
                             <h4 class="metric-title">Total Revenue</h4>
                         </div>
+<<<<<<< HEAD
                         <div class="metric-value">{{ total_revenue|thousands_separator }}</div>
+=======
+                        <div class="metric-value">{{ total_revenue|floatformat:2 }}</div>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                         <div class="metric-change {% if revenue_change >= 0 %}positive{% else %}negative{% endif %}">
                             <i class="bi {% if revenue_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
                             {{ revenue_change|floatformat:2 }}%
@@ -157,7 +164,11 @@
                             <i class="bi bi-cash-coin metric-title-icon"></i>
                             <h4 class="metric-title">Total Expenses</h4>
                         </div>
+<<<<<<< HEAD
                         <div class="metric-value">{{ total_expenses|thousands_separator }}</div>
+=======
+                        <div class="metric-value">{{ total_expenses|floatformat:2 }}</div>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                         <div class="metric-change {% if expenses_change >= 0 %}negative{% else %}positive{% endif %}">
                             <i class="bi {% if expenses_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
                             {{ expenses_change|floatformat:2 }}%
@@ -175,7 +186,11 @@
                             <h4 class="metric-title">PNL Analysis</h4>
                         </div>
                         <div class="metric-value {% if pnl_value >= 0 %}positive{% else %}negative{% endif %}">
+<<<<<<< HEAD
                             {{ pnl_value|thousands_separator }}
+=======
+                            {{ pnl_value|floatformat:2 }}
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                         </div>
                         <div class="metric-change {% if pnl_change >= 0 %}positive{% else %}negative{% endif %}">
                             <i class="bi {% if pnl_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
@@ -193,7 +208,11 @@
                             <i class="bi bi-basket metric-title-icon"></i>
                             <h4 class="metric-title">Total Purchases</h4>
                         </div>
+<<<<<<< HEAD
                         <div class="metric-value">{{ total_purchases|thousands_separator }}</div>
+=======
+                        <div class="metric-value">{{ total_purchases|floatformat:2 }}</div>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                         <div class="metric-change {% if purchases_change >= 0 %}negative{% else %}positive{% endif %}">
                             <i class="bi {% if purchases_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
                             {{ purchases_change|floatformat:2 }}%
@@ -210,13 +229,52 @@
                             <i class="bi bi-tags metric-title-icon"></i>
                             <h4 class="metric-title">Total Sales</h4>
                         </div>
+<<<<<<< HEAD
                         <div class="metric-value">{{ total_sales|thousands_separator }}</div>
+=======
+                        <div class="metric-value">{{ total_sales|floatformat:2 }}</div>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                         <div class="metric-change {% if sales_change >= 0 %}positive{% else %}negative{% endif %}">
                             <i class="bi {% if sales_change >= 0 %}bi-arrow-up-short{% else %}bi-arrow-down-short{% endif %}"></i>
                             {{ sales_change|floatformat:2 }}%
                         </div>
                     </div>
                 </div>
+<<<<<<< HEAD
+=======
+
+                <div class="metric-card pending-quotes">
+                    <div class="metric-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-hourglass-split metric-title-icon"></i>
+                            <h4 class="metric-title">Pending Quotes</h4>
+                        </div>
+                        <div class="metric-value">{{ total_pending_quotes }}</div>
+                        <div class="metric-change {% if total_pending_quotes_value > 0 %}negative{% else %}positive{% endif %}">
+                            {{ total_pending_quotes_value|floatformat:2 }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card overdue-invoices">
+                    <div class="metric-icon">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-header">
+                            <i class="bi bi-clock-history metric-title-icon"></i>
+                            <h4 class="metric-title">Overdue Invoices</h4>
+                        </div>
+                        <div class="metric-value">{{ total_overdue_invoices }}</div>
+                        <div class="metric-change {% if total_overdue_invoices_value > 0 %}negative{% else %}positive{% endif %}">
+                            {{ total_overdue_invoices_value|floatformat:2 }}
+                        </div>
+                    </div>
+                </div>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
             </div>
         </div>
 
@@ -253,7 +311,11 @@
                                     <td>{{ quote.id }}</td>
                                     <td>{{ quote.client_name }}</td>
                                     <td>{{ quote.created_at|date:"d M Y" }}</td>
+<<<<<<< HEAD
                                     <td>{{ quote.total_amount|thousands_separator }}</td>
+=======
+                                    <td>{{ quote.total_amount|floatformat:2 }}</td>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                                     <td>
                                         <span class="status-badge status-pending">
                                             {{ quote.days_pending.days }} Days
@@ -299,7 +361,11 @@
                                     <td>{{ invoice.id }}</td>
                                     <td>{{ invoice.client_name }}</td>
                                     <td>{{ invoice.due_date|date:"d M Y" }}</td>
+<<<<<<< HEAD
                                     <td>{{ invoice.total_amount|thousands_separator }}</td>
+=======
+                                    <td>{{ invoice.total_amount|floatformat:2 }}</td>
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
                                     <td>
                                         <span class="status-badge status-overdue">
                                             {{ invoice.days_overdue.days }} Days

@@ -224,6 +224,54 @@ class SaleItem(models.Model):
             self.total_price = self.quantity * self.unit_price
         super().save(*args, **kwargs)
 
+class Sale(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    )
+    
+    client_name = models.CharField(max_length=200)
+    client_email = models.EmailField(blank=True, null=True)
+    client_phone = models.CharField(max_length=20, blank=True, null=True)
+    sale_date = models.DateField(default=timezone.now)
+    reference_number = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    notes = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_created_sales')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_updated_sales')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-sale_date']
+    
+    def __str__(self):
+        return f"SO-{self.reference_number}"
+    
+    def save(self, *args, **kwargs):
+        # Generate a reference number if not provided
+        if not self.reference_number:
+            self.reference_number = f"SO-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+class SaleItem(models.Model):
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sale_items')
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2)
+    
+    def __str__(self):
+        return f"{self.product.name} ({self.quantity})"
+    
+    def save(self, *args, **kwargs):
+        # Calculate total price if not provided
+        if not self.total_price:
+            self.total_price = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
 class AuditLog(models.Model):
     ACTION_CHOICES = (
         ('create', 'Create'),

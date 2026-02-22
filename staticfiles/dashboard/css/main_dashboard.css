@@ -1,5 +1,6 @@
 /* Advanced Dashboard Styles */
 :root {
+<<<<<<< HEAD
     --color-primary: #3498db;  
     --color-secondary: #2980b9;  
     --color-background: #f4f6f7;  
@@ -18,6 +19,18 @@
     --dark-background: #0a0a1a;
     --mid-background: #121228;
     --accent-glow: #00f0ff;
+=======
+    --color-primary: #4a6cf7;
+    --color-secondary: #6a7adb;
+    --color-background: #f4f7ff;
+    --color-text-dark: #2c3e50;
+    --color-text-light: #6c757d;
+    --color-border: #e9ecef;
+    --color-white: #ffffff;
+    --color-hover: #3a55f0;
+    --transition-speed: 0.3s;
+    --border-radius: 12px;  /* Consistent border radius */
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 * {
@@ -27,7 +40,11 @@
 }
 
 body {
+<<<<<<< HEAD
     font-family: 'Inter', sans-serif;
+=======
+    font-family: 'Nunito', sans-serif;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     background-color: var(--color-background);
     color: var(--color-text-dark);
     line-height: 1.6;
@@ -37,12 +54,16 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+<<<<<<< HEAD
     background-color: var(--color-background);
+=======
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 /* Ultra-Compact Navbar Styles with Border Radius */
 .advanced-dashboard-navbar {
     background-color: var(--color-white);
+<<<<<<< HEAD
     box-shadow: 0 2px 10px rgba(142, 68, 173, 0.05);
     border-bottom: 1px solid var(--color-border);
     position: sticky;
@@ -52,6 +73,13 @@ body {
     height: 60px;
     display: flex;
     align-items: center;
+=======
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: -10px;
+    z-index: 100;
+    padding-top: 5px;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     border-bottom-left-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
     overflow: hidden;
@@ -59,17 +87,27 @@ body {
 
 .navbar-grid {
     display: grid;
+<<<<<<< HEAD
     grid-template-columns: 250px 1fr;
     align-items: center;
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 20px;
     height: 100%;
+=======
+    grid-template-columns: 250px 1fr;  
+    align-items: center;
+    gap: 15px;  
+    max-width: 1600px;  
+    margin: 0 auto;
+    padding: 4px 20px;  
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 .logo-container {
     display: flex;
     align-items: center;
+<<<<<<< HEAD
     gap: 10px;
     height: 100%;
 }
@@ -87,14 +125,39 @@ body {
     font-weight: 700;
     letter-spacing: -0.5px;
     font-size: 1rem;
+=======
+    gap: 8px;  
+    margin-top: -2px;
+}
+
+.logo-icon {
+    width: 26px;  
+    height: 26px;
+    stroke: var(--color-primary);
+    stroke-width: 1.5;
+    fill: none;
+    margin-top: -2px;
+}
+
+.logo-text {
+    font-size: 1.1rem;  
+    font-weight: 600;
+    color: var(--color-primary);
+    letter-spacing: -0.3px;
+    line-height: 1;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 .nav-links {
     display: flex;
     list-style: none;
+<<<<<<< HEAD
     gap: 10px;
     align-items: center;
     height: 100%;
+=======
+    gap: 15px;  
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 .nav-item {
@@ -104,6 +167,7 @@ body {
     text-decoration: none;
     color: var(--color-text-light);
     font-weight: 500;
+<<<<<<< HEAD
     padding: 6px 10px;
     border-radius: 8px;
     transition: all var(--transition-speed) ease;
@@ -116,14 +180,34 @@ body {
 
 .nav-item.active, .nav-item:hover {
     background-color: rgba(142, 68, 173, 0.1);
+=======
+    padding: 6px 10px;  
+    border-radius: calc(var(--border-radius) * 0.75);  /* Slightly smaller radius */
+    transition: all var(--transition-speed) ease;
+    font-size: 0.9rem;
+}
+
+.nav-item i {
+    font-size: 0.9rem;
+}
+
+.nav-item.active, .nav-item:hover {
+    background-color: rgba(74, 108, 247, 0.1);
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     color: var(--color-primary);
 }
 
 .dashboard-content {
     width: 100%;
+<<<<<<< HEAD
     max-width: 1800px;
     margin: 0 auto;
     padding: 30px;
+=======
+    max-width: 1800px;  /* Increased max-width */
+    margin: 0 auto;     /* Center the content */
+    padding: 20px;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 .dashboard-header {
@@ -172,6 +256,7 @@ body {
 
 .dashboard-grid {
     display: grid;
+<<<<<<< HEAD
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     grid-auto-rows: minmax(400px, auto);
@@ -301,12 +386,69 @@ body {
     color: white;
     background-color: #007bff;
     border-radius: 14px;
+=======
+    grid-template-columns: repeat(2, 1fr);  /* 2 columns */
+    grid-template-rows: repeat(2, 1fr);     /* 2 rows */
+    gap: 30px;  /* Increased gap */
+    width: 100%;
+    height: calc(100vh - 100px);  /* Adjusted for navbar */
+}
+
+.widget {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    padding: 25px;  
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    border: none;
+}
+
+.widget:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+}
+
+.widget-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.widget-header h3 {
+    margin-bottom: 0;
+    color: var(--color-text-primary);
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    height: 100%;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 /* Ensure charts are responsive within their grid cells */
 canvas {
     width: 100% !important;
     height: 100% !important;
+<<<<<<< HEAD
     max-width: 100%;
     max-height: 600px;
     border: none;
@@ -821,4 +963,10 @@ canvas {
         grid-template-columns: 1fr;
         gap: 40px;
     }
+=======
+    min-height: 300px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }

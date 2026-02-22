@@ -60,8 +60,13 @@ class Lead(models.Model):
     
     # Relationships
     assigned_to = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_leads')
+<<<<<<< HEAD
     created_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
     modified_by_id = models.IntegerField(null=True, blank=True)  # Store user ID instead of ForeignKey
+=======
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_leads')
+    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='modified_leads')
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     converted_to_client = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True, related_name='converted_from_lead')
     
     # Additional Information

@@ -224,6 +224,7 @@ body {
 }
 
 .chart-container {
+<<<<<<< HEAD
     flex: 1;
     position: relative;
     width: 100%;
@@ -240,6 +241,21 @@ body {
     max-width: 100%;
     height: auto !important;
     width: auto !important;
+=======
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 350px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 .chart-header {
@@ -306,6 +322,7 @@ body {
 /* Ensure charts are responsive within their grid cells */
 canvas {
     width: 100% !important;
+<<<<<<< HEAD
     height: 100% !important;
     max-width: 100%;
     max-height: 600px;
@@ -313,6 +330,12 @@ canvas {
     outline: none;
     box-shadow: none;
     object-fit: contain;
+=======
+    height: 350px !important;
+    border: none;
+    outline: none;
+    box-shadow: none;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 }
 
 .chart-toggle-container {
@@ -470,8 +493,13 @@ canvas {
 
 .metrics-grid {
     display: grid;
+<<<<<<< HEAD
     grid-template-columns: repeat(5, 1fr);
     gap: 100px;
+=======
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     width: 100%;
 }
 
@@ -510,6 +538,17 @@ canvas {
     border-left-color: #FF9800;  
 }
 
+<<<<<<< HEAD
+=======
+.metric-card.pending-quotes {
+    border-left-color: #FFC107;  
+}
+
+.metric-card.overdue-invoices {
+    border-left-color: #DC3545;  
+}
+
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
 .metric-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(142, 68, 173, 0.15);
@@ -771,22 +810,34 @@ canvas {
 
 @media (max-width: 1920px) {
     .metrics-grid {
+<<<<<<< HEAD
         grid-template-columns: repeat(5, 1fr);
         gap: 100px;
+=======
+        grid-template-columns: repeat(7, 1fr);
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     }
 }
 
 @media (max-width: 1600px) {
     .metrics-grid {
+<<<<<<< HEAD
         grid-template-columns: repeat(5, 1fr);
         gap: 100px;
+=======
+        grid-template-columns: repeat(7, 1fr);
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     }
 }
 
 @media (max-width: 1200px) {
     .metrics-grid {
+<<<<<<< HEAD
         grid-template-columns: repeat(5, 1fr);
         gap: 100px;
+=======
+        grid-template-columns: repeat(7, 1fr);
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     }
     .dashboard-grid {
         grid-template-columns: 1fr;
@@ -795,8 +846,12 @@ canvas {
 
 @media (max-width: 992px) {
     .metrics-grid {
+<<<<<<< HEAD
         grid-template-columns: repeat(3, 1fr);
         gap: 80px;
+=======
+        grid-template-columns: repeat(4, 1fr);
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     }
 }
 
@@ -812,13 +867,19 @@ canvas {
     }
     .metrics-grid {
         grid-template-columns: repeat(2, 1fr);
+<<<<<<< HEAD
         gap: 60px;
+=======
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     }
 }
 
 @media (max-width: 480px) {
     .metrics-grid {
         grid-template-columns: 1fr;
+<<<<<<< HEAD
         gap: 40px;
+=======
+>>>>>>> d781b6071826b1e9eeb8bf33453b359a2cce4225
     }
 }
